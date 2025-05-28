@@ -67,7 +67,7 @@ const LearningAnalytics = () => {
         />
         <AnalyticsCard
           title="Achievements"
-          value={analytics.achievements.length}
+          value={analytics.achievements.length.toString()}
           icon={Award}
           color="text-purple-600"
         />
