@@ -36,15 +36,16 @@ const NoteForm = ({ currentNote, setCurrentNote, isEditing, onSave, onCancel }: 
   };
 
   return (
-    <Card>
+    <Card className="simonelabs-glass-card">
       <CardHeader>
-        <CardTitle>{isEditing ? 'Edit Note' : 'Create New Note'}</CardTitle>
+        <CardTitle className="heading text-foreground">{isEditing ? 'Edit Note' : 'Create New Note'}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Input
           placeholder="Note title..."
           value={currentNote.title || ''}
           onChange={(e) => setCurrentNote({ ...currentNote, title: e.target.value })}
+          className="border-border bg-background text-foreground"
         />
         
         <Textarea
@@ -52,6 +53,7 @@ const NoteForm = ({ currentNote, setCurrentNote, isEditing, onSave, onCancel }: 
           value={currentNote.content || ''}
           onChange={(e) => setCurrentNote({ ...currentNote, content: e.target.value })}
           rows={6}
+          className="border-border bg-background text-foreground"
         />
         
         <div className="flex gap-2">
@@ -60,8 +62,9 @@ const NoteForm = ({ currentNote, setCurrentNote, isEditing, onSave, onCancel }: 
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addTag()}
+            className="border-border bg-background text-foreground"
           />
-          <Button onClick={addTag} size="sm">
+          <Button onClick={addTag} size="sm" className="simonelabs-secondary-button">
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -70,7 +73,7 @@ const NoteForm = ({ currentNote, setCurrentNote, isEditing, onSave, onCancel }: 
           {currentNote.tags?.map((tag, index) => (
             <span
               key={index}
-              className="bg-[#46B1F1] text-white px-2 py-1 rounded-full text-sm cursor-pointer hover:bg-[#46B1F1]/80"
+              className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-secondary/80 transition-colors cta-text"
               onClick={() => removeTag(tag)}
             >
               {tag} ×
@@ -79,12 +82,12 @@ const NoteForm = ({ currentNote, setCurrentNote, isEditing, onSave, onCancel }: 
         </div>
         
         <div className="flex gap-2">
-          <Button onClick={onSave} className="bg-[#3446C7] hover:bg-[#3446C7]/90">
+          <Button onClick={onSave} className="simonelabs-primary-button">
             <Save className="w-4 h-4 mr-2" />
             Save Note
           </Button>
           {isEditing && (
-            <Button variant="outline" onClick={onCancel}>
+            <Button variant="outline" onClick={onCancel} className="border-border hover:bg-muted cta-text">
               Cancel
             </Button>
           )}
