@@ -1,6 +1,6 @@
 
 @layer utilities {
-  /* Performance-optimized animations */
+  /* Performance-optimized animations for production */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out forwards;
     contain: layout style paint;
@@ -21,57 +21,104 @@
     contain: layout style paint;
   }
 
-  /* Reduced motion support */
+  .animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+    contain: layout style paint;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+    contain: layout style paint;
+  }
+
+  /* Accessibility - Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in,
     .animate-slide-in-right,
     .animate-float,
-    .animate-gentle-bounce {
+    .animate-gentle-bounce,
+    .animate-pulse-slow,
+    .animate-scale-in {
       animation: none;
     }
     
     .gentle-hover:hover {
       transform: none;
     }
+    
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High performance mode */
+  @media (prefers-reduced-motion: no-preference) {
+    .smooth-scroll {
+      scroll-behavior: smooth;
+    }
   }
 }
 
-/* Optimized keyframes */
+/* Optimized keyframes with hardware acceleration */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(10px) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 
 @keyframes slideInRight {
   from {
-    transform: translateX(100%);
+    transform: translateX(100%) translateZ(0);
   }
   to {
-    transform: translateX(0);
+    transform: translateX(0) translateZ(0);
   }
 }
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0px);
+    transform: translateY(0px) translateZ(0);
   }
   50% {
-    transform: translateY(-15px);
+    transform: translateY(-15px) translateZ(0);
   }
 }
 
 @keyframes gentleBounce {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-5px) translateZ(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02) translateZ(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
   }
 }
 
@@ -79,8 +126,35 @@
 .animate-fade-in,
 .animate-slide-in-right,
 .animate-float,
-.animate-gentle-bounce {
+.animate-gentle-bounce,
+.animate-pulse-slow,
+.animate-scale-in {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+}
+
+/* Optimized transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-bounce {
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Loading animations */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.1) 50%, hsl(var(--muted)) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
 }
