@@ -208,7 +208,11 @@ const Courses = () => {
         {/* Courses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses?.map((course) => (
-            <Card key={course.id} className="hover:shadow-lg transition-shadow">
+            <Card 
+              key={course.id} 
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/course/${course.id}`)}
+            >
               <CardHeader>
                 <div className="flex justify-between items-start mb-2">
                   <Badge variant="secondary">
@@ -251,7 +255,10 @@ const Courses = () => {
                 
                 <Button 
                   className="w-full"
-                  onClick={() => handleEnroll(course.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEnroll(course.id);
+                  }}
                 >
                   <BookOpen className="w-4 h-4 mr-2" />
                   Enroll Now

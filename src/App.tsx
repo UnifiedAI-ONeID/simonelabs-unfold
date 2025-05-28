@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
+import CourseView from "./pages/CourseView";
+import LearnCourse from "./pages/LearnCourse";
 import CreateCourse from "./pages/CreateCourse";
 import CourseBuilder from "./pages/CourseBuilder";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -27,6 +29,12 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/course/:courseId" element={<CourseView />} />
+            <Route path="/learn/:courseId" element={
+              <ProtectedRoute>
+                <LearnCourse />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
