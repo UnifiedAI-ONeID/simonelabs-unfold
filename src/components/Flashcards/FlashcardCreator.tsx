@@ -38,7 +38,7 @@ const FlashcardCreator = ({ courseId }: FlashcardCreatorProps) => {
   const [currentCard, setCurrentCard] = useState({
     front: '',
     back: '',
-    difficulty: 'medium' as const
+    difficulty: 'medium' as 'easy' | 'medium' | 'hard'
   });
   const [selectedDeckId, setSelectedDeckId] = useState<string>('');
   const [studyMode, setStudyMode] = useState(false);
