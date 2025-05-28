@@ -1,6 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Linkedin, Twitter } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const FoundersSection = () => {
   const founders = [
@@ -8,7 +9,8 @@ const FoundersSection = () => {
       name: "Fiona Wong",
       role: "Founder & CEO",
       bio: "Visionary leader with 15+ years in educational technology. Former VP of Product at leading EdTech companies, passionate about democratizing access to quality education through AI.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b593?w=400&h=400&fit=crop&crop=face",
+      image: "/placeholder.svg",
+      fallback: "FW",
       linkedin: "#",
       twitter: "#"
     },
@@ -16,7 +18,8 @@ const FoundersSection = () => {
       name: "Simon Luke",
       role: "Co-Founder & CTO",
       bio: "AI researcher and engineer with expertise in machine learning and educational systems. PhD in Computer Science from Stanford, former Principal Engineer at Google AI.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+      image: "/placeholder.svg",
+      fallback: "SL",
       linkedin: "#",
       twitter: "#"
     }
@@ -38,12 +41,17 @@ const FoundersSection = () => {
           {founders.map((founder, index) => (
             <Card key={index} className="border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
               <CardContent className="p-0">
-                <div className="aspect-square w-full overflow-hidden">
-                  <img 
-                    src={founder.image} 
-                    alt={founder.name}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
+                <div className="aspect-square w-full overflow-hidden flex items-center justify-center bg-muted">
+                  <Avatar className="w-48 h-48">
+                    <AvatarImage 
+                      src={founder.image} 
+                      alt={founder.name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-4xl font-bold bg-primary text-primary-foreground">
+                      {founder.fallback}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 <div className="p-8">
                   <h3 className="text-2xl font-bold text-foreground mb-2">{founder.name}</h3>
