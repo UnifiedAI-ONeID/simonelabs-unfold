@@ -9,8 +9,8 @@ const Hero = () => {
       {/* Soft background pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-20 left-20 w-32 h-32 bg-primary rounded-full blur-3xl animate-gentle-bounce"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-secondary rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-accent rounded-full blur-2xl animate-gentle-bounce" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-accent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-secondary rounded-full blur-2xl animate-gentle-bounce" style={{animationDelay: '2s'}}></div>
       </div>
 
       <div className="container mx-auto px-4 text-center relative z-10">
@@ -54,15 +54,15 @@ const Hero = () => {
           {/* Trust indicators */}
           <div className="pt-12 flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-soft-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-primary rounded-full"></div>
               <span>10,000+ Active Learners</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-soft-amber-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-accent rounded-full"></div>
               <span>4.9/5 Average Rating</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <div className="w-2 h-2 bg-secondary rounded-full"></div>
               <span>500+ Courses Available</span>
             </div>
           </div>

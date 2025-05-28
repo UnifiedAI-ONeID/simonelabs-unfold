@@ -26,19 +26,19 @@ const Features = () => {
       icon: Zap,
       title: "Quick Creation",
       description: "Generate courses and quizzes instantly with AI assistance",
-      color: "text-soft-amber-500"
+      color: "text-blue-primary-500"
     },
     {
       icon: BookOpen,
       title: "Rich Content",
       description: "Interactive lessons with multimedia and real-world examples",
-      color: "text-soft-green-500"
+      color: "text-purple-accent-500"
     },
     {
       icon: BarChart3,
       title: "Analytics Dashboard",
       description: "Detailed insights into your learning progress and performance",
-      color: "text-soft-red-500"
+      color: "text-indigo-secondary-500"
     }
   ];
 

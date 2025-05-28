@@ -20,13 +20,13 @@ const StatsSection = () => {
       icon: Star,
       value: "4.9/5",
       label: "Rating",
-      color: "text-soft-amber-500"
+      color: "text-accent"
     },
     {
       icon: Trophy,
       value: "95%",
       label: "Success Rate",
-      color: "text-soft-green-500"
+      color: "text-blue-primary-500"
     }
   ];
 

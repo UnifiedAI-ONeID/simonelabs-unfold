@@ -61,47 +61,42 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Soft color palette for reduced glare
-				soft: {
-					blue: {
-						50: '#F0F4FF',
-						100: '#E0EAFF', 
-						200: '#C7D9FF',
-						300: '#A3C2FF',
-						400: '#6E8CDC', // Primary soft blue
-						500: '#3741B4', // Primary
-						600: '#2D3399',
-						700: '#242A7F',
-						800: '#1C2066',
-						900: '#151954'
-					},
-					gray: {
-						50: '#FAFBFC',  // Background
-						100: '#F0F3F6', // Muted
-						200: '#E1E6EB', // Border
-						300: '#C5CDD6',
-						400: '#9AA4B2',
-						500: '#6B7685',
-						600: '#4B5569', // Muted foreground
-						700: '#3A424E',
-						800: '#2A323C',
-						900: '#1E2332'  // Foreground
-					},
-					green: {
-						400: '#46B48C',
-						500: '#32966E', // Success
-						600: '#2A7A5A'
-					},
-					amber: {
-						400: '#DCB450',
-						500: '#C8A03C', // Warning
-						600: '#B08A2F'
-					},
-					red: {
-						400: '#C85A64',
-						500: '#B44650', // Destructive
-						600: '#9F3A44'
-					}
+				// Blue and Purple theme palette
+				'blue-primary': {
+					50: '#EFF6FF',
+					100: '#DBEAFE',
+					200: '#BFDBFE',
+					300: '#93C5FD',
+					400: '#60A5FA',
+					500: '#3B82F6', // Primary blue
+					600: '#2563EB',
+					700: '#1D4ED8',
+					800: '#1E40AF',
+					900: '#1E3A8A'
+				},
+				'purple-accent': {
+					50: '#FAF5FF',
+					100: '#F3E8FF',
+					200: '#E9D5FF',
+					300: '#D8B4FE',
+					400: '#C084FC',
+					500: '#A855F7', // Primary purple
+					600: '#9333EA',
+					700: '#7C3AED',
+					800: '#6B21A8',
+					900: '#581C87'
+				},
+				'indigo-secondary': {
+					50: '#EEF2FF',
+					100: '#E0E7FF',
+					200: '#C7D2FE',
+					300: '#A5B4FC',
+					400: '#818CF8',
+					500: '#6366F1', // Primary indigo
+					600: '#4F46E5',
+					700: '#4338CA',
+					800: '#3730A3',
+					900: '#312E81'
 				}
 			},
 			borderRadius: {
@@ -150,9 +145,9 @@ export default {
 				'gentle-bounce': 'gentle-bounce 2s ease-in-out infinite'
 			},
 			boxShadow: {
-				'soft': '0 2px 8px rgba(30, 35, 50, 0.04)',
-				'soft-lg': '0 4px 24px rgba(30, 35, 50, 0.08)',
-				'soft-xl': '0 8px 32px rgba(30, 35, 50, 0.12)',
+				'soft': '0 2px 8px rgba(59, 130, 246, 0.06)',
+				'soft-lg': '0 4px 24px rgba(59, 130, 246, 0.08)',
+				'soft-xl': '0 8px 32px rgba(139, 92, 246, 0.12)',
 			}
 		}
 	},
