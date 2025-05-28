@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -57,31 +56,31 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// SimoneLabs specific colors
+				// SimoneLabs specific colors - Updated
 				simonelabs: {
 					primary: '#3446C7', // Indigo Blue
-					accent: '#FF7043', // Vibrant Coral
+					accent: '#29379A', // Darker Blue (was coral)
 					secondary: '#46B1F1', // Fresh Sky
 					success: '#3EC490', // Emerald Green
 					warning: '#FFD166', // Saffron
 					error: '#EB5160', // Cherry Red
-					background: '#F6F7FB', // Light Gray
-					surface: '#FFFFFF', // White
+					background: '#F8F9FC', // Softer off-white
+					surface: '#FCFDFE', // Very light grey
 					'text-primary': '#23243C', // Graphite
 					'text-secondary': '#50546B', // Gray 600
-					border: '#E2E4EA', // Gray 300
+					border: '#E0E2E8', // Softer border
 					// Dark mode variants
 					'dark-primary': '#7EA2FF', // Light Blue
-					'dark-accent': '#FF8A65', // Bright Coral
+					'dark-accent': '#6079FF', // Darker blue (was coral)
 					'dark-secondary': '#5DD1F2', // Cyan
 					'dark-success': '#4DE1C1', // Aquamarine
 					'dark-warning': '#FFC266', // Amber
 					'dark-error': '#FF5C7A', // Soft Red
-					'dark-background': '#171D2C', // Deep Navy
-					'dark-surface': '#232841', // Slate
-					'dark-text-primary': '#FFFFFF', // White
-					'dark-text-secondary': '#C9D0E2', // Light Gray
-					'dark-border': '#2D3346', // Gray 700
+					'dark-background': '#10141C', // Deeper Navy
+					'dark-surface': '#1C212A', // Dark Slate
+					'dark-text-primary': '#F8F9FC', // Soft White
+					'dark-text-secondary': '#C3CAD8', // Light Gray
+					'dark-border': '#282D36', // Gray 700
 				}
 			},
 			borderRadius: {
