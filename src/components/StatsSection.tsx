@@ -1,128 +1,163 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Users, BookOpen, Star, Trophy, TrendingUp, Award } from "lucide-react";
+import { TrendingUp, Users, BookOpen, Award, Globe, Clock, Star, Zap } from "lucide-react";
 
 const StatsSection = () => {
-  const stats = [
+  const mainStats = [
     {
       icon: Users,
-      value: "15K+",
-      label: "Active Students",
+      value: "10,000+",
+      label: "Active Learners",
+      description: "Students worldwide",
       color: "text-primary",
-      bgColor: "bg-primary/10",
-      description: "Learning daily"
+      bgColor: "bg-gradient-to-br from-primary/20 to-primary/10",
+      growth: "+25% this month"
     },
     {
       icon: BookOpen,
-      value: "750+",
-      label: "Courses",
+      value: "500+",
+      label: "Courses Available",
+      description: "Across all subjects",
       color: "text-secondary",
-      bgColor: "bg-secondary/10",
-      description: "Available now"
+      bgColor: "bg-gradient-to-br from-secondary/20 to-secondary/10",
+      growth: "+50 new courses"
+    },
+    {
+      icon: Award,
+      value: "94%",
+      label: "Completion Rate",
+      description: "Industry leading",
+      color: "text-accent",
+      bgColor: "bg-gradient-to-br from-accent/20 to-accent/10",
+      growth: "+12% improvement"
     },
     {
       icon: Star,
       value: "4.9/5",
-      label: "Rating",
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-      description: "From students"
-    },
-    {
-      icon: Trophy,
-      value: "98%",
-      label: "Success Rate",
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      description: "Course completion"
-    },
+      label: "User Rating",
+      description: "Highly satisfied",
+      color: "text-warning",
+      bgColor: "bg-gradient-to-br from-warning/20 to-warning/10",
+      growth: "98% recommend"
+    }
+  ];
+
+  const achievements = [
     {
       icon: TrendingUp,
-      value: "2.5M+",
-      label: "Study Hours",
-      color: "text-secondary",
-      bgColor: "bg-secondary/10",
-      description: "This month"
+      title: "Fastest Growing",
+      description: "AI Learning Platform 2024"
     },
     {
-      icon: Award,
-      value: "45K+",
-      label: "Certificates",
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-      description: "Awarded"
+      icon: Globe,
+      title: "Global Reach",
+      description: "Available in 50+ countries"
+    },
+    {
+      icon: Clock,
+      title: "Time Efficient",
+      description: "3x faster learning outcomes"
+    },
+    {
+      icon: Zap,
+      title: "AI Powered",
+      description: "Advanced machine learning"
     }
   ];
 
   return (
-    <section className="section-padding bg-background">
-      <div className="container mx-auto container-padding">
-        <div className="text-center mb-16 lg:mb-20 space-y-6 fade-in-up">
-          <div className="inline-flex items-center gap-2 simonelabs-glass-card rounded-full px-4 py-2 text-sm font-medium">
+    <section className="section-padding bg-gradient-to-br from-background via-muted/20 to-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-accent/30 to-transparent rounded-full blur-3xl animate-gentle-bounce"></div>
+      </div>
+
+      <div className="container mx-auto container-padding relative z-10">
+        {/* Header */}
+        <div className="text-center mb-16 space-y-6">
+          <div className="inline-flex items-center gap-3 simonelabs-glass-card rounded-full px-6 py-3 text-sm font-medium border border-primary/20">
             <TrendingUp className="w-4 h-4 text-primary" />
-            <span className="text-muted-foreground">Growing Community</span>
+            <span className="text-muted-foreground font-semibold">Platform Statistics</span>
           </div>
           
-          <h2 className="responsive-heading text-foreground max-w-4xl mx-auto">
-            Trusted by
-            <span className="simonelabs-gradient-text"> Thousands Worldwide</span>
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground max-w-4xl mx-auto leading-tight">
+            Trusted by Learners
+            <span className="block simonelabs-gradient-text mt-2">Worldwide</span>
           </h2>
           
-          <p className="responsive-body text-muted-foreground max-w-2xl mx-auto">
-            Join a thriving community of learners advancing their skills and achieving 
-            their goals every single day with our platform.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Join a thriving community of learners who are achieving their goals 
+            with our cutting-edge AI-powered education platform.
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 lg:gap-8">
-          {stats.map((stat, index) => (
-            <Card 
-              key={index} 
-              className="simonelabs-glass-card gentle-hover text-center border-border/40 rounded-2xl group overflow-hidden"
+
+        {/* Main statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          {mainStats.map((stat, index) => (
+            <div 
+              key={index}
+              className="text-center simonelabs-glass-card p-8 rounded-3xl gentle-hover group border border-primary/10"
               style={{animationDelay: `${index * 150}ms`}}
             >
-              <CardContent className="p-6 lg:p-8 space-y-4">
-                <div className={`w-16 h-16 ${stat.bgColor} rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300`}>
-                  <stat.icon className={`w-8 h-8 ${stat.color}`} />
+              <div className={`w-20 h-20 ${stat.bgColor} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`w-10 h-10 ${stat.color}`} />
+              </div>
+              
+              <div className="space-y-3">
+                <div className="text-4xl sm:text-5xl font-bold text-foreground heading">
+                  {stat.value}
                 </div>
-                <div className="space-y-2">
-                  <div className={`text-3xl lg:text-4xl font-bold ${stat.color} heading group-hover:scale-105 transition-transform`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-base lg:text-lg font-semibold text-foreground">
-                    {stat.label}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.description}
-                  </div>
+                <div className="text-lg font-semibold text-foreground">
+                  {stat.label}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-sm text-muted-foreground">
+                  {stat.description}
+                </div>
+                <div className={`text-xs font-medium ${stat.color} bg-gradient-to-r from-${stat.color.split('-')[1]}/10 to-transparent px-3 py-1 rounded-full inline-block`}>
+                  {stat.growth}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* Enhanced testimonial preview */}
-        <div className="mt-20">
-          <div className="simonelabs-glass-card p-8 lg:p-12 rounded-3xl max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-6 h-6 text-primary fill-current" />
-              ))}
-            </div>
-            <blockquote className="text-xl lg:text-2xl font-medium text-foreground mb-6 italic">
-              "This platform has completely transformed how I approach learning. The AI recommendations 
-              are spot-on and the community support is incredible."
-            </blockquote>
-            <div className="flex items-center justify-center gap-4">
-              <img 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face" 
-                alt="Alex Thompson"
-                className="w-14 h-14 rounded-full object-cover ring-2 ring-border/40"
-              />
-              <div className="text-left">
-                <div className="font-semibold text-foreground heading">Alex Thompson</div>
-                <div className="text-sm text-muted-foreground">Software Engineer</div>
+        {/* Achievements grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {achievements.map((achievement, index) => (
+            <div 
+              key={index}
+              className="flex flex-col items-center text-center simonelabs-glass-card p-6 rounded-2xl gentle-hover group border border-border/40"
+              style={{animationDelay: `${(index + 4) * 100}ms`}}
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <achievement.icon className="w-6 h-6 text-primary" />
               </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2 heading">
+                {achievement.title}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {achievement.description}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="text-center">
+          <div className="simonelabs-glass-card p-8 rounded-3xl border border-primary/20 max-w-3xl mx-auto">
+            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 heading">
+              Ready to Join Our Community?
+            </h3>
+            <p className="text-muted-foreground mb-6 text-lg">
+              Become part of the fastest-growing AI learning platform and accelerate your educational journey.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="simonelabs-primary-button px-8 py-4 rounded-xl text-base font-semibold shadow-lg">
+                Get Started Free
+              </button>
+              <button className="simonelabs-glass-card border border-border/60 px-8 py-4 rounded-xl text-base font-semibold text-foreground hover:bg-muted/50 transition-colors">
+                View Demo
+              </button>
             </div>
           </div>
         </div>
