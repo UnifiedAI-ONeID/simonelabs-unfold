@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Linkedin, Twitter } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -8,7 +9,7 @@ const FoundersSection = () => {
       name: "Fiona Wong",
       role: "Founder & CEO",
       bio: "Visionary leader with 15+ years in educational technology. Former VP of Product at leading EdTech companies, passionate about democratizing access to quality education through AI.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&q=80",
       fallback: "FW",
       linkedin: "#",
       twitter: "#"
