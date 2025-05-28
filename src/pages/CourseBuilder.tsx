@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCourseBuilder } from '@/hooks/useCourseBuilder';
+import { useSecureCourseBuilder } from '@/hooks/useSecureCourseBuilder';
 import CourseHeader from '@/components/CourseBuilder/CourseHeader';
 import SectionsList from '@/components/CourseBuilder/SectionsList';
 import AddSectionForm from '@/components/CourseBuilder/AddSectionForm';
@@ -24,10 +24,10 @@ const CourseBuilder = () => {
     isAddingSection,
     publishCourse,
     isPublishing,
-  } = useCourseBuilder(courseId);
+  } = useSecureCourseBuilder(courseId);
 
   const handleAddSection = (sectionData: any) => {
-    if (!sectionData.title.trim()) {
+    if (!sectionData.title?.trim()) {
       toast({
         title: "Title required",
         description: "Please enter a section title.",
@@ -38,6 +38,12 @@ const CourseBuilder = () => {
 
     addSection(sectionData);
   };
+
+  // Security: redirect if not authenticated
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -57,13 +63,19 @@ const CourseBuilder = () => {
     );
   }
 
-  if (!course || course.instructor_id !== user?.id) {
+  if (!course) {
     return (
       <div className="min-h-screen bg-background pt-20 pb-8">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Course not found</h1>
-          <p className="text-muted-foreground mb-4">You don't have permission to edit this course.</p>
-          <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            Course not found
+          </h1>
+          <p className="text-muted-foreground mb-4">
+            You don't have permission to edit this course or it doesn't exist.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Back to Dashboard
+          </Button>
         </div>
       </div>
     );
