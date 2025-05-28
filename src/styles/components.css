@@ -12,14 +12,16 @@
     background-clip: text;
   }
 
-  /* Enhanced glass morphism - Light grey theme */
+  /* Enhanced glass morphism - Improved readability */
   .simonelabs-glass-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px) saturate(110%);
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     box-shadow: 
       0 1px 3px rgba(99, 102, 241, 0.08),
-      0 8px 32px rgba(99, 102, 241, 0.06);
+      0 8px 32px rgba(99, 102, 241, 0.06),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    color: hsl(var(--foreground));
   }
   
   .dark .simonelabs-glass-card {
@@ -29,14 +31,16 @@
     box-shadow: 
       0 1px 3px rgba(129, 140, 248, 0.15),
       0 8px 32px rgba(129, 140, 248, 0.12);
+    color: hsl(var(--foreground));
   }
 
-  /* Enhanced button styles - Light grey theme */
+  /* Enhanced button styles - Better contrast */
   .simonelabs-primary-button {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-md;
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
     box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
+    color: white;
   }
 
   .simonelabs-primary-button:hover {
@@ -49,6 +53,7 @@
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
     box-shadow: 0 4px 14px rgba(139, 92, 246, 0.2);
+    color: white;
   }
 
   .simonelabs-accent-button {
@@ -56,9 +61,26 @@
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
     box-shadow: 0 4px 14px rgba(226, 232, 240, 0.25);
+    color: hsl(var(--accent-foreground));
   }
 
   .simonelabs-card {
     @apply simonelabs-glass-card p-6 rounded-xl gentle-hover;
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Ensure readable text in cards */
+  .simonelabs-card h1,
+  .simonelabs-card h2,
+  .simonelabs-card h3,
+  .simonelabs-card h4,
+  .simonelabs-card h5,
+  .simonelabs-card h6,
+  .simonelabs-card p,
+  .simonelabs-card span,
+  .simonelabs-card div {
+    color: hsl(var(--card-foreground));
   }
 }
