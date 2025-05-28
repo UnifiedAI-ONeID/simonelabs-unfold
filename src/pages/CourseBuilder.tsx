@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -222,7 +223,7 @@ const CourseBuilder = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600">
-                      {section.content?.text || 'No content added yet'}
+                      {(section.content as any)?.text || 'No content added yet'}
                     </p>
                   </CardContent>
                 </Card>

@@ -12,6 +12,23 @@ import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Clock, Star, Users, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+interface Course {
+  id: string;
+  title: string;
+  description: string | null;
+  difficulty_level: string | null;
+  student_count: number;
+  rating: number | null;
+  estimated_duration: string | null;
+  category_id: string | null;
+  course_categories: {
+    name: string;
+  } | null;
+  users_profiles: {
+    display_name: string | null;
+  } | null;
+}
+
 const Courses = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -38,7 +55,7 @@ const Courses = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as Course[];
     },
   });
 
@@ -108,6 +125,22 @@ const Courses = () => {
     
     return matchesSearch && matchesDifficulty && matchesCategory;
   });
+
+  const formatDuration = (duration: string | null) => {
+    if (!duration) return 'Self-paced';
+    
+    try {
+      // Extract the number from the duration string (e.g., "2 weeks" -> "2")
+      const match = duration.match(/(\d+)/);
+      if (match) {
+        const hours = parseInt(match[1]);
+        return `${Math.floor(hours / 60)}h ${hours % 60}m`;
+      }
+      return 'Self-paced';
+    } catch {
+      return 'Self-paced';
+    }
+  };
 
   if (isLoading) {
     return (
@@ -185,7 +218,7 @@ const Courses = () => {
                     variant={course.difficulty_level === 'beginner' ? 'default' : 
                              course.difficulty_level === 'intermediate' ? 'secondary' : 'destructive'}
                   >
-                    {course.difficulty_level}
+                    {course.difficulty_level || 'beginner'}
                   </Badge>
                 </div>
                 
@@ -209,10 +242,7 @@ const Courses = () => {
 
                 <div className="flex items-center text-sm text-gray-600 mb-4">
                   <Clock className="w-4 h-4 mr-1" />
-                  {course.estimated_duration ? 
-                    `${Math.floor(parseInt(course.estimated_duration.split(' ')[0]) / 60)}h ${parseInt(course.estimated_duration.split(' ')[0]) % 60}m` : 
-                    'Self-paced'
-                  }
+                  {formatDuration(course.estimated_duration)}
                 </div>
 
                 <div className="text-sm text-gray-600 mb-4">
