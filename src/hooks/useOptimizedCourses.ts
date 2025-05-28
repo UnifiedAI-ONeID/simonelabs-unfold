@@ -15,7 +15,6 @@ interface OptimizedCourse {
   category_name: string | null;
 }
 
-// Optimized hook with better caching and error handling
 export const useOptimizedCourses = () => {
   return useQuery({
     queryKey: ['courses-optimized'],
@@ -40,30 +39,40 @@ export const useOptimizedCourses = () => {
         `)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(50); // Limit for performance
+        .limit(50);
       
       if (error) {
         console.error('Error fetching courses:', error);
         throw new Error('Failed to fetch courses');
       }
       
-      return data?.map((course: any) => ({
+      if (!data) {
+        return [];
+      }
+      
+      return data.map((course: any) => ({
         id: course.id,
-        title: course.title,
+        title: course.title || 'Untitled Course',
         description: course.description,
         difficulty_level: course.difficulty_level,
-        student_count: course.student_count,
+        student_count: course.student_count || 0,
         rating: course.rating,
         estimated_duration: course.estimated_duration,
         category_id: course.category_id,
         instructor_name: course.users_profiles?.display_name || 'Unknown Instructor',
         category_name: course.course_categories?.name || 'Uncategorized'
-      })) || [];
+      }));
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
-    retry: 3,
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors
+      if (error?.message?.includes('JWT')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };

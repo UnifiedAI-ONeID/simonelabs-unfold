@@ -14,7 +14,8 @@ interface PricingRegion {
 }
 
 const LocalizedPricing = () => {
-  const [userRegion, setUserRegion] = useState<string>('US');
+  const [userRegion, setUserRegion] = useState<string>('US/EU/UK');
+  const [isLoading, setIsLoading] = useState(true);
   
   const pricingRegions: PricingRegion[] = [
     {
@@ -60,26 +61,52 @@ const LocalizedPricing = () => {
   ];
 
   useEffect(() => {
-    // Simulate geolocation detection
     const detectRegion = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/');
+        setIsLoading(true);
+        // Use a more secure geolocation service with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const response = await fetch('https://ipapi.co/json/', {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch location data');
+        }
+
         const data = await response.json();
-        // Simplified region mapping
-        if (['IN'].includes(data.country_code)) {
+        
+        // Validate response data
+        if (!data.country_code || typeof data.country_code !== 'string') {
+          throw new Error('Invalid location data');
+        }
+
+        const countryCode = data.country_code.toUpperCase();
+        
+        // Improved region mapping with more countries
+        if (['IN'].includes(countryCode)) {
           setUserRegion('India');
-        } else if (['SG', 'MY', 'TH', 'ID', 'PH', 'VN'].includes(data.country_code)) {
+        } else if (['SG', 'MY', 'TH', 'ID', 'PH', 'VN', 'MM', 'KH', 'LA', 'BN'].includes(countryCode)) {
           setUserRegion('Southeast Asia');
-        } else if (['NG', 'KE', 'ZA', 'GH', 'EG'].includes(data.country_code)) {
+        } else if (['NG', 'KE', 'ZA', 'GH', 'EG', 'MA', 'ET', 'TZ', 'UG', 'DZ', 'SD', 'MZ', 'MG', 'CM', 'CI', 'NE', 'BF', 'ML', 'MW', 'ZM', 'SN', 'SO', 'TD', 'GN', 'RW', 'BJ', 'TN', 'BI', 'GW', 'LR', 'SL', 'TG', 'CF', 'MR', 'ER', 'GM', 'BW', 'GA', 'LS', 'GQ', 'MU', 'SZ', 'DJ', 'CV', 'KM', 'SC', 'ST'].includes(countryCode)) {
           setUserRegion('Africa');
-        } else if (['BR', 'MX', 'AR', 'CO', 'CL'].includes(data.country_code)) {
+        } else if (['BR', 'MX', 'AR', 'CO', 'CL', 'PE', 'VE', 'EC', 'GT', 'CU', 'BO', 'DO', 'HN', 'PY', 'NI', 'CR', 'PA', 'UY', 'JM', 'TT', 'GY', 'SR', 'BZ', 'BB', 'BS', 'AG', 'DM', 'GD', 'KN', 'LC', 'VC'].includes(countryCode)) {
           setUserRegion('Latin America');
         } else {
           setUserRegion('US/EU/UK');
         }
       } catch (error) {
-        console.log('Could not detect region, using default');
+        console.log('Could not detect region:', error);
         setUserRegion('US/EU/UK');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -88,9 +115,22 @@ const LocalizedPricing = () => {
 
   const currentPricing = pricingRegions.find(p => p.region === userRegion) || pricingRegions[0];
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-32 bg-muted rounded-lg"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-40 bg-muted rounded-lg"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <Card className="border-blue-200 bg-blue-50">
+      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="w-5 h-5" />
@@ -102,7 +142,7 @@ const LocalizedPricing = () => {
             <div>
               <p className="text-sm text-muted-foreground mb-1">Detected Region: {currentPricing.region}</p>
               {currentPricing.discount > 0 && (
-                <Badge variant="secondary" className="text-green-600 bg-green-100">
+                <Badge variant="secondary" className="text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900">
                   {currentPricing.discount}% Regional Discount Applied
                 </Badge>
               )}
@@ -124,7 +164,7 @@ const LocalizedPricing = () => {
         {pricingRegions.map((pricing) => (
           <Card 
             key={pricing.region} 
-            className={`transition-all ${pricing.region === userRegion ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
+            className={`transition-all hover:shadow-md ${pricing.region === userRegion ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : ''}`}
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">{pricing.region}</CardTitle>

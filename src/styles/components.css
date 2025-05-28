@@ -1,6 +1,6 @@
 
 @layer components {
-  /* Modern gradient backgrounds - Softer for light mode */
+  /* Modern gradient backgrounds - Light grey theme */
   .simonelabs-gradient-bg {
     background: linear-gradient(135deg, hsl(var(--primary) / 0.9) 0%, hsl(var(--secondary) / 0.8) 50%, hsl(var(--accent) / 0.7) 100%);
   }
@@ -12,11 +12,11 @@
     background-clip: text;
   }
 
-  /* Enhanced glass morphism - Softer for light mode */
+  /* Enhanced glass morphism - Light grey theme */
   .simonelabs-glass-card {
-    background: rgba(250, 251, 254, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px) saturate(110%);
-    border: 1px solid rgba(233, 239, 246, 0.6);
+    border: 1px solid rgba(226, 232, 240, 0.6);
     box-shadow: 
       0 1px 3px rgba(99, 102, 241, 0.08),
       0 8px 32px rgba(99, 102, 241, 0.06);
@@ -31,7 +31,7 @@
       0 8px 32px rgba(129, 140, 248, 0.12);
   }
 
-  /* Enhanced button styles - Softer for light mode */
+  /* Enhanced button styles - Light grey theme */
   .simonelabs-primary-button {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-md;
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
@@ -55,7 +55,7 @@
     @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300;
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
-    box-shadow: 0 4px 14px rgba(165, 180, 252, 0.25);
+    box-shadow: 0 4px 14px rgba(226, 232, 240, 0.25);
   }
 
   .simonelabs-card {

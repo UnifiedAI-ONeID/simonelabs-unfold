@@ -17,16 +17,23 @@ export const useSecureCourseEnrollment = () => {
         throw new Error('Authentication required');
       }
 
+      // Validate courseId format (UUID)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(courseId)) {
+        throw new Error('Invalid course ID format');
+      }
+
       // Check if already enrolled first
       const { data: existingProgress, error: checkError } = await supabase
         .from('user_progress')
         .select('id')
         .eq('user_id', user.id)
         .eq('course_id', courseId)
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
+      if (checkError) {
+        console.error('Error checking enrollment:', checkError);
+        throw new Error('Failed to check enrollment status');
       }
 
       if (existingProgress) {
@@ -36,16 +43,21 @@ export const useSecureCourseEnrollment = () => {
       // Verify course exists and is published
       const { data: course, error: courseError } = await supabase
         .from('courses')
-        .select('id, status')
+        .select('id, status, title')
         .eq('id', courseId)
         .eq('status', 'published')
-        .single();
+        .maybeSingle();
 
-      if (courseError || !course) {
+      if (courseError) {
+        console.error('Error fetching course:', courseError);
+        throw new Error('Failed to verify course availability');
+      }
+
+      if (!course) {
         throw new Error('Course not found or not available');
       }
 
-      // Create enrollment record
+      // Create enrollment record with error handling
       const { error: enrollError } = await supabase
         .from('user_progress')
         .insert({
@@ -56,21 +68,26 @@ export const useSecureCourseEnrollment = () => {
         });
 
       if (enrollError) {
-        throw enrollError;
+        console.error('Enrollment error:', enrollError);
+        throw new Error('Failed to enroll in course');
       }
 
-      return courseId;
+      return { courseId, courseTitle: course.title };
     },
-    onSuccess: (courseId) => {
+    onSuccess: ({ courseId, courseTitle }) => {
+      // Invalidate relevant queries for fresh data
       queryClient.invalidateQueries({ queryKey: ['user-progress'] });
       queryClient.invalidateQueries({ queryKey: ['courses-optimized'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
       
       toast({
         title: "Enrolled successfully!",
-        description: "You can now access this course from your dashboard.",
+        description: `You can now access "${courseTitle}" from your dashboard.`,
       });
     },
     onError: (error: any) => {
+      console.error('Enrollment mutation error:', error);
+      
       if (error.message === 'Authentication required') {
         navigate('/auth');
         toast({
@@ -83,8 +100,13 @@ export const useSecureCourseEnrollment = () => {
           title: "Already enrolled",
           description: "You're already enrolled in this course!",
         });
+      } else if (error.message === 'Invalid course ID format') {
+        toast({
+          title: "Invalid course",
+          description: "The course ID is not valid.",
+          variant: "destructive",
+        });
       } else {
-        console.error('Enrollment error:', error);
         toast({
           title: "Enrollment failed",
           description: "Please try again later.",
@@ -97,5 +119,6 @@ export const useSecureCourseEnrollment = () => {
   return {
     enroll: enrollMutation.mutate,
     isEnrolling: enrollMutation.isPending,
+    error: enrollMutation.error,
   };
 };
