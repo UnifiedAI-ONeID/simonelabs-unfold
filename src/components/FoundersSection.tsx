@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Linkedin, Twitter } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -17,8 +16,8 @@ const FoundersSection = () => {
     {
       name: "Simon Luke",
       role: "Co-Founder & CTO",
-      bio: "AI researcher and engineer with expertise in machine learning and educational systems. PhD in Computer Science from Stanford, former Principal Engineer at Google AI.",
-      image: "/placeholder.svg",
+      bio: "Ex Microsoft engineer and AI researcher with expertise in machine learning and educational systems. PhD in Computer Science from Stanford, passionate about leveraging AI to revolutionize learning.",
+      image: "/lovable-uploads/3e498a20-6de2-4231-8d3f-bf16f1738c22.png",
       fallback: "SL",
       linkedin: "#",
       twitter: "#"
