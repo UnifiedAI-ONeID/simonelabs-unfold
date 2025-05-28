@@ -1,0 +1,103 @@
+
+@layer components {
+  /* Enhanced animations */
+  .animate-float {
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .animate-gentle-bounce {
+    animation: gentle-bounce 3s ease-in-out infinite;
+  }
+}
+
+/* Enhanced keyframes */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(2deg); 
+  }
+}
+
+@keyframes gentle-bounce {
+  0%, 100% { 
+    transform: translateY(0) scale(1); 
+  }
+  50% { 
+    transform: translateY(-8px) scale(1.02); 
+  }
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-gentle-bounce,
+  .gentle-hover,
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .simonelabs-gradient-text {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: hsl(var(--primary));
+  }
+
+  .simonelabs-glass-card {
+    background: hsl(var(--card));
+    backdrop-filter: none;
+  }
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 640px) {
+  .responsive-heading {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  .responsive-subheading {
+    @apply text-base sm:text-lg;
+  }
+  
+  .responsive-body {
+    @apply text-sm leading-relaxed;
+  }
+
+  .section-padding {
+    @apply py-12;
+  }
+
+  .container-padding {
+    @apply px-4;
+  }
+}
+
+/* Print styles */
+@media print {
+  .simonelabs-glass-card {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  .simonelabs-gradient-text {
+    color: black !important;
+    background: none !important;
+    -webkit-text-fill-color: unset !important;
+  }
+}
