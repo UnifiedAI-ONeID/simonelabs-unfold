@@ -25,11 +25,11 @@ const Courses = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 pb-8">
+      <div className="min-h-screen bg-background pt-20 pb-8">
         <div className="container mx-auto px-4">
           <div className="animate-pulse space-y-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded" />
+              <div key={i} className="h-64 bg-muted rounded" />
             ))}
           </div>
         </div>
@@ -38,13 +38,13 @@ const Courses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-8">
+    <div className="min-h-screen bg-background pt-20 pb-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Explore Courses
           </h1>
-          <p className="text-gray-600">Discover amazing courses and start learning today</p>
+          <p className="text-muted-foreground">Discover amazing courses and start learning today</p>
         </div>
 
         <CourseFilters

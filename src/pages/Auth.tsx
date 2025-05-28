@@ -69,11 +69,11 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-8 border">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold gradient-text">SimoneLabs</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             {isLogin ? 'Welcome back!' : 'Join our learning community'}
           </p>
         </div>
@@ -130,7 +130,7 @@ const Auth = () => {
         <div className="mt-6 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-purple-600 hover:text-purple-700 font-medium"
+            className="text-primary hover:text-primary/80 font-medium"
           >
             {isLogin
               ? "Don't have an account? Sign up"
