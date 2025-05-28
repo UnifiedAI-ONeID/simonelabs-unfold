@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,7 +56,14 @@ const CourseView = () => {
         .single();
       
       if (error) throw error;
-      return data as Course;
+      
+      // Transform the data to match our Course interface
+      return {
+        ...data,
+        users_profiles: Array.isArray(data.users_profiles) 
+          ? data.users_profiles[0] || { display_name: null }
+          : data.users_profiles || { display_name: null }
+      } as Course;
     },
     enabled: !!courseId,
   });
