@@ -7,7 +7,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import FoundersSection from "@/components/FoundersSection";
 import Dashboard from "@/components/Dashboard";
 import CourseCreator from "@/components/CourseCreator";
-import TutoringChatbot from "@/components/AI/TutoringChatbot";
+import EnhancedTutoringChatbot from "@/components/AI/EnhancedTutoringChatbot";
 
 const Index = () => {
   return (
@@ -20,7 +20,7 @@ const Index = () => {
       <FoundersSection />
       <Dashboard />
       <CourseCreator />
-      <TutoringChatbot />
+      <EnhancedTutoringChatbot />
     </div>
   );
 };
