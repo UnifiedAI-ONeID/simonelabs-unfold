@@ -10,7 +10,7 @@ import TutoringChatbot from "@/components/AI/TutoringChatbot";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navigation />
       <Hero />
       <Features />

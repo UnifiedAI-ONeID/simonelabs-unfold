@@ -1,190 +1,175 @@
-import { Button } from "@/components/ui/button";
+
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Menu, X, BookOpen, Brain, BarChart3, Trophy, CreditCard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { Link, useNavigate } from "react-router-dom";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navigation = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, loading } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "Come back soon!",
-      });
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <div className="text-2xl font-bold gradient-text cursor-pointer" onClick={() => navigate('/')}>
-              SimoneLabs
-            </div>
-            <div className="hidden md:flex space-x-6">
-              <a href="#features" className="text-gray-600 hover:text-primary transition-colors">Features</a>
-              <button 
-                onClick={() => navigate('/courses')}
-                className="text-gray-600 hover:text-primary transition-colors"
-              >
-                Courses
-              </button>
-              <button 
-                onClick={() => navigate('/ai-generator')}
-                className="text-gray-600 hover:text-primary transition-colors"
-              >
-                AI Generator
-              </button>
-              <button 
-                onClick={() => navigate('/analytics')}
-                className="text-gray-600 hover:text-primary transition-colors"
-              >
-                Analytics
-              </button>
-              <button 
-                onClick={() => navigate('/pricing')}
-                className="text-gray-600 hover:text-primary transition-colors"
-              >
-                Pricing
-              </button>
-              <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
-            </div>
+    <nav className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <BookOpen className="h-8 w-8 text-primary" />
+              <span className="font-bold text-xl gradient-text">EduPlatform</span>
+            </Link>
           </div>
-          
-          <div className="hidden md:flex items-center space-x-4">
-            {loading ? (
-              <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
-            ) : user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  Welcome, {user.email}
-                </span>
-                <Button
-                  onClick={() => navigate('/dashboard')}
-                  variant="ghost"
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/courses" className="text-foreground hover:text-primary transition-colors">
+              Courses
+            </Link>
+            <Link to="/pricing" className="text-foreground hover:text-primary transition-colors">
+              Pricing
+            </Link>
+            
+            {user ? (
+              <>
+                <Link 
+                  to="/dashboard" 
+                  className="text-foreground hover:text-primary transition-colors"
                 >
                   Dashboard
-                </Button>
-                <Button
-                  onClick={() => navigate('/create-course')}
-                  variant="ghost"
+                </Link>
+                <Link 
+                  to="/ai-generator" 
+                  className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors"
                 >
-                  Create Course
+                  <Brain className="h-4 w-4" />
+                  <span>AI Generator</span>
+                </Link>
+                <Link 
+                  to="/analytics" 
+                  className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Analytics</span>
+                </Link>
+                <Link 
+                  to="/achievements" 
+                  className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors"
+                >
+                  <Trophy className="h-4 w-4" />
+                  <span>Achievements</span>
+                </Link>
+                <ThemeToggle />
+                <Button onClick={handleLogout} variant="outline">
+                  Logout
                 </Button>
-                <Button onClick={handleSignOut} variant="outline">
-                  Sign Out
-                </Button>
-              </div>
+              </>
             ) : (
               <>
-                <Button 
-                  variant="ghost"
-                  onClick={() => navigate('/auth')}
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  onClick={() => navigate('/auth')}
-                >
-                  Get Started
-                </Button>
+                <ThemeToggle />
+                <Link to="/auth">
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button>Sign Up</Button>
+                </Link>
               </>
             )}
           </div>
 
-          <button 
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-              <div className="w-full h-0.5 bg-gray-600"></div>
-              <div className="w-full h-0.5 bg-gray-600"></div>
-              <div className="w-full h-0.5 bg-gray-600"></div>
-            </div>
-          </button>
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-foreground hover:text-primary"
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="flex flex-col space-y-4">
-              <a href="#features" className="text-gray-600 hover:text-primary transition-colors">Features</a>
-              <button 
-                onClick={() => navigate('/courses')}
-                className="text-gray-600 hover:text-primary transition-colors text-left"
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-t border-border">
+              <Link
+                to="/courses"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
               >
                 Courses
-              </button>
-              <button 
-                onClick={() => navigate('/ai-generator')}
-                className="text-gray-600 hover:text-primary transition-colors text-left"
-              >
-                AI Generator
-              </button>
-              <button 
-                onClick={() => navigate('/analytics')}
-                className="text-gray-600 hover:text-primary transition-colors text-left"
-              >
-                Analytics
-              </button>
-              <button 
-                onClick={() => navigate('/pricing')}
-                className="text-gray-600 hover:text-primary transition-colors text-left"
+              </Link>
+              <Link
+                to="/pricing"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
               >
                 Pricing
-              </button>
-              <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
-              <div className="flex flex-col space-y-2 pt-4">
-                {user ? (
-                  <>
-                    <Button
-                      onClick={() => navigate('/dashboard')}
-                      variant="ghost"
-                    >
-                      Dashboard
+              </Link>
+              
+              {user ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="block px-3 py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/ai-generator"
+                    className="flex items-center space-x-2 px-3 py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Brain className="h-4 w-4" />
+                    <span>AI Generator</span>
+                  </Link>
+                  <Link
+                    to="/analytics"
+                    className="flex items-center space-x-2 px-3 py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Analytics</span>
+                  </Link>
+                  <Link
+                    to="/achievements"
+                    className="flex items-center space-x-2 px-3 py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Trophy className="h-4 w-4" />
+                    <span>Achievements</span>
+                  </Link>
+                  <Button
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full mt-2"
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <div className="space-y-2 pt-2">
+                  <Link to="/auth" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      Login
                     </Button>
-                    <Button
-                      onClick={() => navigate('/create-course')}
-                      variant="ghost"
-                    >
-                      Create Course
-                    </Button>
-                    <Button onClick={handleSignOut} variant="outline">
-                      Sign Out
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/auth')}
-                    >
-                      Sign In
-                    </Button>
-                    <Button 
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                      onClick={() => navigate('/auth')}
-                    >
-                      Get Started
-                    </Button>
-                  </>
-                )}
-              </div>
+                  </Link>
+                  <Link to="/auth" onClick={() => setIsOpen(false)}>
+                    <Button className="w-full">Sign Up</Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
