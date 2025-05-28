@@ -1,38 +1,63 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Clock, Star, Users, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { BookOpen, Clock, Star, Users, Play, CheckCircle } from 'lucide-react';
+
+interface CourseSection {
+  id: string;
+  title: string;
+  content: any;
+  video_url: string | null;
+  order: number;
+}
+
+interface Course {
+  id: string;
+  title: string;
+  description: string | null;
+  difficulty_level: string | null;
+  student_count: number;
+  rating: number | null;
+  estimated_duration: any;
+  course_categories: {
+    name: string;
+  } | null;
+  users_profiles: {
+    display_name: string | null;
+  } | null;
+}
 
 const CourseView = () => {
   const { courseId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: course, isLoading: courseLoading } = useQuery({
+  const { data: course } = useQuery({
     queryKey: ['course', courseId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('courses')
         .select(`
           *,
-          course_categories (name),
-          users_profiles!courses_instructor_id_fkey (display_name)
+          course_categories (
+            name
+          ),
+          users_profiles!courses_instructor_id_fkey (
+            display_name
+          )
         `)
         .eq('id', courseId)
         .single();
       
       if (error) throw error;
-      return data;
+      return data as Course;
     },
     enabled: !!courseId,
   });
@@ -47,7 +72,7 @@ const CourseView = () => {
         .order('order');
       
       if (error) throw error;
-      return data;
+      return data as CourseSection[];
     },
     enabled: !!courseId,
   });
@@ -70,45 +95,7 @@ const CourseView = () => {
     enabled: !!courseId && !!user,
   });
 
-  const enrollMutation = useMutation({
-    mutationFn: async () => {
-      if (!user || !courseId) throw new Error('User not authenticated');
-      
-      const { error } = await supabase
-        .from('user_progress')
-        .insert({
-          user_id: user.id,
-          course_id: courseId,
-          progress: 0,
-          completed: false,
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-progress', courseId, user?.id] });
-      toast({
-        title: "Enrolled successfully!",
-        description: "You can now start learning this course.",
-      });
-    },
-    onError: (error: any) => {
-      if (error.code === '23505') {
-        toast({
-          title: "Already enrolled",
-          description: "You're already enrolled in this course!",
-        });
-      } else {
-        toast({
-          title: "Enrollment failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (!user) {
       toast({
         title: "Please sign in",
@@ -118,16 +105,68 @@ const CourseView = () => {
       navigate('/auth');
       return;
     }
-    enrollMutation.mutate();
+
+    try {
+      const { error } = await supabase
+        .from('user_progress')
+        .insert({
+          user_id: user.id,
+          course_id: courseId!,
+          progress: 0,
+          completed: false,
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already enrolled",
+            description: "You're already enrolled in this course!",
+          });
+          return;
+        }
+        throw error;
+      }
+
+      toast({
+        title: "Enrolled successfully!",
+        description: "You can now start learning.",
+      });
+      
+      // Refresh progress data
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: "Enrollment failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
-  if (courseLoading) {
+  const formatDuration = (duration: any) => {
+    if (!duration) return 'Self-paced';
+    
+    try {
+      // Handle different duration formats
+      if (typeof duration === 'string') {
+        const match = duration.match(/(\d+)/);
+        if (match) {
+          const hours = parseInt(match[1]);
+          return `${Math.floor(hours / 60)}h ${hours % 60}m`;
+        }
+      }
+      return 'Self-paced';
+    } catch {
+      return 'Self-paced';
+    }
+  };
+
+  if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 pb-8">
         <div className="container mx-auto px-4">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
         </div>
@@ -135,37 +174,16 @@ const CourseView = () => {
     );
   }
 
-  if (!course) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-20 pb-8">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Course not found</h1>
-          <Button onClick={() => navigate('/courses')}>Back to Courses</Button>
-        </div>
-      </div>
-    );
-  }
-
   const isEnrolled = !!userProgress;
-  const progressPercentage = userProgress?.progress || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/courses')}
-          className="mb-6"
-        >
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Back to Courses
-        </Button>
-
+      <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center space-x-2 mb-4">
                 <Badge variant="secondary">
                   {course.course_categories?.name || 'General'}
                 </Badge>
@@ -179,7 +197,7 @@ const CourseView = () => {
               
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.title}</h1>
               
-              <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
+              <div className="flex items-center space-x-6 text-sm text-gray-600 mb-6">
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-1" />
                   {course.student_count} students
@@ -190,151 +208,96 @@ const CourseView = () => {
                 </div>
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {course.estimated_duration || 'Self-paced'}
+                  {formatDuration(course.estimated_duration)}
                 </div>
               </div>
 
-              <p className="text-gray-600 mb-6">{course.description}</p>
+              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                {course.description}
+              </p>
 
-              {isEnrolled && (
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">Course Progress</span>
-                    <span className="text-sm text-gray-600">{Math.round(progressPercentage)}%</span>
-                  </div>
-                  <Progress value={progressPercentage} className="w-full" />
-                </div>
-              )}
+              <div className="text-sm text-gray-600 mb-6">
+                Instructor: {course.users_profiles?.display_name || 'Anonymous'}
+              </div>
             </div>
 
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
-                <TabsTrigger value="instructor">Instructor</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>What you'll learn</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {course.learning_objectives ? (
-                      <ul className="space-y-2">
-                        {JSON.parse(course.learning_objectives).map((objective: string, index: number) => (
-                          <li key={index} className="flex items-start">
-                            <span className="text-green-500 mr-2">✓</span>
-                            {objective}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-gray-600">Learning objectives will be available soon.</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {course.prerequisites && course.prerequisites.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Prerequisites</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-1">
-                        {course.prerequisites.map((prereq: string, index: number) => (
-                          <li key={index} className="text-gray-600">• {prereq}</li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="curriculum" className="space-y-4">
-                {sections?.map((section, index) => (
-                  <Card key={section.id}>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center">
-                        <span className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-medium mr-3">
-                          {index + 1}
-                        </span>
-                        {section.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 mb-3">
-                        {(section.content as any)?.text || 'Content coming soon...'}
-                      </p>
-                      {section.video_url && (
-                        <div className="flex items-center text-sm text-blue-600">
-                          <Play className="w-4 h-4 mr-1" />
-                          Video included
-                        </div>
+            {/* Course Content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Course Content</CardTitle>
+                <CardDescription>
+                  {sections?.length || 0} sections in this course
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {sections?.map((section, index) => (
+                    <div key={section.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium">{section.title}</h3>
+                        {section.video_url && (
+                          <p className="text-sm text-gray-600 flex items-center mt-1">
+                            <Play className="w-3 h-3 mr-1" />
+                            Video lesson
+                          </p>
+                        )}
+                      </div>
+                      {isEnrolled && (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-
-              <TabsContent value="instructor">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Meet your instructor</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <h3 className="font-semibold text-lg mb-2">
-                      {course.users_profiles?.display_name || 'Anonymous Instructor'}
-                    </h3>
-                    <p className="text-gray-600">
-                      Experienced educator passionate about sharing knowledge and helping students succeed.
-                    </p>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardContent className="p-6">
-                {!isEnrolled ? (
-                  <Button 
-                    className="w-full mb-4"
-                    onClick={handleEnroll}
-                    disabled={enrollMutation.isPending}
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    {enrollMutation.isPending ? 'Enrolling...' : 'Enroll Now'}
-                  </Button>
+                {isEnrolled ? (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
+                      <h3 className="font-semibold text-green-700">You're enrolled!</h3>
+                      <p className="text-sm text-gray-600 mb-4">Continue your learning journey</p>
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      onClick={() => navigate(`/learn/${courseId}`)}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Continue Learning
+                    </Button>
+                  </div>
                 ) : (
-                  <Button 
-                    className="w-full mb-4"
-                    onClick={() => navigate(`/learn/${courseId}`)}
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Continue Learning
-                  </Button>
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <BookOpen className="w-12 h-12 text-blue-500 mx-auto mb-2" />
+                      <h3 className="font-semibold">Ready to start learning?</h3>
+                      <p className="text-sm text-gray-600 mb-4">Enroll now to access all course content</p>
+                    </div>
+                    
+                    <Button className="w-full" onClick={handleEnroll}>
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Enroll Now
+                    </Button>
+                  </div>
                 )}
 
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Students enrolled</span>
-                    <span className="font-medium">{course.student_count}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Difficulty</span>
-                    <span className="font-medium capitalize">{course.difficulty_level || 'beginner'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Duration</span>
-                    <span className="font-medium">{course.estimated_duration || 'Self-paced'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Rating</span>
-                    <span className="font-medium">{course.rating?.toFixed(1) || '0.0'} ⭐</span>
-                  </div>
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="font-medium mb-2">What you'll learn</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Core concepts and fundamentals</li>
+                    <li>• Practical hands-on exercises</li>
+                    <li>• Real-world applications</li>
+                    <li>• Best practices and tips</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
