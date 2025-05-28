@@ -38,7 +38,14 @@ export const useCourses = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as Course[];
+      
+      // Transform the data to match our Course interface
+      return data?.map((course: any) => ({
+        ...course,
+        users_profiles: Array.isArray(course.users_profiles) 
+          ? course.users_profiles[0] || { display_name: null }
+          : course.users_profiles || { display_name: null }
+      })) as Course[];
     },
   });
 };
