@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import FoundersSection from "@/components/FoundersSection";
 import Dashboard from "@/components/Dashboard";
 import CourseCreator from "@/components/CourseCreator";
 import TutoringChatbot from "@/components/AI/TutoringChatbot";
@@ -16,6 +17,7 @@ const Index = () => {
       <Features />
       <StatsSection />
       <TestimonialsSection />
+      <FoundersSection />
       <Dashboard />
       <CourseCreator />
       <TutoringChatbot />
