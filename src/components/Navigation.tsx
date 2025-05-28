@@ -45,6 +45,12 @@ const Navigation = () => {
               >
                 Courses
               </button>
+              <button 
+                onClick={() => navigate('/ai-generator')}
+                className="text-gray-600 hover:text-primary transition-colors"
+              >
+                AI Generator
+              </button>
               <a href="#pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</a>
               <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
             </div>
@@ -113,6 +119,12 @@ const Navigation = () => {
                 className="text-gray-600 hover:text-primary transition-colors text-left"
               >
                 Courses
+              </button>
+              <button 
+                onClick={() => navigate('/ai-generator')}
+                className="text-gray-600 hover:text-primary transition-colors text-left"
+              >
+                AI Generator
               </button>
               <a href="#pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</a>
               <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>

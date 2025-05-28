@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import CreateCourse from "./pages/CreateCourse";
 import CourseBuilder from "./pages/CourseBuilder";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import AIGenerator from "./pages/AIGenerator";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +43,11 @@ const App = () => (
             <Route path="/create-course" element={
               <ProtectedRoute>
                 <CreateCourse />
+              </ProtectedRoute>
+            } />
+            <Route path="/ai-generator" element={
+              <ProtectedRoute>
+                <AIGenerator />
               </ProtectedRoute>
             } />
             <Route path="/course-builder/:courseId" element={
