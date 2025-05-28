@@ -19,9 +19,13 @@ const Index = () => {
         <StatsSection />
         <TestimonialsSection />
         <FoundersSection />
-        <Dashboard />
-        <CourseCreator />
-        <EnhancedTutoringChatbot />
+        <section className="py-8 sm:py-12 lg:py-16">
+          <div className="container mx-auto px-4 space-y-12 lg:space-y-20">
+            <Dashboard />
+            <CourseCreator />
+            <EnhancedTutoringChatbot />
+          </div>
+        </section>
       </main>
     </div>
   );
