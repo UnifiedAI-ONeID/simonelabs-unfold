@@ -39,7 +39,12 @@ const Navigation = () => {
             </div>
             <div className="hidden md:flex space-x-6">
               <a href="#features" className="text-gray-600 hover:text-primary transition-colors">Features</a>
-              <a href="#courses" className="text-gray-600 hover:text-primary transition-colors">Courses</a>
+              <button 
+                onClick={() => navigate('/courses')}
+                className="text-gray-600 hover:text-primary transition-colors"
+              >
+                Courses
+              </button>
               <a href="#pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</a>
               <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
             </div>
@@ -58,6 +63,12 @@ const Navigation = () => {
                   variant="ghost"
                 >
                   Dashboard
+                </Button>
+                <Button
+                  onClick={() => navigate('/create-course')}
+                  variant="ghost"
+                >
+                  Create Course
                 </Button>
                 <Button onClick={handleSignOut} variant="outline">
                   Sign Out
@@ -97,7 +108,12 @@ const Navigation = () => {
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
               <a href="#features" className="text-gray-600 hover:text-primary transition-colors">Features</a>
-              <a href="#courses" className="text-gray-600 hover:text-primary transition-colors">Courses</a>
+              <button 
+                onClick={() => navigate('/courses')}
+                className="text-gray-600 hover:text-primary transition-colors text-left"
+              >
+                Courses
+              </button>
               <a href="#pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</a>
               <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
               <div className="flex flex-col space-y-2 pt-4">
@@ -108,6 +124,12 @@ const Navigation = () => {
                       variant="ghost"
                     >
                       Dashboard
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/create-course')}
+                      variant="ghost"
+                    >
+                      Create Course
                     </Button>
                     <Button onClick={handleSignOut} variant="outline">
                       Sign Out
