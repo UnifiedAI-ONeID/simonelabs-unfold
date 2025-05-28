@@ -28,42 +28,42 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-background">
+    <section className="py-16 sm:py-20 lg:py-24 bg-muted/20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16 space-y-4">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground heading">
+        <div className="text-center mb-12 lg:mb-16 space-y-4">
+          <h2 className="responsive-heading text-foreground">
             What Our Students Say
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Real stories from learners who achieved their goals
+          <p className="responsive-body text-muted-foreground max-w-2xl mx-auto">
+            Real stories from learners who achieved their goals with our platform
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="simonelabs-glass-card hover:shadow-lg transition-all duration-200">
-              <CardContent className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+            <Card key={index} className="simonelabs-glass-card gentle-hover border-border/40 rounded-xl">
+              <CardContent className="p-6 lg:p-8 space-y-6">
                 <div className="flex items-center gap-1">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-simonelabs-warning fill-current" />
+                    <Star key={i} className="w-5 h-5 text-soft-amber-500 fill-current" />
                   ))}
                 </div>
                 
-                <p className="text-sm sm:text-base text-muted-foreground italic leading-relaxed">
+                <p className="text-muted-foreground italic leading-relaxed">
                   "{testimonial.content}"
                 </p>
                 
-                <div className="flex items-center gap-3 sm:gap-4 pt-2">
+                <div className="flex items-center gap-4 pt-2">
                   <img 
                     src={testimonial.avatar} 
                     alt={testimonial.name}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-border/40"
                   />
                   <div className="space-y-1">
-                    <div className="font-semibold text-sm sm:text-base text-foreground heading">
+                    <div className="font-semibold text-foreground heading">
                       {testimonial.name}
                     </div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground">
                       {testimonial.role}
                     </div>
                   </div>

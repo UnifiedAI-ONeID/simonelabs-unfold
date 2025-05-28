@@ -1,69 +1,80 @@
 
-import { Brain, Video, Users, Trophy, Zap, Shield } from "lucide-react";
-import FeatureCard from "./FeatureCard";
+import { Brain, Target, Users, Zap, BookOpen, BarChart3 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Features = () => {
   const features = [
     {
       icon: Brain,
       title: "AI-Powered Learning",
-      description: "Personalized course recommendations and adaptive learning paths powered by advanced AI algorithms.",
-      gradient: "bg-gradient-to-br from-purple-500 to-purple-600"
+      description: "Personalized learning paths adapted to your pace and style",
+      color: "text-primary"
     },
     {
-      icon: Video,
-      title: "Interactive Content",
-      description: "Engage with high-quality videos, interactive exercises, and hands-on projects for better learning outcomes.",
-      gradient: "bg-gradient-to-br from-blue-500 to-blue-600"
+      icon: Target,
+      title: "Goal Tracking",
+      description: "Set and achieve learning objectives with smart progress monitoring",
+      color: "text-secondary"
     },
     {
       icon: Users,
-      title: "Expert Instructors",
-      description: "Learn from industry professionals and thought leaders who bring real-world experience to every lesson.",
-      gradient: "bg-gradient-to-br from-green-500 to-green-600"
-    },
-    {
-      icon: Trophy,
-      title: "Skill Certification",
-      description: "Earn recognized certificates upon course completion to showcase your new skills to employers.",
-      gradient: "bg-gradient-to-br from-yellow-500 to-orange-500"
+      title: "Collaborative Learning",
+      description: "Connect with peers and learn together in study groups",
+      color: "text-accent"
     },
     {
       icon: Zap,
-      title: "Fast-Track Learning",
-      description: "Accelerated learning paths designed to help you master new skills in weeks, not months.",
-      gradient: "bg-gradient-to-br from-pink-500 to-red-500"
+      title: "Quick Creation",
+      description: "Generate courses and quizzes instantly with AI assistance",
+      color: "text-soft-amber-500"
     },
     {
-      icon: Shield,
-      title: "Lifetime Access",
-      description: "Once enrolled, access your courses forever with free updates and new content additions.",
-      gradient: "bg-gradient-to-br from-indigo-500 to-purple-500"
+      icon: BookOpen,
+      title: "Rich Content",
+      description: "Interactive lessons with multimedia and real-world examples",
+      color: "text-soft-green-500"
+    },
+    {
+      icon: BarChart3,
+      title: "Analytics Dashboard",
+      description: "Detailed insights into your learning progress and performance",
+      color: "text-soft-red-500"
     }
   ];
 
   return (
-    <section id="features" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-16 sm:py-20 lg:py-24 bg-muted/20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why Choose <span className="gradient-text">SimoneLabs</span>?
+        <div className="text-center mb-12 lg:mb-16 space-y-4">
+          <h2 className="responsive-heading text-foreground">
+            Everything You Need to Learn
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Experience the future of online learning with cutting-edge technology, 
-            expert instruction, and personalized learning paths designed for your success.
+          <p className="responsive-body text-muted-foreground max-w-2xl mx-auto">
+            Discover powerful features designed to enhance your learning experience
+            and help you achieve your educational goals.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-              gradient={feature.gradient}
-            />
+            <Card 
+              key={index} 
+              className="simonelabs-glass-card gentle-hover border-border/40 rounded-xl"
+            >
+              <CardHeader className="pb-4">
+                <div className={`w-12 h-12 bg-muted/60 rounded-lg flex items-center justify-center mb-4`}>
+                  <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                </div>
+                <CardTitle className="text-lg font-semibold text-foreground heading">
+                  {feature.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <CardDescription className="text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

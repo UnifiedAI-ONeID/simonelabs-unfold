@@ -7,71 +7,71 @@
 
 @layer base {
   :root {
-    /* SimoneLabs Light Mode Colors - Updated */
-    --background: 248 249 252; /* #F8F9FC - Softer off-white */
-    --foreground: 35 36 60; /* #23243C */
+    /* SimoneLabs Soft Light Mode Colors - Reduced Glare */
+    --background: 250 251 252; /* #FAFBFC - Very soft off-white */
+    --foreground: 30 35 50; /* #1E2332 - Soft dark blue-gray */
 
-    --card: 252 253 254; /* #FCFDFE - Very light grey instead of pure white */
-    --card-foreground: 35 36 60; /* #23243C */
+    --card: 253 254 255; /* #FDFEFF - Barely tinted white */
+    --card-foreground: 30 35 50; /* #1E2332 */
 
-    --popover: 252 253 254;
-    --popover-foreground: 35 36 60;
+    --popover: 253 254 255;
+    --popover-foreground: 30 35 50;
 
-    --primary: 52 70 199; /* #3446C7 - Indigo Blue */
-    --primary-foreground: 252 253 254;
+    --primary: 55 65 180; /* #3741B4 - Muted indigo */
+    --primary-foreground: 248 250 252;
 
-    --secondary: 70 177 241; /* #46B1F1 - Fresh Sky */
-    --secondary-foreground: 252 253 254;
+    --secondary: 70 130 200; /* #4682C8 - Soft steel blue */
+    --secondary-foreground: 248 250 252;
 
-    --accent: 41 55 161; /* #29379A - Darker Blue instead of coral */
-    --accent-foreground: 252 253 254;
+    --accent: 95 105 160; /* #5F69A0 - Soft slate blue */
+    --accent-foreground: 248 250 252;
 
-    --success: 62 196 144; /* #3EC490 - Emerald Green */
-    --warning: 255 209 102; /* #FFD166 - Saffron */
-    --destructive: 235 81 96; /* #EB5160 - Cherry Red */
-    --destructive-foreground: 252 253 254;
+    --success: 50 150 110; /* #32966E - Muted emerald */
+    --warning: 200 160 60; /* #C8A03C - Soft amber */
+    --destructive: 180 70 80; /* #B44650 - Muted red */
+    --destructive-foreground: 248 250 252;
 
-    --muted: 244 245 247; /* #F4F5F7 - Light grey */
-    --muted-foreground: 80 84 107; /* #50546B */
+    --muted: 240 243 246; /* #F0F3F6 - Very light gray-blue */
+    --muted-foreground: 75 85 105; /* #4B5569 - Soft gray */
 
-    --border: 224 226 232; /* #E0E2E8 - Softer border */
-    --input: 224 226 232;
-    --ring: 52 70 199;
+    --border: 225 230 235; /* #E1E6EB - Soft border */
+    --input: 225 230 235;
+    --ring: 55 65 180;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    /* SimoneLabs Dark Mode Colors - Updated */
-    --background: 16 20 28; /* #10141C - Deeper navy */
-    --foreground: 248 249 252; /* #F8F9FC - Soft white */
+    /* SimoneLabs Soft Dark Mode Colors - Reduced Glare */
+    --background: 15 18 25; /* #0F1219 - Deep soft navy */
+    --foreground: 240 242 245; /* #F0F2F5 - Warm white */
 
-    --card: 28 33 42; /* #1C212A - Dark slate */
-    --card-foreground: 248 249 252;
+    --card: 20 25 32; /* #141920 - Soft dark slate */
+    --card-foreground: 240 242 245;
 
-    --popover: 28 33 42;
-    --popover-foreground: 248 249 252;
+    --popover: 20 25 32;
+    --popover-foreground: 240 242 245;
 
-    --primary: 126 162 255; /* #7EA2FF - Light Blue */
-    --primary-foreground: 16 20 28;
+    --primary: 110 140 220; /* #6E8CDC - Soft light blue */
+    --primary-foreground: 15 18 25;
 
-    --secondary: 93 209 242; /* #5DD1F2 - Cyan */
-    --secondary-foreground: 16 20 28;
+    --secondary: 85 160 210; /* #55A0D2 - Soft cyan */
+    --secondary-foreground: 15 18 25;
 
-    --accent: 96 121 255; /* #6079FF - Darker blue instead of coral */
-    --accent-foreground: 16 20 28;
+    --accent: 120 135 200; /* #7887C8 - Soft periwinkle */
+    --accent-foreground: 15 18 25;
 
-    --success: 77 225 193; /* #4DE1C1 - Aquamarine */
-    --warning: 255 194 102; /* #FFC266 - Amber */
-    --destructive: 255 92 122; /* #FF5C7A - Soft Red */
-    --destructive-foreground: 248 249 252;
+    --success: 70 180 140; /* #46B48C - Soft aquamarine */
+    --warning: 220 180 80; /* #DCB450 - Soft gold */
+    --destructive: 200 90 100; /* #C85A64 - Soft rose */
+    --destructive-foreground: 240 242 245;
 
-    --muted: 28 33 42;
-    --muted-foreground: 195 202 216; /* #C3CAD8 */
+    --muted: 25 30 40; /* #191E28 - Soft dark gray */
+    --muted-foreground: 180 185 195; /* #B4B9C3 - Soft light gray */
 
-    --border: 40 45 54; /* #282D36 */
-    --input: 40 45 54;
-    --ring: 126 162 255;
+    --border: 35 42 52; /* #232A34 - Soft dark border */
+    --input: 35 42 52;
+    --ring: 110 140 220;
   }
 }
 
@@ -90,14 +90,19 @@
     font-family: 'Nunito', system-ui, -apple-system, sans-serif;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
+    /* Reduce blue light emission */
+    filter: sepia(0.05) saturate(0.95);
   }
 
   h1, h2, h3, h4, h5, h6, .heading {
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
   }
 
   .cta-text, .button-text {
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
+    font-weight: 600;
   }
 
   button, 
@@ -122,127 +127,125 @@
 
 @layer components {
   .simonelabs-gradient-bg {
-    background: linear-gradient(135deg, #3446C7 0%, #46B1F1 100%);
+    background: linear-gradient(135deg, #3741B4 0%, #4682C8 100%);
   }
   
   .simonelabs-gradient-text {
-    background: linear-gradient(135deg, #3446C7 0%, #46B1F1 100%);
+    background: linear-gradient(135deg, #3741B4 0%, #4682C8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .dark .simonelabs-gradient-text {
-    background: linear-gradient(135deg, #7EA2FF 0%, #5DD1F2 100%);
+    background: linear-gradient(135deg, #6E8CDC 0%, #55A0D2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   
   .simonelabs-glass-card {
-    background: rgba(252, 253, 254, 0.85);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(224, 226, 232, 0.4);
-    box-shadow: 0 8px 32px rgba(52, 70, 199, 0.08);
+    background: rgba(253, 254, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(225, 230, 235, 0.5);
+    box-shadow: 0 4px 24px rgba(30, 35, 50, 0.04);
   }
   
   .dark .simonelabs-glass-card {
-    background: rgba(28, 33, 42, 0.85);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(40, 45, 54, 0.6);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    background: rgba(20, 25, 32, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(35, 42, 52, 0.6);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
   }
 
   .simonelabs-primary-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300;
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(55, 65, 180, 0.15);
   }
 
   .simonelabs-accent-button {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300;
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(95, 105, 160, 0.15);
   }
 
   .simonelabs-secondary-button {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all duration-200;
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all duration-300;
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(70, 130, 200, 0.15);
   }
 
   .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out;
+    animation: float 8s ease-in-out infinite;
   }
 
   .responsive-grid {
-    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    @apply grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
 
   .simonelabs-card {
-    @apply simonelabs-glass-card p-6 rounded-lg transition-all duration-200 hover:shadow-lg;
+    @apply simonelabs-glass-card p-6 rounded-xl transition-all duration-300 hover:shadow-lg;
   }
 
   .responsive-heading {
-    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold;
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold;
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
+    line-height: 1.2;
   }
 
   .responsive-subheading {
-    @apply text-lg sm:text-xl md:text-2xl;
+    @apply text-lg sm:text-xl md:text-2xl font-medium;
     font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
+    line-height: 1.3;
   }
 
   .responsive-body {
-    @apply text-sm sm:text-base md:text-lg;
+    @apply text-sm sm:text-base md:text-lg leading-relaxed;
     font-family: 'Nunito', system-ui, sans-serif;
+  }
+
+  /* Soft focus states for better accessibility */
+  .soft-focus:focus {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(55, 65, 180, 0.1);
+  }
+
+  /* Gentle hover transitions */
+  .gentle-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .gentle-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(30, 35, 50, 0.08);
+  }
+
+  .dark .gentle-hover:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  50% { transform: translateY(-15px); }
 }
 
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 640px) {
-  .safe-area-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  .safe-area-left {
-    padding-left: env(safe-area-inset-left);
-  }
-  
-  .safe-area-right {
-    padding-right: env(safe-area-inset-right);
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-@media (display-mode: standalone) {
-  body {
-    padding-top: env(safe-area-inset-top);
-  }
-}
-
+/* High contrast support */
 @media (prefers-contrast: high) {
   .simonelabs-gradient-text {
     background: none;
@@ -253,12 +256,17 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .animate-fade-in-up,
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+/* Mobile-first responsive typography */
+@media (max-width: 640px) {
+  .responsive-heading {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  .responsive-subheading {
+    @apply text-base sm:text-lg;
+  }
+  
+  .responsive-body {
+    @apply text-sm;
   }
 }
