@@ -14,6 +14,8 @@ import CourseView from "./pages/CourseView";
 import LearnCourse from "./pages/LearnCourse";
 import CreateCourse from "./pages/CreateCourse";
 import CourseBuilder from "./pages/CourseBuilder";
+import StudyTools from "./pages/StudyTools";
+import LearningAnalyticsPage from "./pages/LearningAnalytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import AIGenerator from "./pages/AIGenerator";
@@ -65,6 +67,16 @@ const App = () => (
               <Route path="/achievements" element={
                 <ProtectedRoute>
                   <Achievements />
+                </ProtectedRoute>
+              } />
+              <Route path="/study-tools" element={
+                <ProtectedRoute>
+                  <StudyTools />
+                </ProtectedRoute>
+              } />
+              <Route path="/learning-analytics" element={
+                <ProtectedRoute>
+                  <LearningAnalyticsPage />
                 </ProtectedRoute>
               } />
               <Route path="/course-builder/:courseId" element={
