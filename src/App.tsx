@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +16,9 @@ import CourseBuilder from "./pages/CourseBuilder";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import AIGenerator from "./pages/AIGenerator";
+import Analytics from "./pages/Analytics";
+import Pricing from "./pages/Pricing";
+import Achievements from "./pages/Achievements";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +34,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/course/:courseId" element={<CourseView />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/learn/:courseId" element={
               <ProtectedRoute>
                 <LearnCourse />
@@ -48,6 +53,16 @@ const App = () => (
             <Route path="/ai-generator" element={
               <ProtectedRoute>
                 <AIGenerator />
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/achievements" element={
+              <ProtectedRoute>
+                <Achievements />
               </ProtectedRoute>
             } />
             <Route path="/course-builder/:courseId" element={

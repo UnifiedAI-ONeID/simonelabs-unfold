@@ -6,6 +6,7 @@ import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import Dashboard from "@/components/Dashboard";
 import CourseCreator from "@/components/CourseCreator";
+import TutoringChatbot from "@/components/AI/TutoringChatbot";
 
 const Index = () => {
   return (
@@ -17,6 +18,7 @@ const Index = () => {
       <TestimonialsSection />
       <Dashboard />
       <CourseCreator />
+      <TutoringChatbot />
     </div>
   );
 };

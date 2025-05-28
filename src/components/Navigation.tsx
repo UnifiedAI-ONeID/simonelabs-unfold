@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,7 +50,18 @@ const Navigation = () => {
               >
                 AI Generator
               </button>
-              <a href="#pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</a>
+              <button 
+                onClick={() => navigate('/analytics')}
+                className="text-gray-600 hover:text-primary transition-colors"
+              >
+                Analytics
+              </button>
+              <button 
+                onClick={() => navigate('/pricing')}
+                className="text-gray-600 hover:text-primary transition-colors"
+              >
+                Pricing
+              </button>
               <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
             </div>
           </div>
@@ -126,7 +136,18 @@ const Navigation = () => {
               >
                 AI Generator
               </button>
-              <a href="#pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</a>
+              <button 
+                onClick={() => navigate('/analytics')}
+                className="text-gray-600 hover:text-primary transition-colors text-left"
+              >
+                Analytics
+              </button>
+              <button 
+                onClick={() => navigate('/pricing')}
+                className="text-gray-600 hover:text-primary transition-colors text-left"
+              >
+                Pricing
+              </button>
               <a href="#about" className="text-gray-600 hover:text-primary transition-colors">About</a>
               <div className="flex flex-col space-y-2 pt-4">
                 {user ? (
