@@ -17,8 +17,8 @@ const StatsSection = () => {
       value: "500+",
       label: "Courses Available",
       description: "Across all subjects",
-      color: "text-secondary",
-      bgColor: "bg-secondary/10 border-secondary/20",
+      color: "text-primary",
+      bgColor: "bg-primary/10 border-primary/20",
       growth: "+50 new courses"
     },
     {
@@ -35,8 +35,8 @@ const StatsSection = () => {
       value: "4.9/5",
       label: "User Rating",
       description: "Highly satisfied",
-      color: "text-warning",
-      bgColor: "bg-warning/10 border-warning/20",
+      color: "text-accent",
+      bgColor: "bg-accent/10 border-accent/20",
       growth: "98% recommend"
     }
   ];
@@ -152,10 +152,10 @@ const StatsSection = () => {
               Become part of the fastest-growing AI learning platform and accelerate your educational journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="simonelabs-accent-button px-8 py-4 rounded-xl text-base font-semibold shadow-lg">
+              <button className="simonelabs-primary-button px-8 py-4 rounded-xl text-base font-semibold shadow-lg">
                 Get Started Free
               </button>
-              <button className="simonelabs-glass-card border px-8 py-4 rounded-xl text-base font-semibold text-foreground hover:bg-muted/50 transition-colors">
+              <button className="simonelabs-glass-card border px-8 py-4 rounded-xl text-base font-semibold text-foreground hover:bg-card/50 transition-colors">
                 View Demo
               </button>
             </div>

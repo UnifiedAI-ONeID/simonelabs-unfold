@@ -27,10 +27,10 @@ const Hero = () => {
             </p>
           </div>
 
-          {/* CTA Button using accent color */}
+          {/* CTA Button using primary color */}
           <div className="flex justify-center">
             <Link to="/auth">
-              <Button className="simonelabs-accent-button text-lg px-8 py-4 h-auto rounded-xl group shadow-lg">
+              <Button className="simonelabs-primary-button text-lg px-8 py-4 h-auto rounded-xl group shadow-lg">
                 <span className="font-semibold">Start Learning Now</span>
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
@@ -50,8 +50,8 @@ const Hero = () => {
             </div>
             
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-secondary/20">
-                <Users className="h-8 w-8 text-secondary" />
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                <Users className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-xl font-semibold text-foreground">Collaborative Community</h3>
               <p className="text-muted-foreground">

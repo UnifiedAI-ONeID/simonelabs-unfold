@@ -66,7 +66,7 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="section-padding bg-gradient-to-br from-muted/30 via-background to-muted/20 relative overflow-hidden">
+    <section className="section-padding bg-gradient-to-br from-card/30 via-background to-card/20 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-10 w-32 h-32 bg-gradient-to-br from-primary/40 to-transparent rounded-full blur-3xl animate-float"></div>
@@ -106,7 +106,7 @@ const TestimonialsSection = () => {
                     className="flex items-center gap-3 simonelabs-glass-card p-4 rounded-xl gentle-hover"
                     style={{animationDelay: `${index * 100}ms`}}
                   >
-                    <CheckCircle className="w-5 h-5 text-secondary flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
                     <span className="text-foreground font-medium">{feature}</span>
                   </div>
                 ))}
@@ -117,7 +117,7 @@ const TestimonialsSection = () => {
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-warning fill-warning" />
+                    <Star key={i} className="w-5 h-5 text-accent fill-accent" />
                   ))}
                 </div>
                 <span className="text-2xl font-bold text-foreground">4.9/5</span>
@@ -141,20 +141,20 @@ const TestimonialsSection = () => {
                 <div className="flex justify-between items-center mb-8">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-warning fill-warning" />
+                      <Star key={i} className="w-5 h-5 text-accent fill-accent" />
                     ))}
                   </div>
                   
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={prevTestimonial}
-                      className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center transition-colors gentle-hover"
+                      className="w-10 h-10 rounded-full bg-card hover:bg-primary/10 flex items-center justify-center transition-colors gentle-hover"
                     >
                       <ArrowLeft className="w-5 h-5 text-foreground" />
                     </button>
                     <button 
                       onClick={nextTestimonial}
-                      className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center transition-colors gentle-hover"
+                      className="w-10 h-10 rounded-full bg-card hover:bg-primary/10 flex items-center justify-center transition-colors gentle-hover"
                     >
                       <ArrowRight className="w-5 h-5 text-foreground" />
                     </button>
@@ -204,7 +204,7 @@ const TestimonialsSection = () => {
                       className={`w-3 h-3 rounded-full transition-colors ${
                         index === currentTestimonial 
                           ? 'bg-primary' 
-                          : 'bg-muted hover:bg-primary/50'
+                          : 'bg-card hover:bg-primary/50'
                       }`}
                     />
                   ))}

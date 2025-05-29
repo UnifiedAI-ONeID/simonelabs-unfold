@@ -2,7 +2,7 @@
 @layer components {
   /* Production-ready gradient backgrounds using your color scheme */
   .simonelabs-gradient-bg {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.95) 0%, hsl(var(--secondary) / 0.85) 50%, hsl(var(--accent) / 0.75) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.95) 0%, hsl(var(--accent) / 0.85) 50%, hsl(var(--secondary) / 0.75) 100%);
   }
   
   .simonelabs-gradient-text {
@@ -15,14 +15,14 @@
 
   /* Premium glass morphism cards with your color scheme */
   .simonelabs-glass-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: hsl(var(--card) / 0.95);
     backdrop-filter: blur(20px) saturate(120%);
     border: 1px solid hsl(var(--border) / 0.5);
     box-shadow: 
       0 1px 3px hsl(var(--primary) / 0.08),
       0 8px 32px hsl(var(--primary) / 0.06),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-    color: hsl(var(--foreground));
+      0 0 0 1px hsl(var(--background) / 0.1);
+    color: hsl(var(--card-foreground));
   }
   
   .dark .simonelabs-glass-card {
@@ -32,8 +32,8 @@
     box-shadow: 
       0 1px 3px hsl(var(--primary) / 0.15),
       0 8px 32px hsl(var(--primary) / 0.12),
-      0 0 0 1px hsl(var(--foreground) / 0.05);
-    color: hsl(var(--foreground));
+      0 0 0 1px hsl(var(--accent) / 0.05);
+    color: hsl(var(--card-foreground));
   }
 
   /* Enhanced button system using your exact colors */
@@ -129,14 +129,14 @@
   .hero-gradient {
     background: linear-gradient(135deg, 
       hsl(var(--background)) 0%, 
-      hsl(var(--muted) / 0.3) 50%, 
+      hsl(var(--card) / 0.3) 50%, 
       hsl(var(--background)) 100%);
   }
 
   .dark .hero-gradient {
     background: linear-gradient(135deg, 
       hsl(var(--background)) 0%, 
-      hsl(var(--muted) / 0.2) 50%, 
+      hsl(var(--card) / 0.2) 50%, 
       hsl(var(--background)) 100%);
   }
 }

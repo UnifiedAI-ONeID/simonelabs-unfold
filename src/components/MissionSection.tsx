@@ -3,12 +3,12 @@ import { Star } from "lucide-react";
 
 const MissionSection = () => {
   return (
-    <section className="section-padding bg-muted/30">
+    <section className="section-padding bg-card/30">
       <div className="container mx-auto container-padding">
         <div className="text-center max-w-4xl mx-auto space-y-8">
           {/* Mission icon */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20">
               <Star className="h-8 w-8 text-primary" />
             </div>
           </div>
@@ -25,7 +25,7 @@ const MissionSection = () => {
             learners worldwide to reach their full potential.
           </p>
           
-          {/* Stats indicators - matching reference design */}
+          {/* Stats indicators - matching your color scheme */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-8">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
