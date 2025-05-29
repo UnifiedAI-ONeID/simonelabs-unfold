@@ -9,7 +9,7 @@ const StatsSection = () => {
       label: "Active Learners",
       description: "Students worldwide",
       color: "text-primary",
-      bgColor: "bg-gradient-to-br from-primary/20 to-primary/10",
+      bgColor: "bg-primary/10 border-primary/20",
       growth: "+25% this month"
     },
     {
@@ -18,7 +18,7 @@ const StatsSection = () => {
       label: "Courses Available",
       description: "Across all subjects",
       color: "text-secondary",
-      bgColor: "bg-gradient-to-br from-secondary/20 to-secondary/10",
+      bgColor: "bg-secondary/10 border-secondary/20",
       growth: "+50 new courses"
     },
     {
@@ -27,7 +27,7 @@ const StatsSection = () => {
       label: "Completion Rate",
       description: "Industry leading",
       color: "text-accent",
-      bgColor: "bg-gradient-to-br from-accent/20 to-accent/10",
+      bgColor: "bg-accent/10 border-accent/20",
       growth: "+12% improvement"
     },
     {
@@ -36,7 +36,7 @@ const StatsSection = () => {
       label: "User Rating",
       description: "Highly satisfied",
       color: "text-warning",
-      bgColor: "bg-gradient-to-br from-warning/20 to-warning/10",
+      bgColor: "bg-warning/10 border-warning/20",
       growth: "98% recommend"
     }
   ];
@@ -65,17 +65,17 @@ const StatsSection = () => {
   ];
 
   return (
-    <section className="section-padding bg-gradient-to-br from-background via-muted/20 to-background relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-accent/30 to-transparent rounded-full blur-3xl animate-gentle-bounce"></div>
+    <section className="section-padding bg-background relative overflow-hidden">
+      {/* Background decoration using your colors */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-primary/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-accent/30 rounded-full blur-3xl animate-gentle-bounce"></div>
       </div>
 
       <div className="container mx-auto container-padding relative z-10">
         {/* Header */}
         <div className="text-center mb-16 space-y-6">
-          <div className="inline-flex items-center gap-3 simonelabs-glass-card rounded-full px-6 py-3 text-sm font-medium border border-primary/20">
+          <div className="inline-flex items-center gap-3 simonelabs-glass-card rounded-full px-6 py-3 text-sm font-medium border">
             <TrendingUp className="w-4 h-4 text-primary" />
             <span className="text-muted-foreground font-semibold">Platform Statistics</span>
           </div>
@@ -96,10 +96,10 @@ const StatsSection = () => {
           {mainStats.map((stat, index) => (
             <div 
               key={index}
-              className="text-center simonelabs-glass-card p-8 rounded-3xl gentle-hover group border border-primary/10"
+              className="text-center simonelabs-glass-card p-8 rounded-3xl gentle-hover group border"
               style={{animationDelay: `${index * 150}ms`}}
             >
-              <div className={`w-20 h-20 ${stat.bgColor} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
+              <div className={`w-20 h-20 ${stat.bgColor} border rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
                 <stat.icon className={`w-10 h-10 ${stat.color}`} />
               </div>
               
@@ -113,7 +113,7 @@ const StatsSection = () => {
                 <div className="text-sm text-muted-foreground">
                   {stat.description}
                 </div>
-                <div className={`text-xs font-medium ${stat.color} bg-gradient-to-r from-${stat.color.split('-')[1]}/10 to-transparent px-3 py-1 rounded-full inline-block`}>
+                <div className={`text-xs font-medium ${stat.color} bg-current/10 px-3 py-1 rounded-full inline-block`}>
                   {stat.growth}
                 </div>
               </div>
@@ -126,10 +126,10 @@ const StatsSection = () => {
           {achievements.map((achievement, index) => (
             <div 
               key={index}
-              className="flex flex-col items-center text-center simonelabs-glass-card p-6 rounded-2xl gentle-hover group border border-border/40"
+              className="flex flex-col items-center text-center simonelabs-glass-card p-6 rounded-2xl gentle-hover group border"
               style={{animationDelay: `${(index + 4) * 100}ms`}}
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <achievement.icon className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2 heading">
@@ -144,7 +144,7 @@ const StatsSection = () => {
 
         {/* Bottom CTA */}
         <div className="text-center">
-          <div className="simonelabs-glass-card p-8 rounded-3xl border border-primary/20 max-w-3xl mx-auto">
+          <div className="simonelabs-glass-card p-8 rounded-3xl border max-w-3xl mx-auto">
             <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 heading">
               Ready to Join Our Community?
             </h3>
@@ -152,10 +152,10 @@ const StatsSection = () => {
               Become part of the fastest-growing AI learning platform and accelerate your educational journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="simonelabs-primary-button px-8 py-4 rounded-xl text-base font-semibold shadow-lg">
+              <button className="simonelabs-accent-button px-8 py-4 rounded-xl text-base font-semibold shadow-lg">
                 Get Started Free
               </button>
-              <button className="simonelabs-glass-card border border-border/60 px-8 py-4 rounded-xl text-base font-semibold text-foreground hover:bg-muted/50 transition-colors">
+              <button className="simonelabs-glass-card border px-8 py-4 rounded-xl text-base font-semibold text-foreground hover:bg-muted/50 transition-colors">
                 View Demo
               </button>
             </div>
