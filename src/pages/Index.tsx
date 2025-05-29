@@ -2,6 +2,7 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
+import MissionSection from "@/components/MissionSection";
 import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import FoundersSection from "@/components/FoundersSection";
@@ -16,6 +17,7 @@ const Index = () => {
       <main className="pt-16">
         <Hero />
         <Features />
+        <MissionSection />
         <StatsSection />
         <TestimonialsSection />
         <FoundersSection />
