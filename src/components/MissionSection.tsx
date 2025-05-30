@@ -6,9 +6,9 @@ const MissionSection = () => {
     <section className="section-padding bg-card/30">
       <div className="container mx-auto container-padding">
         <div className="text-center max-w-4xl mx-auto space-y-8">
-          {/* Mission icon using exact primary blue */}
+          {/* Mission icon using calming primary blue */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/15">
               <Star className="h-8 w-8 text-primary" />
             </div>
           </div>
@@ -25,18 +25,18 @@ const MissionSection = () => {
             learners worldwide to reach their full potential.
           </p>
           
-          {/* Stats indicators using exact primary blue */}
+          {/* Stats indicators using calming primary blue */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-8">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
               <span className="text-sm text-muted-foreground">100+ Courses</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <div className="w-2 h-2 bg-accent rounded-full"></div>
               <span className="text-sm text-muted-foreground">50,000+ Learners</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <div className="w-2 h-2 bg-secondary rounded-full"></div>
               <span className="text-sm text-muted-foreground">Global Community</span>
             </div>
           </div>

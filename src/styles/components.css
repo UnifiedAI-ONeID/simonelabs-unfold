@@ -1,8 +1,7 @@
-
 @layer components {
-  /* Production-ready gradient backgrounds using your exact color scheme */
+  /* Calming gradient backgrounds using soft blues */
   .simonelabs-gradient-bg {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.95) 0%, hsl(var(--accent) / 0.85) 50%, hsl(var(--secondary) / 0.75) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.85) 0%, hsl(var(--accent) / 0.75) 50%, hsl(var(--secondary) / 0.65) 100%);
   }
   
   .simonelabs-gradient-text {
@@ -13,40 +12,40 @@
     color: transparent;
   }
 
-  /* Premium glass morphism cards with your exact color scheme */
+  /* Gentle glass morphism cards with calming blues */
   .simonelabs-glass-card {
     background: hsl(var(--card) / 0.95);
-    backdrop-filter: blur(20px) saturate(120%);
-    border: 1px solid hsl(var(--border) / 0.5);
+    backdrop-filter: blur(20px) saturate(110%);
+    border: 1px solid hsl(var(--border) / 0.6);
     box-shadow: 
-      0 1px 3px hsl(var(--primary) / 0.08),
-      0 8px 32px hsl(var(--primary) / 0.06),
+      0 1px 3px hsl(var(--primary) / 0.06),
+      0 8px 32px hsl(var(--primary) / 0.04),
       0 0 0 1px hsl(var(--background) / 0.1);
     color: hsl(var(--card-foreground));
   }
   
   .dark .simonelabs-glass-card {
     background: hsl(var(--card) / 0.9);
-    backdrop-filter: blur(20px) saturate(120%);
-    border: 1px solid hsl(var(--border) / 0.3);
+    backdrop-filter: blur(20px) saturate(110%);
+    border: 1px solid hsl(var(--border) / 0.4);
     box-shadow: 
-      0 1px 3px hsl(var(--primary) / 0.15),
-      0 8px 32px hsl(var(--primary) / 0.12),
-      0 0 0 1px hsl(var(--accent) / 0.05);
+      0 1px 3px hsl(var(--primary) / 0.1),
+      0 8px 32px hsl(var(--primary) / 0.08),
+      0 0 0 1px hsl(var(--accent) / 0.03);
     color: hsl(var(--card-foreground));
   }
 
-  /* Enhanced button system using your exact colors */
+  /* Subtle button system using calming colors */
   .simonelabs-primary-button {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-lg;
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
-    box-shadow: 0 4px 14px hsl(var(--primary) / 0.25);
+    box-shadow: 0 4px 14px hsl(var(--primary) / 0.15);
     border-radius: 0.75rem;
   }
 
   .simonelabs-primary-button:hover {
-    box-shadow: 0 6px 20px hsl(var(--primary) / 0.3);
+    box-shadow: 0 6px 20px hsl(var(--primary) / 0.2);
     transform: translateY(-1px);
   }
 
@@ -54,7 +53,7 @@
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all duration-300 shadow-lg;
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
-    box-shadow: 0 4px 14px hsl(var(--secondary) / 0.25);
+    box-shadow: 0 4px 14px hsl(var(--secondary) / 0.15);
     border-radius: 0.75rem;
   }
 
@@ -62,11 +61,11 @@
     @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 shadow-lg;
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
-    box-shadow: 0 4px 14px hsl(var(--accent) / 0.25);
+    box-shadow: 0 4px 14px hsl(var(--accent) / 0.15);
     border-radius: 0.75rem;
   }
 
-  /* Premium card component with proper color inheritance */
+  /* Soft card component with gentle shadows */
   .simonelabs-card {
     @apply simonelabs-glass-card p-6 rounded-xl gentle-hover;
     background: hsl(var(--card));
@@ -76,13 +75,13 @@
   }
 
   .simonelabs-card:hover {
-    border-color: hsl(var(--primary) / 0.3);
-    box-shadow: 0 8px 25px hsl(var(--primary) / 0.1);
+    border-color: hsl(var(--primary) / 0.2);
+    box-shadow: 0 8px 25px hsl(var(--primary) / 0.06);
   }
 
   .dark .simonelabs-card:hover {
-    border-color: hsl(var(--primary) / 0.5);
-    box-shadow: 0 8px 25px hsl(var(--primary) / 0.2);
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 8px 25px hsl(var(--primary) / 0.12);
   }
 
   /* Ensure consistent text in cards using your color scheme */
@@ -125,18 +124,18 @@
     @apply bg-destructive/10 text-destructive border border-destructive/20;
   }
 
-  /* Hero section backgrounds using your exact colors */
+  /* Gentle hero section backgrounds */
   .hero-gradient {
     background: linear-gradient(135deg, 
       hsl(var(--background)) 0%, 
-      hsl(var(--card) / 0.3) 50%, 
+      hsl(var(--card) / 0.4) 50%, 
       hsl(var(--background)) 100%);
   }
 
   .dark .hero-gradient {
     background: linear-gradient(135deg, 
       hsl(var(--background)) 0%, 
-      hsl(var(--card) / 0.2) 50%, 
+      hsl(var(--card) / 0.3) 50%, 
       hsl(var(--background)) 100%);
   }
 }
