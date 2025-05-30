@@ -34,11 +34,15 @@ export const useAuth = () => {
 };
 
 const cleanupAuthState = () => {
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (error) {
+    console.error('Error cleaning up auth state:', error);
+  }
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -51,6 +55,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       cleanupAuthState();
       
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -88,6 +96,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       cleanupAuthState();
       
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
@@ -123,7 +135,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetPassword = useCallback(async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (!email) {
+        throw new Error('Email is required');
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
 
       if (error) {
         console.error('Password reset error:', {
@@ -148,6 +166,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updatePassword = useCallback(async (newPassword: string) => {
     try {
+      if (!newPassword || newPassword.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -193,7 +215,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
       
-      window.location.href = '/';
+      // Use a small timeout to ensure state is cleaned up
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (error: any) {
       console.error('Signout process failed:', {
         message: error.message,
@@ -229,6 +254,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               title: "Password Recovery",
               description: "Please check your email for password reset instructions.",
             });
+          } else if (event === 'USER_UPDATED') {
+            toast({
+              title: "Profile Updated",
+              description: "Your profile has been updated successfully.",
+            });
           }
         }
       }
@@ -243,6 +273,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             status: error.status,
             code: error.code,
             details: error
+          });
+          toast({
+            title: "Session Error",
+            description: "There was an error retrieving your session. Please try signing in again.",
+            variant: "destructive",
           });
         }
         if (mounted) {
@@ -259,6 +294,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         if (mounted) {
           setLoading(false);
+          toast({
+            title: "Error",
+            description: "Failed to initialize session. Please refresh the page.",
+            variant: "destructive",
+          });
         }
       }
     };
