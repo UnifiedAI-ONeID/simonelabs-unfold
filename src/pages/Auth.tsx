@@ -9,6 +9,7 @@ import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -17,13 +18,33 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      if (isForgotPassword) {
+        const { error } = await resetPassword(email);
+        
+        if (error) {
+          toast({
+            title: "Password Reset Failed",
+            description: error.message || "Please check your email and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Please check your email for password reset instructions.",
+        });
+        setIsForgotPassword(false);
+        return;
+      }
+
       if (isLogin) {
         const { error } = await signIn(email, password);
         
@@ -120,6 +141,7 @@ const Auth = () => {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
+    setIsForgotPassword(false);
     resetForm();
   };
 
@@ -132,14 +154,18 @@ const Auth = () => {
           </div>
           <h1 className="text-3xl font-bold gradient-text heading">SimoneLabs</h1>
           <p className="text-muted-foreground mt-2">
-            {isLogin ? 'Welcome back!' : 'Join our learning community'}
+            {isForgotPassword 
+              ? 'Reset your password'
+              : isLogin 
+                ? 'Welcome back!' 
+                : 'Join our learning community'}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && (
+          {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="fullName\" className="text-sm font-medium">
+              <Label htmlFor="fullName" className="text-sm font-medium">
                 Full Name
               </Label>
               <div className="relative">
@@ -175,36 +201,38 @@ const Auth = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">
-              Password
-            </Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter your password"
-                minLength={6}
-                className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+          {!isForgotPassword && (
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  minLength={6}
+                  className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 6 characters long
+                </p>
+              )}
             </div>
-            {!isLogin && (
-              <p className="text-xs text-muted-foreground">
-                Password must be at least 6 characters long
-              </p>
-            )}
-          </div>
+          )}
 
           <Button
             type="submit"
@@ -214,23 +242,51 @@ const Auth = () => {
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                {isLogin ? 'Signing in...' : 'Creating account...'}
+                {isForgotPassword 
+                  ? 'Sending reset email...' 
+                  : isLogin 
+                    ? 'Signing in...' 
+                    : 'Creating account...'}
               </div>
             ) : (
-              isLogin ? 'Sign In' : 'Create Account'
+              isForgotPassword 
+                ? 'Send Reset Email' 
+                : isLogin 
+                  ? 'Sign In' 
+                  : 'Create Account'
             )}
           </Button>
         </form>
 
-        <div className="mt-8 text-center">
-          <button
-            onClick={toggleMode}
-            className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
-          >
-            {isLogin
-              ? "Don't have an account? Create one"
-              : 'Already have an account? Sign in'}
-          </button>
+        <div className="mt-6 text-center space-y-2">
+          {isLogin && !isForgotPassword && (
+            <button
+              onClick={() => setIsForgotPassword(true)}
+              className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
+            >
+              Forgot your password?
+            </button>
+          )}
+          
+          {isForgotPassword && (
+            <button
+              onClick={() => setIsForgotPassword(false)}
+              className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+            >
+              Back to Sign In
+            </button>
+          )}
+          
+          {!isForgotPassword && (
+            <button
+              onClick={toggleMode}
+              className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+            >
+              {isLogin
+                ? "Don't have an account? Create one"
+                : 'Already have an account? Sign in'}
+            </button>
+          )}
         </div>
       </div>
     </div>

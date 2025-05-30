@@ -10,6 +10,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,6 +21,8 @@ const AuthContext = createContext<AuthContextType>({
   signUp: async () => ({ error: null }),
   signIn: async () => ({ error: null }),
   signOut: async () => {},
+  resetPassword: async () => ({ error: null }),
+  updatePassword: async () => ({ error: null }),
 });
 
 export const useAuth = () => {
@@ -117,6 +121,60 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) {
+        console.error('Password reset error:', {
+          message: error.message,
+          status: error.status,
+          code: error.code,
+          details: error
+        });
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Password reset process failed:', {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
+      return { error };
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        console.error('Password update error:', {
+          message: error.message,
+          status: error.status,
+          code: error.code,
+          details: error
+        });
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Password update process failed:', {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
+      return { error };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     try {
       console.log('Signing out...');
@@ -168,6 +226,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               title: "Welcome back!",
               description: `Signed in as ${session?.user?.email}`,
             });
+          } else if (event === 'PASSWORD_RECOVERY') {
+            toast({
+              title: "Password Recovery",
+              description: "Please check your email for password reset instructions.",
+            });
           }
         }
       }
@@ -217,6 +280,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signIn,
     signOut,
+    resetPassword,
+    updatePassword,
   };
 
   return (
