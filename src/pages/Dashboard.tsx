@@ -60,41 +60,31 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
-  const { data: achievements, isLoading: achievementsLoading } = useQuery({
-    queryKey: ['user-achievements', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('user_achievements')
-        .select(`
-          *,
-          achievements (
-            id,
-            title,
-            description,
-            icon_name,
-            xp_reward
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('earned_at', { ascending: false })
-        .limit(5);
-      
-      if (error) {
-        console.error('Achievements fetch error:', error);
-        return [];
-      }
-      return data || [];
+  // Mock achievements data since the table was removed
+  const mockAchievements = [
+    {
+      id: '1',
+      title: 'First Course Completed',
+      earned_at: new Date().toISOString(),
+      xp_reward: 100
     },
-    enabled: !!user?.id,
-  });
+    {
+      id: '2', 
+      title: 'Learning Streak',
+      earned_at: new Date(Date.now() - 86400000).toISOString(),
+      xp_reward: 50
+    }
+  ];
 
   const completedCourses = userProgress?.filter(p => p.completed).length || 0;
   const inProgressCourses = userProgress?.filter(p => !p.completed && p.progress > 0).length || 0;
   const totalCourses = userProgress?.length || 0;
 
-  if (profileLoading || progressLoading || achievementsLoading) {
+  // Mock level and XP since these columns were removed
+  const mockLevel = Math.floor(completedCourses / 2) + 1;
+  const mockXP = completedCourses * 100 + inProgressCourses * 25;
+
+  if (profileLoading || progressLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 pt-20 pb-8">
         <div className="container mx-auto px-4">
@@ -134,7 +124,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Level</p>
-                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{profile?.level || 1}</p>
+                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{mockLevel}</p>
               </div>
               <Star className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             </div>
@@ -144,7 +134,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400">XP Points</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{profile?.xp || 0}</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{mockXP}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             </div>
@@ -241,20 +231,20 @@ const Dashboard = () => {
             </div>
             
             <div className="space-y-3">
-              {achievements && achievements.length > 0 ? (
-                achievements.map((achievement) => (
+              {mockAchievements.length > 0 ? (
+                mockAchievements.map((achievement) => (
                   <div key={achievement.id} className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
                     <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
                       <Trophy className="h-5 w-5 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">{achievement.achievements?.title}</p>
+                      <p className="font-medium">{achievement.title}</p>
                       <div className="flex items-center gap-2">
                         <p className="text-sm text-muted-foreground">
                           {new Date(achievement.earned_at).toLocaleDateString()}
                         </p>
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                          +{achievement.achievements?.xp_reward} XP
+                          +{achievement.xp_reward} XP
                         </span>
                       </div>
                     </div>

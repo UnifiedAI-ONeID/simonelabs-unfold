@@ -52,8 +52,9 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({ courseId, sectionId, onQu
 
       setGeneratedQuestions(result.questions);
       
-      if (onQuizGenerated && result.quiz) {
-        onQuizGenerated(result.quiz);
+      // Since we simplified the quiz system, we just pass the questions
+      if (onQuizGenerated) {
+        onQuizGenerated({ questions: result.questions });
       }
     } catch (error) {
       console.error('Failed to generate quiz:', error);
