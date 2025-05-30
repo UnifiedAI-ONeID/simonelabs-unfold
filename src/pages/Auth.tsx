@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +15,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { signUp, signIn } = useAuth();
 
@@ -28,6 +28,13 @@ const Auth = () => {
         const { error } = await signIn(email, password);
         
         if (error) {
+          console.error('Login error:', {
+            message: error.message,
+            status: error.status,
+            code: error.code,
+            details: error
+          });
+          
           if (error.message?.includes('Invalid login credentials')) {
             toast({
               title: "Login Failed",
@@ -41,6 +48,7 @@ const Auth = () => {
               variant: "destructive",
             });
           }
+          setLoading(false);
           return;
         }
         
@@ -48,11 +56,21 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You've been successfully logged in.",
         });
-        navigate('/dashboard');
+
+        // Redirect to the intended page or dashboard
+        const from = (location.state as any)?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
       } else {
         const { error } = await signUp(email, password, fullName);
         
         if (error) {
+          console.error('Registration error:', {
+            message: error.message,
+            status: error.status,
+            code: error.code,
+            details: error
+          });
+          
           if (error.message?.includes('User already registered')) {
             toast({
               title: "Account Exists",
@@ -67,6 +85,7 @@ const Auth = () => {
               variant: "destructive",
             });
           }
+          setLoading(false);
           return;
         }
         
@@ -77,7 +96,11 @@ const Auth = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error('Auth process failed:', {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
       toast({
         title: "Authentication Error",
         description: "An unexpected error occurred. Please try again.",

@@ -1,7 +1,7 @@
-
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -41,18 +41,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const signUp = useCallback(async (email: string, password: string, displayName?: string) => {
     try {
       cleanupAuthState();
       
-      const redirectUrl = `${window.location.origin}/`;
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
           data: {
             display_name: displayName || email.split('@')[0],
             full_name: displayName || email.split('@')[0],
@@ -61,14 +59,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        console.error('Signup error:', error);
+        console.error('Signup error:', { 
+          message: error.message,
+          status: error.status,
+          code: error.code,
+          details: error 
+        });
         return { error };
       }
       
       console.log('Signup successful:', data);
       return { error: null };
-    } catch (error) {
-      console.error('Signup failed:', error);
+    } catch (error: any) {
+      console.error('Signup process failed:', {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
       return { error };
     }
   }, []);
@@ -89,14 +96,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        console.error('Signin error:', error);
+        console.error('Signin error:', {
+          message: error.message,
+          status: error.status,
+          code: error.code,
+          details: error
+        });
         return { error };
       }
       
       console.log('Signin successful:', data);
       return { error: null };
-    } catch (error) {
-      console.error('Signin failed:', error);
+    } catch (error: any) {
+      console.error('Signin process failed:', {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
       return { error };
     }
   }, []);
@@ -104,26 +120,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(async () => {
     try {
       console.log('Signing out...');
-      
       cleanupAuthState();
       
-      try {
-        const { error } = await supabase.auth.signOut({ scope: 'global' });
-        if (error) {
-          console.error('Signout error:', error);
-        }
-      } catch (err) {
-        console.error('Signout failed:', err);
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Signout error:', {
+          message: error.message,
+          status: error.status,
+          code: error.code,
+          details: error
+        });
+        toast({
+          title: "Error signing out",
+          description: "Please try again",
+          variant: "destructive",
+        });
       }
       
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
-    } catch (error) {
-      console.error('Signout process failed:', error);
+      window.location.href = '/';
+    } catch (error: any) {
+      console.error('Signout process failed:', {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
       window.location.href = '/';
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     let mounted = true;
@@ -140,6 +163,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (event === 'SIGNED_OUT') {
             console.log('User signed out');
             cleanupAuthState();
+          } else if (event === 'SIGNED_IN') {
+            toast({
+              title: "Welcome back!",
+              description: `Signed in as ${session?.user?.email}`,
+            });
           }
         }
       }
@@ -149,7 +177,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('Error getting session:', {
+            message: error.message,
+            status: error.status,
+            code: error.code,
+            details: error
+          });
         }
         if (mounted) {
           console.log('Initial session:', session?.user?.email || 'No session');
@@ -157,8 +190,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session?.user ?? null);
           setLoading(false);
         }
-      } catch (error) {
-        console.error('Session initialization failed:', error);
+      } catch (error: any) {
+        console.error('Session initialization failed:', {
+          message: error.message,
+          stack: error.stack,
+          details: error
+        });
         if (mounted) {
           setLoading(false);
         }
@@ -171,7 +208,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   const value = {
     user,
