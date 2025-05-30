@@ -66,7 +66,7 @@ const StatsSection = () => {
 
   return (
     <section className="section-padding bg-background relative overflow-hidden">
-      {/* Background decoration using your colors */}
+      {/* Background decoration using exact colors */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-20 left-20 w-40 h-40 bg-primary/30 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-20 w-32 h-32 bg-accent/30 rounded-full blur-3xl animate-gentle-bounce"></div>

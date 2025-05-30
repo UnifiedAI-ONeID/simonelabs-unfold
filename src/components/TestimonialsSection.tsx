@@ -67,7 +67,7 @@ const TestimonialsSection = () => {
 
   return (
     <section className="section-padding bg-gradient-to-br from-card/30 via-background to-card/20 relative overflow-hidden">
-      {/* Background decoration */}
+      {/* Background decoration using exact colors */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-10 w-32 h-32 bg-gradient-to-br from-primary/40 to-transparent rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-1/4 right-10 w-40 h-40 bg-gradient-to-br from-accent/30 to-transparent rounded-full blur-3xl animate-gentle-bounce"></div>

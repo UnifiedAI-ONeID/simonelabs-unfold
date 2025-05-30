@@ -1,6 +1,6 @@
 
 @layer components {
-  /* Production-ready gradient backgrounds using your color scheme */
+  /* Production-ready gradient backgrounds using your exact color scheme */
   .simonelabs-gradient-bg {
     background: linear-gradient(135deg, hsl(var(--primary) / 0.95) 0%, hsl(var(--accent) / 0.85) 50%, hsl(var(--secondary) / 0.75) 100%);
   }
@@ -13,7 +13,7 @@
     color: transparent;
   }
 
-  /* Premium glass morphism cards with your color scheme */
+  /* Premium glass morphism cards with your exact color scheme */
   .simonelabs-glass-card {
     background: hsl(var(--card) / 0.95);
     backdrop-filter: blur(20px) saturate(120%);
@@ -125,7 +125,7 @@
     @apply bg-destructive/10 text-destructive border border-destructive/20;
   }
 
-  /* Hero section backgrounds using your colors */
+  /* Hero section backgrounds using your exact colors */
   .hero-gradient {
     background: linear-gradient(135deg, 
       hsl(var(--background)) 0%, 

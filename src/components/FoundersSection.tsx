@@ -46,7 +46,7 @@ const FoundersSection = () => {
                 </Avatar>
               </div>
               
-              {/* Founder details */}
+              {/* Founder details using exact colors */}
               <div className="space-y-3">
                 <h3 className="text-2xl font-bold text-foreground">{founder.name}</h3>
                 <p className="text-lg font-medium text-primary">{founder.role}</p>
