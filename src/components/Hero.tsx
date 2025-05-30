@@ -16,11 +16,11 @@ const Hero = () => {
           
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-              <span className="block text-foreground">Education for Everyone,</span>
+              <span className="block text-heading">Education for Everyone,</span>
               <span className="block gradient-text mt-2">Everywhere</span>
             </h1>
             
-            <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl sm:text-2xl text-subtle max-w-3xl mx-auto leading-relaxed">
               SimoneLabs is revolutionizing learning by making quality education accessible, adaptive, and engaging for learners of all ages and backgrounds.
             </p>
           </div>
@@ -37,30 +37,30 @@ const Hero = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16 max-w-5xl mx-auto">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20">
-                <Brain className="h-8 w-8 text-primary" />
+                <Brain className="h-8 w-8 text-primary-blue" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Adaptive Learning</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold text-heading">Adaptive Learning</h3>
+              <p className="text-subtle">
                 Content that adjusts to your learning style, pace, and comprehension level for a personalized learning experience.
               </p>
             </div>
             
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-accent/20">
-                <Users className="h-8 w-8 text-accent" />
+                <Users className="h-8 w-8 text-accent-blue" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Collaborative Community</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold text-heading">Collaborative Community</h3>
+              <p className="text-subtle">
                 Join study groups, share knowledge, and learn together with peers from around the world.
               </p>
             </div>
             
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-secondary/30 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border">
-                <Globe className="h-8 w-8 text-foreground" />
+                <Globe className="h-8 w-8 text-heading" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Global Access</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold text-heading">Global Access</h3>
+              <p className="text-subtle">
                 Quality education available to everyone, regardless of location or background.
               </p>
             </div>
