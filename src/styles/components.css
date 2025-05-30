@@ -1,10 +1,11 @@
+
 @layer components {
-  /* Calming gradient backgrounds using soft blues */
-  .simonelabs-gradient-bg {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.85) 0%, hsl(var(--accent) / 0.75) 50%, hsl(var(--secondary) / 0.65) 100%);
+  /* Clean gradient system */
+  .gradient-bg {
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(var(--background)) 100%);
   }
   
-  .simonelabs-gradient-text {
+  .gradient-text {
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -12,130 +13,71 @@
     color: transparent;
   }
 
-  /* Gentle glass morphism cards with calming blues */
-  .simonelabs-glass-card {
-    background: hsl(var(--card) / 0.95);
-    backdrop-filter: blur(20px) saturate(110%);
-    border: 1px solid hsl(var(--border) / 0.6);
-    box-shadow: 
-      0 1px 3px hsl(var(--primary) / 0.06),
-      0 8px 32px hsl(var(--primary) / 0.04),
-      0 0 0 1px hsl(var(--background) / 0.1);
-    color: hsl(var(--card-foreground));
-  }
-  
-  .dark .simonelabs-glass-card {
-    background: hsl(var(--card) / 0.9);
-    backdrop-filter: blur(20px) saturate(110%);
-    border: 1px solid hsl(var(--border) / 0.4);
-    box-shadow: 
-      0 1px 3px hsl(var(--primary) / 0.1),
-      0 8px 32px hsl(var(--primary) / 0.08),
-      0 0 0 1px hsl(var(--accent) / 0.03);
-    color: hsl(var(--card-foreground));
-  }
-
-  /* Subtle button system using calming colors */
-  .simonelabs-primary-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-lg;
-    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    box-shadow: 0 4px 14px hsl(var(--primary) / 0.15);
-    border-radius: 0.75rem;
-  }
-
-  .simonelabs-primary-button:hover {
-    box-shadow: 0 6px 20px hsl(var(--primary) / 0.2);
-    transform: translateY(-1px);
-  }
-
-  .simonelabs-secondary-button {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all duration-300 shadow-lg;
-    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    box-shadow: 0 4px 14px hsl(var(--secondary) / 0.15);
-    border-radius: 0.75rem;
-  }
-
-  .simonelabs-accent-button {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 shadow-lg;
-    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    box-shadow: 0 4px 14px hsl(var(--accent) / 0.15);
-    border-radius: 0.75rem;
-  }
-
-  /* Soft card component with gentle shadows */
-  .simonelabs-card {
-    @apply simonelabs-glass-card p-6 rounded-xl gentle-hover;
-    background: hsl(var(--card));
-    color: hsl(var(--card-foreground));
+  /* Modern glass morphism */
+  .glass-card {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid hsl(var(--border));
-    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px hsl(var(--foreground) / 0.08);
   }
 
-  .simonelabs-card:hover {
-    border-color: hsl(var(--primary) / 0.2);
-    box-shadow: 0 8px 25px hsl(var(--primary) / 0.06);
+  /* Button system */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    font-weight: 500;
   }
 
-  .dark .simonelabs-card:hover {
-    border-color: hsl(var(--primary) / 0.3);
-    box-shadow: 0 8px 25px hsl(var(--primary) / 0.12);
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all duration-200;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    font-weight: 500;
   }
 
-  /* Ensure consistent text in cards using your color scheme */
-  .simonelabs-card h1,
-  .simonelabs-card h2,
-  .simonelabs-card h3,
-  .simonelabs-card h4,
-  .simonelabs-card h5,
-  .simonelabs-card h6,
-  .simonelabs-card p,
-  .simonelabs-card span,
-  .simonelabs-card div,
-  .simonelabs-card li {
-    color: hsl(var(--card-foreground));
+  /* Card system */
+  .modern-card {
+    @apply bg-card text-card-foreground border border-border rounded-lg p-6 transition-all duration-200;
+    box-shadow: 0 1px 3px hsl(var(--foreground) / 0.1);
   }
 
-  /* Premium navigation with your color scheme */
-  .simonelabs-nav {
-    background: hsl(var(--background) / 0.95);
-    backdrop-filter: blur(20px) saturate(120%);
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  .modern-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px hsl(var(--foreground) / 0.15);
   }
 
-  .dark .simonelabs-nav {
-    background: hsl(var(--background) / 0.95);
-    backdrop-filter: blur(20px) saturate(120%);
-    border-bottom: 1px solid hsl(var(--border) / 0.3);
+  /* Navigation */
+  .nav-glass {
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--border));
   }
 
-  /* Status indicators using your color scheme */
-  .status-success {
-    @apply bg-success/10 text-success border border-success/20;
+  /* Section padding */
+  .section-padding {
+    @apply py-16 lg:py-24;
   }
 
-  .status-warning {
-    @apply bg-warning/10 text-warning border border-warning/20;
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
   }
 
-  .status-error {
-    @apply bg-destructive/10 text-destructive border border-destructive/20;
+  /* Animation utilities */
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
   }
 
-  /* Gentle hero section backgrounds */
-  .hero-gradient {
-    background: linear-gradient(135deg, 
-      hsl(var(--background)) 0%, 
-      hsl(var(--card) / 0.4) 50%, 
-      hsl(var(--background)) 100%);
+  .gentle-hover {
+    @apply transition-all duration-200 hover:scale-[1.02];
   }
 
-  .dark .hero-gradient {
-    background: linear-gradient(135deg, 
-      hsl(var(--background)) 0%, 
-      hsl(var(--card) / 0.3) 50%, 
-      hsl(var(--background)) 100%);
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

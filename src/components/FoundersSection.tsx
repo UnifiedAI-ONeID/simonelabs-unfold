@@ -1,5 +1,4 @@
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const FoundersSection = () => {
@@ -32,7 +31,6 @@ const FoundersSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
           {founders.map((founder, index) => (
             <div key={index} className="text-center space-y-6">
-              {/* Founder image */}
               <div className="flex justify-center">
                 <Avatar className="w-32 h-32">
                   <AvatarImage 
@@ -46,7 +44,6 @@ const FoundersSection = () => {
                 </Avatar>
               </div>
               
-              {/* Founder details using exact colors */}
               <div className="space-y-3">
                 <h3 className="text-2xl font-bold text-foreground">{founder.name}</h3>
                 <p className="text-lg font-medium text-primary">{founder.role}</p>

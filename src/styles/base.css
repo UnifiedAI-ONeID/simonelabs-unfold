@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,71 +7,61 @@
 
 @layer base {
   :root {
-    /* Light Mode - Calming blues and modern grays */
-    --background: 250 251 254; /* #FAFBFE - Very soft blue-white */
-    --foreground: 30 41 59; /* #1E293B - Slate gray */
+    /* Light Mode - Clean and minimal */
+    --background: 255 255 255; /* Pure white */
+    --foreground: 15 23 42; /* Deep slate */
 
-    --card: 248 250 252; /* #F8FAFC - Subtle blue-gray */
-    --card-foreground: 15 23 42; /* #0F172A - Deep slate */
+    --card: 248 250 252; /* Very light blue-gray */
+    --card-foreground: 15 23 42; /* Deep slate */
 
     --popover: 255 255 255;
-    --popover-foreground: 30 41 59;
+    --popover-foreground: 15 23 42;
 
-    --primary: 71 125 175; /* #477DAF - Calm blue */
+    --primary: 59 130 246; /* Clean blue */
     --primary-foreground: 255 255 255;
 
-    --secondary: 100 116 139; /* #64748B - Muted slate */
-    --secondary-foreground: 255 255 255;
+    --secondary: 241 245 249; /* Light gray */
+    --secondary-foreground: 15 23 42;
 
-    --accent: 125 175 220; /* #7DAFDC - Soft sky blue */
-    --accent-foreground: 15 23 42;
+    --accent: 99 102 241; /* Indigo accent */
+    --accent-foreground: 255 255 255;
 
-    --success: 72 157 120; /* #489D78 - Muted green */
-    --warning: 180 148 87; /* #B49457 - Soft gold */
-    --destructive: 156 87 87; /* #9C5757 - Muted red */
-    --destructive-foreground: 255 255 255;
+    --muted: 241 245 249; /* Light muted */
+    --muted-foreground: 100 116 139; /* Medium gray */
 
-    --muted: 148 163 184; /* #94A3B8 - Gentle gray */
-    --muted-foreground: 100 116 139; /* #64748B - Subtle gray */
-
-    --border: 226 232 240; /* #E2E8F0 - Light border */
+    --border: 226 232 240; /* Light border */
     --input: 226 232 240;
-    --ring: 71 125 175;
+    --ring: 59 130 246;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .dark {
-    /* Dark Mode - Deep calming blues and soft grays */
-    --background: 15 23 42; /* #0F172A - Deep navy slate */
-    --foreground: 248 250 252; /* #F8FAFC - Soft white */
+    /* Dark Mode - Deep and sophisticated */
+    --background: 2 8 23; /* Very deep blue-black */
+    --foreground: 248 250 252; /* Light text */
 
-    --card: 30 41 59; /* #1E293B - Dark blue-gray */
-    --card-foreground: 241 245 249; /* #F1F5F9 - Light gray */
+    --card: 15 23 42; /* Dark blue card */
+    --card-foreground: 248 250 252; /* Light text */
 
-    --popover: 30 41 59;
+    --popover: 15 23 42;
     --popover-foreground: 248 250 252;
 
-    --primary: 125 175 220; /* #7DAFDC - Soft blue */
-    --primary-foreground: 15 23 42;
+    --primary: 59 130 246; /* Bright blue */
+    --primary-foreground: 255 255 255;
 
-    --secondary: 71 85 105; /* #475569 - Muted slate */
+    --secondary: 30 41 59; /* Dark secondary */
     --secondary-foreground: 248 250 252;
 
-    --accent: 148 180 220; /* #94B4DC - Gentle blue */
-    --accent-foreground: 15 23 42;
+    --accent: 99 102 241; /* Indigo accent */
+    --accent-foreground: 255 255 255;
 
-    --success: 104 182 154; /* #68B69A - Soft green */
-    --warning: 205 184 130; /* #CDB882 - Warm beige */
-    --destructive: 185 113 113; /* #B97171 - Soft coral */
-    --destructive-foreground: 15 23 42;
+    --muted: 30 41 59; /* Dark muted */
+    --muted-foreground: 148 163 184; /* Light muted text */
 
-    --muted: 100 116 139; /* #64748B - Gentle slate */
-    --muted-foreground: 148 163 184; /* #94A3B8 - Soft gray */
-
-    --border: 51 65 85; /* #334155 - Dark border */
+    --border: 51 65 85; /* Dark border */
     --input: 51 65 85;
-    --ring: 125 175 220;
+    --ring: 59 130 246;
   }
 }
 
@@ -93,7 +84,7 @@
     min-height: 100vh;
   }
 
-  h1, h2, h3, h4, h5, h6, .heading {
+  h1, h2, h3, h4, h5, h6 {
     font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-weight: 600;
     letter-spacing: -0.025em;
@@ -101,12 +92,6 @@
     color: hsl(var(--foreground));
   }
 
-  .cta-text, .button-text {
-    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-  }
-
-  /* Enhanced accessibility - Production standards */
   button, 
   [role="button"],
   input[type="submit"],
@@ -126,35 +111,9 @@
     font-size: 16px;
   }
 
-  /* Enhanced focus visibility */
   :focus-visible {
     outline: 2px solid hsl(var(--primary));
     outline-offset: 2px;
     border-radius: 4px;
-  }
-
-  /* Ensure consistent text rendering */
-  p, span, div, li, td, th {
-    color: hsl(var(--foreground));
-  }
-
-  /* Improved muted text contrast */
-  .text-muted-foreground {
-    color: hsl(var(--muted-foreground)) !important;
-  }
-
-  /* High contrast mode support */
-  @media (prefers-contrast: high) {
-    :root {
-      --foreground: 0 0 0;
-      --background: 255 255 255;
-      --muted-foreground: 64 64 64;
-    }
-    
-    .dark {
-      --foreground: 255 255 255;
-      --background: 0 0 0;
-      --muted-foreground: 191 191 191;
-    }
   }
 }
