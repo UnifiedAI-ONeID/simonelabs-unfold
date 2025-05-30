@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DiscussionThread, Reply } from '@/components/Discussions/types';
 
+// Since discussion tables were removed, this hook now uses only mock data
 export const useDiscussions = (courseId: string, sectionId?: string) => {
   const [threads, setThreads] = useState<DiscussionThread[]>([]);
   const [replies, setReplies] = useState<Reply[]>([]);
@@ -11,43 +11,8 @@ export const useDiscussions = (courseId: string, sectionId?: string) => {
 
   const fetchThreads = async () => {
     try {
-      let query = supabase
-        .from('discussion_threads')
-        .select(`
-          *,
-          users_profiles!discussion_threads_author_id_fkey (
-            display_name,
-            avatar_url
-          )
-        `)
-        .eq('course_id', courseId)
-        .order('created_at', { ascending: false });
-
-      if (sectionId) {
-        query = query.eq('section_id', sectionId);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      // Mock reply counts for now since the replies table might not be in types yet
-      const threadsWithCounts = (data || []).map((thread) => ({
-        ...thread,
-        author_profile: thread.users_profiles,
-        reply_count: Math.floor(Math.random() * 10) // Mock value
-      }));
-
-      setThreads(threadsWithCounts);
-    } catch (error: any) {
-      console.error('Error fetching discussions:', error);
-      toast({
-        title: "Error fetching discussions",
-        description: "Could not load discussions. Using demo data.",
-        variant: "destructive",
-      });
-      
-      // Use mock data if there's an error
-      setThreads([
+      // Use mock data since discussion_threads table was removed
+      const mockThreads: DiscussionThread[] = [
         {
           id: '1',
           title: 'How to approach this assignment?',
@@ -60,15 +25,33 @@ export const useDiscussions = (courseId: string, sectionId?: string) => {
           created_at: new Date().toISOString(),
           author_profile: { display_name: 'Demo Student' },
           reply_count: 3
+        },
+        {
+          id: '2',
+          title: 'Course feedback',
+          content: 'This course has been really helpful! Thank you.',
+          author_id: 'demo-user-2',
+          course_id: courseId,
+          topic: 'general',
+          tags: ['feedback', 'thanks'],
+          is_answered: true,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          author_profile: { display_name: 'Another Student' },
+          reply_count: 1
         }
-      ]);
+      ];
+
+      setThreads(mockThreads);
+    } catch (error: any) {
+      console.error('Error with mock discussions:', error);
+      setThreads([]);
     }
   };
 
   const fetchReplies = async (threadId: string) => {
     try {
-      // Mock replies for now since the table might not be in types yet
-      setReplies([
+      // Use mock replies since discussion tables were removed
+      const mockReplies: Reply[] = [
         {
           id: '1',
           content: 'You should start by reviewing the course materials and breaking down the requirements.',
@@ -77,9 +60,10 @@ export const useDiscussions = (courseId: string, sectionId?: string) => {
           created_at: new Date().toISOString(),
           author_profile: { display_name: 'Demo Instructor' }
         }
-      ]);
+      ];
+      setReplies(mockReplies);
     } catch (error: any) {
-      console.error('Error fetching replies:', error);
+      console.error('Error with mock replies:', error);
       setReplies([]);
     }
   };
@@ -100,30 +84,12 @@ export const useDiscussions = (courseId: string, sectionId?: string) => {
     }
 
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('discussion_threads')
-        .insert({
-          title: threadData.title,
-          content: threadData.content,
-          topic: threadData.topic,
-          tags: threadData.tags,
-          author_id: user.data.user.id,
-          course_id: courseId,
-          section_id: sectionId
-        });
-
-      if (error) throw error;
-
       toast({
-        title: "Discussion created!",
-        description: "Your discussion thread has been created.",
+        title: "Discussion feature disabled",
+        description: "Discussion features have been simplified and are not available.",
+        variant: "destructive",
       });
-
-      fetchThreads();
-      return true;
+      return false;
     } catch (error: any) {
       toast({
         title: "Error creating discussion",
@@ -139,22 +105,11 @@ export const useDiscussions = (courseId: string, sectionId?: string) => {
 
     try {
       toast({
-        title: "Reply added!",
-        description: "Your reply has been posted.",
+        title: "Discussion feature disabled",
+        description: "Discussion features have been simplified and are not available.",
+        variant: "destructive",
       });
-
-      // Add mock reply to the list
-      const mockReply: Reply = {
-        id: Date.now().toString(),
-        content,
-        author_id: 'current-user',
-        thread_id: threadId,
-        created_at: new Date().toISOString(),
-        author_profile: { display_name: 'You' }
-      };
-
-      setReplies(prev => [...prev, mockReply]);
-      return true;
+      return false;
     } catch (error: any) {
       toast({
         title: "Error adding reply",

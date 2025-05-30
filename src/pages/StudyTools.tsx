@@ -1,15 +1,9 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import NotesEditor from '@/components/StudyNotes/NotesEditor';
-import FlashcardCreator from '@/components/Flashcards/FlashcardCreator';
-import DiscussionForum from '@/components/Discussions/DiscussionForum';
-import { BookOpen, MessageSquare, RotateCcw } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 const StudyTools = () => {
-  const [selectedCourse] = useState<string>(''); // Would be passed from course context
-
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-8">
       <div className="container mx-auto px-4">
@@ -18,55 +12,24 @@ const StudyTools = () => {
           <p className="text-gray-600">Enhance your learning with notes, flashcards, and discussions</p>
         </div>
 
-        <Tabs defaultValue="notes" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="notes" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Notes
-            </TabsTrigger>
-            <TabsTrigger value="flashcards" className="flex items-center gap-2">
-              <RotateCcw className="w-4 h-4" />
-              Flashcards
-            </TabsTrigger>
-            <TabsTrigger value="discussions" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Discussions
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="notes">
-            <Card>
-              <CardHeader>
-                <CardTitle>Study Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <NotesEditor courseId={selectedCourse} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="flashcards">
-            <Card>
-              <CardHeader>
-                <CardTitle>Flashcards</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FlashcardCreator courseId={selectedCourse} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="discussions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Course Discussions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DiscussionForum courseId={selectedCourse || 'demo'} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              Study Tools Feature Disabled
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center space-y-4 py-8">
+              <div className="text-muted-foreground">
+                Study tools functionality has been simplified and is not available in this version.
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Features like notes, flashcards, and discussions have been removed to focus on core course functionality.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

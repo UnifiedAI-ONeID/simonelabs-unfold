@@ -1,6 +1,7 @@
 
 import React from 'react';
-import LearningAnalytics from '@/components/Analytics/LearningAnalytics';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle } from 'lucide-react';
 
 const LearningAnalyticsPage = () => {
   return (
@@ -15,7 +16,24 @@ const LearningAnalyticsPage = () => {
           </p>
         </div>
         
-        <LearningAnalytics />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              Analytics Feature Disabled
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center space-y-4 py-8">
+              <div className="text-muted-foreground">
+                Learning analytics functionality has been simplified and is not available in this version.
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Advanced analytics, progress tracking, and achievement systems have been removed to focus on core course functionality.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
