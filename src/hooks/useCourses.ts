@@ -39,7 +39,6 @@ export const useCourses = () => {
       
       if (error) throw error;
       
-      // Transform the data to match our Course interface
       return data?.map((course: any) => ({
         ...course,
         users_profiles: Array.isArray(course.users_profiles) 

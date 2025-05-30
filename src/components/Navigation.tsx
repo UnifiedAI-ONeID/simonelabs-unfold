@@ -9,7 +9,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Navigation = () => {
   }, []);
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate("/");
   };
 
@@ -48,7 +48,7 @@ const Navigation = () => {
             </Link>
           </div>
 
-          {/* Desktop Menu - Enhanced */}
+          {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-2">
             <Link 
               to="/courses" 
@@ -56,12 +56,6 @@ const Navigation = () => {
             >
               <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
               <span>Courses</span>
-            </Link>
-            <Link 
-              to="/pricing" 
-              className="text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-4 py-2 rounded-xl hover:bg-primary/10"
-            >
-              Pricing
             </Link>
             
             {user ? (
@@ -72,27 +66,6 @@ const Navigation = () => {
                 >
                   <User className="h-4 w-4 group-hover:scale-110 transition-transform" />
                   <span>Dashboard</span>
-                </Link>
-                <Link 
-                  to="/ai-generator" 
-                  className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-4 py-2 rounded-xl hover:bg-primary/10 group"
-                >
-                  <Brain className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span>AI Generator</span>
-                </Link>
-                <Link 
-                  to="/analytics" 
-                  className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-4 py-2 rounded-xl hover:bg-primary/10 group"
-                >
-                  <BarChart3 className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span>Analytics</span>
-                </Link>
-                <Link 
-                  to="/achievements" 
-                  className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-4 py-2 rounded-xl hover:bg-primary/10 group"
-                >
-                  <Trophy className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span>Achievements</span>
                 </Link>
                 
                 <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-border/40">
@@ -127,7 +100,7 @@ const Navigation = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button - Enhanced */}
+          {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-3">
             <ThemeToggle />
             <button
@@ -139,7 +112,7 @@ const Navigation = () => {
           </div>
         </div>
 
-        {/* Mobile Menu - Enhanced */}
+        {/* Mobile Menu */}
         {isOpen && (
           <div className="lg:hidden simonelabs-glass-card mt-4 rounded-3xl border border-border/60 shadow-2xl overflow-hidden">
             <div className="px-6 pt-6 pb-8 space-y-2">
@@ -150,13 +123,6 @@ const Navigation = () => {
               >
                 <BookOpen className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 <span>Courses</span>
-              </Link>
-              <Link
-                to="/pricing"
-                className="block px-4 py-4 text-foreground hover:text-primary transition-all duration-300 font-medium rounded-2xl hover:bg-primary/10"
-                onClick={() => setIsOpen(false)}
-              >
-                Pricing
               </Link>
               
               {user ? (
@@ -169,30 +135,6 @@ const Navigation = () => {
                   >
                     <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
                     <span>Dashboard</span>
-                  </Link>
-                  <Link
-                    to="/ai-generator"
-                    className="flex items-center gap-4 px-4 py-4 text-foreground hover:text-primary transition-all duration-300 font-medium rounded-2xl hover:bg-primary/10 group"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Brain className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <span>AI Generator</span>
-                  </Link>
-                  <Link
-                    to="/analytics"
-                    className="flex items-center gap-4 px-4 py-4 text-foreground hover:text-primary transition-all duration-300 font-medium rounded-2xl hover:bg-primary/10 group"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <BarChart3 className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <span>Analytics</span>
-                  </Link>
-                  <Link
-                    to="/achievements"
-                    className="flex items-center gap-4 px-4 py-4 text-foreground hover:text-primary transition-all duration-300 font-medium rounded-2xl hover:bg-primary/10 group"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Trophy className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <span>Achievements</span>
                   </Link>
                   <div className="border-t border-border/40 my-4"></div>
                   <Button
