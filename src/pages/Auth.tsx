@@ -272,7 +272,6 @@ const Auth = () => {
                     size: 'normal',
                     appearance: 'always',
                     retry: 'auto',
-                    'retry-interval': 8000,
                   }}
                 />
               </div>
