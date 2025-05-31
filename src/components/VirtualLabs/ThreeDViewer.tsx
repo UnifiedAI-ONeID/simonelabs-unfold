@@ -1,6 +1,10 @@
+
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Card, CardContent } from "@/components/ui/card";
+import ThreeDModel from './LabComponents/ThreeDModel';
+import LabCamera from './LabComponents/LabCamera';
+import LabLighting from './LabComponents/LabLighting';
 
 const ThreeDViewer = () => {
   return (
@@ -8,14 +12,10 @@ const ThreeDViewer = () => {
       <CardContent className="p-0">
         <div className="h-[500px] w-full">
           <Canvas>
-            <PerspectiveCamera makeDefault position={[0, 0, 5]} />
+            <LabCamera />
             <OrbitControls />
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} />
-            <mesh>
-              <boxGeometry args={[1, 1, 1]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
+            <LabLighting />
+            <ThreeDModel />
           </Canvas>
         </div>
       </CardContent>

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,13 +20,14 @@ import Collaboration from "./pages/Collaboration";
 import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import LoadingSpinner from "./components/UI/LoadingSpinner";
 import { Suspense } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 10, // 10 minutes
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 10,
       retry: (failureCount, error) => {
         if (failureCount < 3) return true;
         return false;
@@ -39,9 +41,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const LoadingSpinner = () => (
+const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+    <LoadingSpinner size="lg" />
   </div>
 );
 
@@ -55,7 +57,7 @@ const App = () => (
             <Sonner />
             
             <main className="min-h-screen">
-              <Suspense fallback={<LoadingSpinner />}>
+              <Suspense fallback={<LoadingFallback />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />

@@ -1,220 +1,121 @@
 
-import { useState, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useMutation } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { validatePassword, validateEmail, validateDisplayName, getGenericAuthError, createRateLimiter } from '@/lib/security';
+import { useNavigate } from 'react-router-dom';
+import { useSecurityOperations } from '@/components/Security/SecurityEnhancements';
+import { validateInput } from '@/lib/securityEnhancements';
 
-const authRateLimiter = createRateLimiter(5, 15 * 60 * 1000); // 5 attempts per 15 minutes
+interface AuthData {
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  fullName?: string;
+}
 
 export const useSecureAuth = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { signUp, signIn, resetPassword } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { performSecureAuthOperation, logAuthAttempt } = useSecurityOperations();
 
-  const secureSignUp = useCallback(async (email: string, password: string, fullName: string, captchaToken: string) => {
-    const clientId = `signup_${email}`;
-    
-    if (!authRateLimiter(clientId)) {
-      toast({
-        title: "Too many attempts",
-        description: "Please wait before trying again.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
+  const signUpMutation = useMutation({
+    mutationFn: async (authData: AuthData) => {
+      return performSecureAuthOperation(async () => {
+        // Enhanced input validation
+        if (!validateInput.email(authData.email)) {
+          throw new Error('Invalid email format');
+        }
 
-    if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
+        if (!validateInput.password(authData.password)) {
+          throw new Error('Password must be at least 8 characters long');
+        }
 
-    if (!validateDisplayName(fullName)) {
-      toast({
-        title: "Invalid name",
-        description: "Name must be 2-50 characters and contain only letters, numbers, spaces, hyphens, and underscores.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
+        if (!authData.email || !authData.password || !authData.confirmPassword) {
+          throw new Error('All fields are required');
+        }
 
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      toast({
-        title: "Password requirements not met",
-        description: passwordValidation.errors.join('. '),
-        variant: "destructive",
-      });
-      return { success: false };
-    }
+        if (authData.password !== authData.confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
 
-    if (!captchaToken) {
-      toast({
-        title: "CAPTCHA required",
-        description: "Please complete the security verification.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await signUp(email, password, fullName);
-      
-      if (error) {
-        console.error('Signup error:', error);
-        toast({
-          title: "Registration failed",
-          description: getGenericAuthError(error),
-          variant: "destructive",
+        const { data, error } = await supabase.auth.signUp({
+          email: authData.email,
+          password: authData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`
+          }
         });
-        return { success: false };
-      }
 
+        if (error) {
+          await logAuthAttempt(authData.email, false, error.message);
+          throw new Error(error.message);
+        }
+
+        await logAuthAttempt(authData.email, true);
+        return data;
+      }, authData.email);
+    },
+    onSuccess: () => {
       toast({
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
       });
-      return { success: true };
-    } catch (error: any) {
-      console.error('Signup process failed:', error);
+      navigate('/dashboard');
+    },
+    onError: (error: any) => {
       toast({
-        title: "Registration failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Sign up failed",
+        description: error.message,
         variant: "destructive",
       });
-      return { success: false };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [signUp, toast]);
+    },
+  });
 
-  const secureSignIn = useCallback(async (email: string, password: string, captchaToken: string) => {
-    const clientId = `signin_${email}`;
-    
-    if (!authRateLimiter(clientId)) {
-      toast({
-        title: "Too many attempts",
-        description: "Please wait before trying again.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
+  const signInMutation = useMutation({
+    mutationFn: async (authData: AuthData) => {
+      return performSecureAuthOperation(async () => {
+        if (!validateInput.email(authData.email)) {
+          throw new Error('Invalid email format');
+        }
 
-    if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
+        if (!authData.email || !authData.password) {
+          throw new Error('Email and password are required');
+        }
 
-    if (!password) {
-      toast({
-        title: "Password required",
-        description: "Please enter your password.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
-
-    if (!captchaToken) {
-      toast({
-        title: "CAPTCHA required",
-        description: "Please complete the security verification.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        console.error('Login error:', error);
-        toast({
-          title: "Login failed",
-          description: getGenericAuthError(error),
-          variant: "destructive",
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: authData.email,
+          password: authData.password,
         });
-        return { success: false };
-      }
 
-      return { success: true };
-    } catch (error: any) {
-      console.error('Login process failed:', error);
+        if (error) {
+          await logAuthAttempt(authData.email, false, error.message);
+          throw new Error(error.message);
+        }
+
+        await logAuthAttempt(authData.email, true);
+        return data;
+      }, authData.email);
+    },
+    onSuccess: () => {
       toast({
-        title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Welcome back!",
+        description: "You have been signed in successfully.",
+      });
+      navigate('/dashboard');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sign in failed",
+        description: error.message,
         variant: "destructive",
       });
-      return { success: false };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [signIn, toast]);
-
-  const secureResetPassword = useCallback(async (email: string) => {
-    const clientId = `reset_${email}`;
-    
-    if (!authRateLimiter(clientId)) {
-      toast({
-        title: "Too many attempts",
-        description: "Please wait before trying again.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
-
-    if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return { success: false };
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await resetPassword(email);
-      
-      if (error) {
-        console.error('Password reset error:', error);
-        // Always show success message to prevent user enumeration
-        toast({
-          title: "Reset email sent",
-          description: "If an account with this email exists, you'll receive reset instructions.",
-        });
-        return { success: true };
-      }
-
-      toast({
-        title: "Reset email sent",
-        description: "Please check your email for password reset instructions.",
-      });
-      return { success: true };
-    } catch (error: any) {
-      console.error('Password reset failed:', error);
-      toast({
-        title: "Reset email sent",
-        description: "If an account with this email exists, you'll receive reset instructions.",
-      });
-      return { success: true };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [resetPassword, toast]);
+    },
+  });
 
   return {
-    secureSignUp,
-    secureSignIn,
-    secureResetPassword,
-    isLoading
+    signUp: signUpMutation.mutate,
+    signIn: signInMutation.mutate,
+    isSigningUp: signUpMutation.isPending,
+    isSigningIn: signInMutation.isPending,
   };
 };
