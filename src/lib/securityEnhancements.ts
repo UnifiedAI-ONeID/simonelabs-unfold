@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import DOMPurify from 'dompurify';
 import { CSRFProtection } from './csrf';
+import { SECURITY_CONFIG } from './securityConfig';
 
 // Rate limiting utilities with expanded scope
 interface RateLimitConfig {
@@ -52,10 +53,10 @@ const createAdvancedRateLimiter = (config: RateLimitConfig) => {
   };
 };
 
-// Enhanced rate limiters
+// Enhanced rate limiters with proper configuration
 export const authRateLimiter = createAdvancedRateLimiter({
-  maxRequests: 5,
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: SECURITY_CONFIG.AUTH_RATE_LIMIT.maxAttempts,
+  windowMs: SECURITY_CONFIG.AUTH_RATE_LIMIT.windowMs,
   identifier: 'auth'
 });
 
@@ -85,7 +86,7 @@ export const validateInput = {
   },
   
   password: (password: string): boolean => {
-    return password.length >= 8 && password.length <= 128;
+    return password.length >= SECURITY_CONFIG.PASSWORD_MIN_LENGTH && password.length <= 128;
   },
   
   text: (text: string, maxLength: number = 1000): boolean => {
@@ -160,13 +161,13 @@ const sanitizeObject = (obj: any): any => {
   return obj;
 };
 
-// Enhanced security event logging with expanded event types
+// Enhanced security event logging
 export const logSecurityEvent = async (event: {
   type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY' | 'CSRF_VIOLATION' | 
         'SESSION_EXPIRED' | 'SESSION_INACTIVE' | 'SESSION_VALIDATION_ERROR' | 'LOGIN' | 'LOGOUT' | 'FAILED_LOGIN' |
         'OPERATION_START' | 'OPERATION_SUCCESS' | 'OPERATION_FAILED' | 'WEBHOOK_PROCESSING' | 'WEBHOOK_SUCCESS' | 'WEBHOOK_ERROR' |
         'INVALID_METHOD' | 'MISSING_SIGNATURE' | 'INVALID_SIGNATURE' | 'VALIDATION_SUCCESS' | 'SECURITY_SETTING_CHANGED' |
-        'SESSION_TERMINATED' | 'ALL_SESSIONS_TERMINATED';
+        'SESSION_TERMINATED' | 'ALL_SESSIONS_TERMINATED' | 'SECURE_FORM_SUBMISSION' | 'FORM_SUBMISSION_ERROR';
   details: string;
   userAgent?: string;
   ipAddress?: string;
@@ -177,15 +178,32 @@ export const logSecurityEvent = async (event: {
       ...event,
       timestamp: new Date().toISOString(),
       sessionId: crypto.randomUUID(),
-      csrfToken: CSRFProtection.getToken()
+      csrfToken: CSRFProtection.getToken(),
+      userAgent: event.userAgent || navigator.userAgent,
+      url: window.location.href
     };
 
     console.log('Security Event:', eventData);
 
-    // In production, send to monitoring service
-    if (event.type === 'SUSPICIOUS_ACTIVITY' || event.type === 'CSRF_VIOLATION') {
-      // Could integrate with external monitoring service here
+    // Store in localStorage for admin review (in production, send to monitoring service)
+    const existingEvents = JSON.parse(localStorage.getItem('security_events') || '[]');
+    existingEvents.push(eventData);
+    
+    // Keep only last 100 events
+    if (existingEvents.length > 100) {
+      existingEvents.splice(0, existingEvents.length - 100);
+    }
+    
+    localStorage.setItem('security_events', JSON.stringify(existingEvents));
+
+    // High-priority events
+    if (event.type === 'SUSPICIOUS_ACTIVITY' || event.type === 'CSRF_VIOLATION' || event.type === 'RATE_LIMIT_EXCEEDED') {
       console.warn('High-priority security event detected:', eventData);
+      
+      // In production, trigger immediate alerts
+      if (typeof window !== 'undefined' && (window as any).securityAlertCallback) {
+        (window as any).securityAlertCallback(eventData);
+      }
     }
   } catch (error) {
     console.error('Failed to log security event:', error);
@@ -221,30 +239,6 @@ export const secureAuth = {
     
     return session;
   }
-};
-
-// Enhanced Content Security Policy with stricter controls
-export const cspHeaders = {
-  'Content-Security-Policy': [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://js.stripe.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://rbaouxhsajpeegrrvlag.supabase.co https://api.stripe.com https://challenges.cloudflare.com wss://realtime.supabase.co",
-    "frame-src https://challenges.cloudflare.com https://js.stripe.com",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "upgrade-insecure-requests",
-    "block-all-mixed-content"
-  ].join('; '),
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-XSS-Protection': '1; mode=block',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
 };
 
 // Secure operation wrapper with comprehensive protection
