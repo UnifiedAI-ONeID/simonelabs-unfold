@@ -505,7 +505,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_user_gamification_stats: {
+        Args: {
+          target_user_id: string
+          new_level?: number
+          new_xp_points?: number
+          new_streak_count?: number
+          new_last_activity_date?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
