@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 
 const Auth = () => {
@@ -59,7 +59,7 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!turnstileToken) {
+    if (!turnstileToken && !isForgotPassword) {
       toast({
         title: "CAPTCHA Required",
         description: "Please complete the CAPTCHA verification.",
@@ -68,7 +68,7 @@ const Auth = () => {
       return;
     }
 
-    if (!email || !password || (!isLogin && !fullName)) {
+    if (!email || (!isForgotPassword && !password) || (!isLogin && !fullName)) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -98,6 +98,7 @@ const Auth = () => {
           description: "Please check your email for password reset instructions.",
         });
         setIsForgotPassword(false);
+        resetForm();
         return;
       }
 
@@ -212,7 +213,7 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="fullName\" className="text-sm font-medium">
+              <Label htmlFor="fullName" className="text-sm font-medium">
                 Full Name
               </Label>
               <div className="relative">
@@ -285,25 +286,27 @@ const Auth = () => {
             </div>
           )}
 
-          <div className="flex justify-center">
-            <Turnstile
-              ref={turnstileRef}
-              siteKey="0x4AAAAAABfVmLaPZh3sMQ7-"
-              onSuccess={handleTurnstileSuccess}
-              onError={handleTurnstileError}
-              onExpire={handleTurnstileExpire}
-              options={{
-                theme: 'light',
-                size: 'normal',
-                appearance: 'interaction-only',
-              }}
-            />
-          </div>
+          {!isForgotPassword && (
+            <div className="flex justify-center">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey="0x4AAAAAABfVmLaPZh3sMQ7-"
+                onSuccess={handleTurnstileSuccess}
+                onError={handleTurnstileError}
+                onExpire={handleTurnstileExpire}
+                options={{
+                  theme: 'light',
+                  size: 'normal',
+                  appearance: 'interaction-only',
+                }}
+              />
+            </div>
+          )}
 
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl py-3 font-medium transition-all duration-200"
-            disabled={loading || !turnstileToken}
+            disabled={loading || (!isForgotPassword && !turnstileToken)}
           >
             {loading ? (
               <div className="flex items-center gap-2">
@@ -338,9 +341,10 @@ const Auth = () => {
           {isForgotPassword && (
             <button
               onClick={() => setIsForgotPassword(false)}
-              className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+              className="text-primary hover:text-primary/80 font-medium transition-colors duration-200 flex items-center justify-center gap-2"
               disabled={loading}
             >
+              <ArrowLeft className="w-4 h-4" />
               Back to Sign In
             </button>
           )}
