@@ -18,6 +18,9 @@ i18n
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
+    
+    ns: ['common', 'auth', 'courses', 'dashboard', 'payment'],
+    defaultNS: 'common',
   });
 
 export default i18n;

@@ -1,21 +1,21 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Initialize Stripe with your publishable key
-export const stripe = loadStripe('pk_test_51OqXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+export const stripe = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-export const createCheckoutSession = async (priceId: string) => {
+export const createCheckoutSession = async (priceId: string, userId: string) => {
   try {
-    const response = await fetch('/api/create-checkout-session', {
+    const response = await fetch('/.netlify/functions/create-checkout-session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ priceId }),
+      body: JSON.stringify({ priceId, userId }),
     });
 
     const session = await response.json();
     
-    if (!response.ok) throw new Error(session.message);
+    if (!response.ok) throw new Error(session.error);
     
     const result = await stripe?.redirectToCheckout({
       sessionId: session.id,
@@ -30,12 +30,13 @@ export const createCheckoutSession = async (priceId: string) => {
   }
 };
 
-export const createPortalSession = async () => {
+export const createPortalSession = async (token: string) => {
   try {
-    const response = await fetch('/api/create-portal-session', {
+    const response = await fetch('/.netlify/functions/create-portal-session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
     });
 

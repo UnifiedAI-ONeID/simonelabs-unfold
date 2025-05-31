@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useTranslation } from 'react-i18next';
+import Navigation from '@/components/Navigation';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);

@@ -5,5 +5,24 @@
     "login": "Log In",
     "signup": "Sign Up",
     "logout": "Log Out"
+  },
+  "hero": {
+    "title": "Education for Everyone, Everywhere",
+    "subtitle": "Transform your learning experience with AI-powered education that adapts to your needs",
+    "cta": "Start Learning Now"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "Adaptive Learning",
+      "description": "AI-powered content that adapts to your learning style and pace"
+    },
+    "expertCommunity": {
+      "title": "Expert Community",
+      "description": "Learn together with peers and expert instructors"
+    },
+    "globalAccess": {
+      "title": "Global Access",
+      "description": "Quality education available anytime, anywhere"
+    }
   }
 }
