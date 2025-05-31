@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "courses": "Cursos",
+    "dashboard": "Panel",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "logout": "Cerrar Sesión"
+  },
+  "hero": {
+    "title": "Educación para Todos, en Todas Partes",
+    "subtitle": "Transforma tu experiencia de aprendizaje con educación impulsada por IA que se adapta a tus necesidades",
+    "cta": "Comienza a Aprender"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "Aprendizaje Adaptativo",
+      "description": "Contenido impulsado por IA que se adapta a tu estilo y ritmo de aprendizaje"
+    },
+    "expertCommunity": {
+      "title": "Comunidad Experta",
+      "description": "Aprende junto a compañeros e instructores expertos"
+    },
+    "globalAccess": {
+      "title": "Acceso Global",
+      "description": "Educación de calidad disponible en cualquier momento y lugar"
+    }
+  }
+}
