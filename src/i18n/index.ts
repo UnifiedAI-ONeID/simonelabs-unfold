@@ -9,20 +9,13 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development',
-    
+    debug: import.meta.env.DEV,
     interpolation: {
       escapeValue: false,
     },
-    
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
-    
-    supportedLngs: ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'ar'],
-    
-    ns: ['common', 'auth', 'courses', 'dashboard'],
-    defaultNS: 'common',
   });
 
 export default i18n;

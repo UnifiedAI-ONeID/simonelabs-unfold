@@ -1,37 +1,4 @@
 {
-  "title": "Explore Courses",
-  "subtitle": "Discover amazing courses and start learning today",
-  "filters": {
-    "search": "Search courses...",
-    "difficulty": {
-      "label": "Difficulty Level",
-      "all": "All Levels",
-      "beginner": "Beginner",
-      "intermediate": "Intermediate",
-      "advanced": "Advanced"
-    },
-    "category": {
-      "label": "Category",
-      "all": "All Categories"
-    }
-  },
-  "courseCard": {
-    "students": "students",
-    "enrollButton": "Enroll Now",
-    "enrollingButton": "Enrolling...",
-    "selfPaced": "Self-paced"
-  },
-  "noCourses": {
-    "title": "No courses found",
-    "subtitle": "Try adjusting your search filters"
-  },
-  "courseView": {
-    "enrollButton": "Enroll Now",
-    "continueButton": "Continue Learning",
-    "alreadyEnrolled": "You're enrolled!",
-    "whatYouWillLearn": "What you'll learn",
-    "courseContent": "Course Content",
-    "sections": "sections in this course",
-    "instructor": "Instructor"
-  }
+  "title": "Available Courses",
+  "subtitle": "Explore our wide range of courses and start learning today"
 }
