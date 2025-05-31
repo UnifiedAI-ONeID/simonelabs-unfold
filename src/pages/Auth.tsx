@@ -1,9 +1,11 @@
 
 import { useState, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useSecureAuthWithCaptcha } from '@/hooks/useSecureAuthWithCaptcha';
 import AuthHeader from '@/components/Auth/AuthHeader';
 import AuthForm from '@/components/Auth/AuthForm';
+import { Button } from '@/components/ui/button';
+import { TestTube } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -62,6 +64,19 @@ const Auth = () => {
             onToggleMode={toggleMode}
             onToggleForgotPassword={setIsForgotPassword}
           />
+          
+          <div className="mt-6 pt-6 border-t border-border/60">
+            <Link to="/captcha-test">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs"
+              >
+                <TestTube className="h-3 w-3 mr-2" />
+                Test CAPTCHA Validation
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
