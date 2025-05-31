@@ -92,7 +92,8 @@
     "face-api.js": "^0.22.2",
     "ml5": "^0.12.2",
     "peerjs": "^1.5.2",
-    "webrtc-adapter": "^8.2.3"
+    "webrtc-adapter": "^8.2.3",
+    "stripe": "^14.21.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
