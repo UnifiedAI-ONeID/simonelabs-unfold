@@ -1,0 +1,70 @@
+{
+  "title": "Flexible Lern-Investitionsoptionen",
+  "subtitle": "Wählen Sie aus Abonnements, einzelnen Kursen, Zertifizierungen, Mentoring und Unternehmenslösungen. Alles darauf ausgerichtet, Ihre Lernreise und Ihr Budget zu unterstützen.",
+  "tabs": {
+    "plans": "Preispläne",
+    "regional": "Regionale Preise"
+  },
+  "subscriptions": {
+    "title": "Abonnements",
+    "monthly": {
+      "name": "SimoneLabs Plus Monatlich",
+      "description": "Unbegrenzter Zugang zu den meisten Kursen",
+      "period": "Monat"
+    },
+    "premium": {
+      "name": "SimoneLabs Plus Premium",
+      "description": "Alles plus Live-Sessions & Mentoring",
+      "period": "Monat",
+      "badge": "Am beliebtesten"
+    },
+    "yearly": {
+      "name": "SimoneLabs Plus Jährlich",
+      "description": "Sparen Sie 43% mit jährlicher Abrechnung",
+      "period": "Jahr",
+      "badge": "Bester Wert"
+    }
+  },
+  "courses": {
+    "title": "Kurse",
+    "standard": {
+      "name": "Standard-Kurs",
+      "description": "Zugang zu einzelnem Kurs",
+      "period": "einmalig"
+    },
+    "premium": {
+      "name": "Premium-Kurs",
+      "description": "Vertiefter Kurs mit Zertifizierung",
+      "period": "einmalig"
+    }
+  },
+  "buttons": {
+    "startSubscription": "Abonnement starten",
+    "buyCourse": "Kurs kaufen",
+    "getCertified": "Zertifizierung erhalten",
+    "bookSession": "Session buchen",
+    "contactSales": "Vertrieb kontaktieren",
+    "processing": "Verarbeitung..."
+  },
+  "features": {
+    "moneyBack": "Geld-zurück-Garantie",
+    "moneyBackDescription": "30-Tage-Rückerstattungsrichtlinie für alle Käufe",
+    "referral": "Empfehlungsprogramm",
+    "referralDescription": "Verdienen Sie 10$ Guthaben für jeden Freund, den Sie empfehlen",
+    "localizedPricing": "Lokalisierte Preise",
+    "localizedPricingDescription": "Spezielle Preise für Schwellenmärkte"
+  },
+  "trust": {
+    "moneyBack": "30-Tage-Geld-zurück-Garantie",
+    "securePayment": "Sichere Zahlungsabwicklung",
+    "cancelAnytime": "Jederzeit kündbar",
+    "support": "24/7 Kundensupport"
+  },
+  "regional": {
+    "title": "Ihre regionalen Preise",
+    "detectedRegion": "Erkannte Region: {{region}}",
+    "discount": "{{discount}}% regionaler Rabatt angewendet",
+    "currency": "Währung: {{currency}}",
+    "description": "Preise werden automatisch basierend auf Ihrem Standort angepasst, um Bildung weltweit zugänglicher zu machen. Alle Funktionen und Inhalte bleiben unabhängig von der Preisstufe gleich."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "title": "Kurse Entdecken",
+  "subtitle": "Entdecken Sie erstaunliche Kurse und beginnen Sie noch heute mit dem Lernen",
+  "filters": {
+    "search": "Kurse suchen...",
+    "difficulty": {
+      "label": "Schwierigkeitsgrad",
+      "all": "Alle Stufen",
+      "beginner": "Anfänger",
+      "intermediate": "Fortgeschritten",
+      "advanced": "Experte"
+    },
+    "category": {
+      "label": "Kategorie",
+      "all": "Alle Kategorien"
+    }
+  },
+  "courseCard": {
+    "students": "Teilnehmer",
+    "enrollButton": "Jetzt Einschreiben",
+    "enrollingButton": "Einschreibung...",
+    "selfPaced": "Selbststudium"
+  },
+  "noCourses": {
+    "title": "Keine Kurse gefunden",
+    "subtitle": "Versuchen Sie, Ihre Suchfilter anzupassen"
+  },
+  "courseView": {
+    "enrollButton": "Jetzt Einschreiben",
+    "continueButton": "Lernen Fortsetzen",
+    "alreadyEnrolled": "Sie sind eingeschrieben!",
+    "whatYouWillLearn": "Was Sie lernen werden",
+    "courseContent": "Kursinhalt",
+    "sections": "Abschnitte in diesem Kurs",
+    "instructor": "Kursleiter"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Options d'Investissement d'Apprentissage Flexibles",
+  "subtitle": "Choisissez parmi les abonnements, les cours individuels, les certifications, le mentorat et les solutions d'entreprise. Tous conçus pour s'adapter à votre parcours d'apprentissage et à votre budget.",
+  "tabs": {
+    "plans": "Plans Tarifaires",
+    "regional": "Tarification Régionale"
+  },
+  "subscriptions": {
+    "title": "Abonnements",
+    "monthly": {
+      "name": "SimoneLabs Plus Mensuel",
+      "description": "Accès illimité à la plupart des cours",
+      "period": "mois"
+    },
+    "premium": {
+      "name": "SimoneLabs Plus Premium",
+      "description": "Tout plus des sessions en direct et du mentorat",
+      "period": "mois",
+      "badge": "Le Plus Populaire"
+    },
+    "yearly": {
+      "name": "SimoneLabs Plus Annuel",
+      "description": "Économisez 43% avec la facturation annuelle",
+      "period": "an",
+      "badge": "Meilleure Valeur"
+    }
+  },
+  "courses": {
+    "title": "Cours",
+    "standard": {
+      "name": "Cours Standard",
+      "description": "Accès à un cours individuel",
+      "period": "paiement unique"
+    },
+    "premium": {
+      "name": "Cours Premium",
+      "description": "Cours approfondi avec certification",
+      "period": "paiement unique"
+    }
+  },
+  "buttons": {
+    "startSubscription": "Démarrer l'Abonnement",
+    "buyCourse": "Acheter le Cours",
+    "getCertified": "Obtenir la Certification",
+    "bookSession": "Réserver une Session",
+    "contactSales": "Contacter les Ventes",
+    "processing": "Traitement en cours..."
+  },
+  "features": {
+    "moneyBack": "Garantie de Remboursement",
+    "moneyBackDescription": "Politique de remboursement de 30 jours sur tous les achats",
+    "referral": "Programme de Parrainage",
+    "referralDescription": "Gagnez 10$ de crédit pour chaque ami que vous parrainez",
+    "localizedPricing": "Tarification Localisée",
+    "localizedPricingDescription": "Prix spéciaux pour les marchés émergents"
+  },
+  "trust": {
+    "moneyBack": "Garantie de remboursement de 30 jours",
+    "securePayment": "Traitement sécurisé des paiements",
+    "cancelAnytime": "Annulez à tout moment",
+    "support": "Support client 24/7"
+  },
+  "regional": {
+    "title": "Votre Tarification Régionale",
+    "detectedRegion": "Région Détectée: {{region}}",
+    "discount": "{{discount}}% de Remise Régionale Appliquée",
+    "currency": "Devise: {{currency}}",
+    "description": "Prix automatiquement ajustés en fonction de votre emplacement pour rendre l'éducation plus accessible dans le monde entier. Toutes les fonctionnalités et le contenu restent les mêmes quel que soit le niveau de prix."
+  }
+}

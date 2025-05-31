@@ -1,0 +1,28 @@
+{
+  "welcome": "Bon retour, {{name}}!",
+  "subtitle": "Continuez votre parcours d'apprentissage",
+  "stats": {
+    "level": "Niveau",
+    "xp": "Points XP",
+    "completed": "Terminés",
+    "inProgress": "En Cours"
+  },
+  "continueLearning": {
+    "title": "Continuer l'Apprentissage",
+    "browseButton": "Explorer les Cours",
+    "complete": "terminé",
+    "continueButton": "Continuer",
+    "noCourses": {
+      "title": "Pas encore de cours en cours",
+      "button": "Commencer à Apprendre"
+    }
+  },
+  "achievements": {
+    "title": "Réalisations Récentes",
+    "viewAll": "Voir Tout",
+    "noAchievements": {
+      "title": "Pas encore de réalisations",
+      "description": "Terminez des cours et des quiz pour gagner des réalisations!"
+    }
+  }
+}

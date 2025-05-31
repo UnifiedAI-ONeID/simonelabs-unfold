@@ -1,0 +1,28 @@
+{
+  "welcome": "Willkommen zurück, {{name}}!",
+  "subtitle": "Setzen Sie Ihre Lernreise fort",
+  "stats": {
+    "level": "Stufe",
+    "xp": "XP-Punkte",
+    "completed": "Abgeschlossen",
+    "inProgress": "In Bearbeitung"
+  },
+  "continueLearning": {
+    "title": "Weiterlernen",
+    "browseButton": "Kurse Durchsuchen",
+    "complete": "abgeschlossen",
+    "continueButton": "Fortfahren",
+    "noCourses": {
+      "title": "Noch keine Kurse in Bearbeitung",
+      "button": "Lernen Beginnen"
+    }
+  },
+  "achievements": {
+    "title": "Neueste Erfolge",
+    "viewAll": "Alle Anzeigen",
+    "noAchievements": {
+      "title": "Noch keine Erfolge",
+      "description": "Schließen Sie Kurse und Quizze ab, um Erfolge zu erzielen!"
+    }
+  }
+}

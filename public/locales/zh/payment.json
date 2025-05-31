@@ -1,0 +1,70 @@
+{
+  "title": "灵活的学习投资选项",
+  "subtitle": "从订阅、单个课程、认证、指导和企业解决方案中选择。所有这些都旨在适应您的学习旅程和预算。",
+  "tabs": {
+    "plans": "价格方案",
+    "regional": "区域定价"
+  },
+  "subscriptions": {
+    "title": "订阅",
+    "monthly": {
+      "name": "SimoneLabs Plus 月度",
+      "description": "无限访问大多数课程",
+      "period": "月"
+    },
+    "premium": {
+      "name": "SimoneLabs Plus 高级版",
+      "description": "所有内容加上直播课程和指导",
+      "period": "月",
+      "badge": "最受欢迎"
+    },
+    "yearly": {
+      "name": "SimoneLabs Plus 年度",
+      "description": "年度账单节省43%",
+      "period": "年",
+      "badge": "最佳价值"
+    }
+  },
+  "courses": {
+    "title": "课程",
+    "standard": {
+      "name": "标准课程",
+      "description": "单个课程访问",
+      "period": "一次性"
+    },
+    "premium": {
+      "name": "高级课程",
+      "description": "深入课程与认证",
+      "period": "一次性"
+    }
+  },
+  "buttons": {
+    "startSubscription": "开始订阅",
+    "buyCourse": "购买课程",
+    "getCertified": "获取认证",
+    "bookSession": "预约课程",
+    "contactSales": "联系销售",
+    "processing": "处理中..."
+  },
+  "features": {
+    "moneyBack": "退款保证",
+    "moneyBackDescription": "所有购买30天退款政策",
+    "referral": "推荐计划",
+    "referralDescription": "每推荐一位朋友获得$10积分",
+    "localizedPricing": "本地化定价",
+    "localizedPricingDescription": "为新兴市场提供特殊价格"
+  },
+  "trust": {
+    "moneyBack": "30天退款保证",
+    "securePayment": "安全支付处理",
+    "cancelAnytime": "随时取消",
+    "support": "24/7客户支持"
+  },
+  "regional": {
+    "title": "您的区域定价",
+    "detectedRegion": "检测到的区域: {{region}}",
+    "discount": "已应用{{discount}}%区域折扣",
+    "currency": "货币: {{currency}}",
+    "description": "价格根据您的位置自动调整，使教育在全球范围内更加可及。无论价格等级如何，所有功能和内容都保持不变。"
+  }
+}

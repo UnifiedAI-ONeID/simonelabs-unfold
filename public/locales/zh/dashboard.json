@@ -1,0 +1,28 @@
+{
+  "welcome": "欢迎回来，{{name}}！",
+  "subtitle": "继续您的学习之旅",
+  "stats": {
+    "level": "等级",
+    "xp": "经验值",
+    "completed": "已完成",
+    "inProgress": "进行中"
+  },
+  "continueLearning": {
+    "title": "继续学习",
+    "browseButton": "浏览课程",
+    "complete": "完成",
+    "continueButton": "继续",
+    "noCourses": {
+      "title": "尚无进行中的课程",
+      "button": "开始学习"
+    }
+  },
+  "achievements": {
+    "title": "最近成就",
+    "viewAll": "查看全部",
+    "noAchievements": {
+      "title": "尚无成就",
+      "description": "完成课程和测验以获得成就！"
+    }
+  }
+}

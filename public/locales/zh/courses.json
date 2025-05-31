@@ -1,0 +1,37 @@
+{
+  "title": "探索课程",
+  "subtitle": "发现精彩课程，今天就开始学习",
+  "filters": {
+    "search": "搜索课程...",
+    "difficulty": {
+      "label": "难度级别",
+      "all": "所有级别",
+      "beginner": "初学者",
+      "intermediate": "中级",
+      "advanced": "高级"
+    },
+    "category": {
+      "label": "类别",
+      "all": "所有类别"
+    }
+  },
+  "courseCard": {
+    "students": "学生",
+    "enrollButton": "立即报名",
+    "enrollingButton": "报名中...",
+    "selfPaced": "自定进度"
+  },
+  "noCourses": {
+    "title": "未找到课程",
+    "subtitle": "尝试调整搜索过滤器"
+  },
+  "courseView": {
+    "enrollButton": "立即报名",
+    "continueButton": "继续学习",
+    "alreadyEnrolled": "您已报名！",
+    "whatYouWillLearn": "您将学到什么",
+    "courseContent": "课程内容",
+    "sections": "本课程的章节",
+    "instructor": "讲师"
+  }
+}
