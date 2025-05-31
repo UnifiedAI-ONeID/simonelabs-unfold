@@ -82,8 +82,8 @@ export const sanitizeQueryParams = (params: Record<string, unknown>) => {
   
   Object.entries(params).forEach(([key, value]) => {
     if (typeof value === 'string') {
-      // Remove potential SQL injection patterns - fixed regex
-      sanitized[key] = value.replace(/[';--]/g, '').trim();
+      // Remove potential SQL injection patterns - fixed regex with proper escaping
+      sanitized[key] = value.replace(/[';-]/g, '').replace(/--/g, '').trim();
     } else {
       sanitized[key] = value;
     }
