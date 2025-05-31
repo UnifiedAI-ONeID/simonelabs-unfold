@@ -24,12 +24,15 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type UserRole = Database['public']['Enums']['app_role'];
 
 interface User {
   id: string;
   email: string;
   created_at: string;
-  roles: string[];
+  roles: UserRole[];
 }
 
 const Administration = () => {
@@ -41,7 +44,7 @@ const Administration = () => {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [searchEmail, setSearchEmail] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserRole, setNewUserRole] = useState<string>('user');
+  const [newUserRole, setNewUserRole] = useState<UserRole>('user');
 
   useEffect(() => {
     if (isSuperuser) {
@@ -68,7 +71,7 @@ const Administration = () => {
         }
         
         // Group roles by user_id
-        const userRolesMap = new Map<string, string[]>();
+        const userRolesMap = new Map<string, UserRole[]>();
         roleUsers?.forEach(roleUser => {
           const existing = userRolesMap.get(roleUser.user_id) || [];
           userRolesMap.set(roleUser.user_id, [...existing, roleUser.role]);
@@ -95,7 +98,7 @@ const Administration = () => {
       }
 
       // Group roles by user_id
-      const userRolesMap = new Map<string, string[]>();
+      const userRolesMap = new Map<string, UserRole[]>();
       userRoles?.forEach(roleUser => {
         const existing = userRolesMap.get(roleUser.user_id) || [];
         userRolesMap.set(roleUser.user_id, [...existing, roleUser.role]);
@@ -122,13 +125,13 @@ const Administration = () => {
     }
   };
 
-  const assignRole = async (userId: string, role: string) => {
+  const assignRole = async (userId: string, role: UserRole) => {
     try {
       const { error } = await supabase
         .from('user_roles')
         .insert({
           user_id: userId,
-          role: role as any
+          role: role
         });
 
       if (error) {
@@ -150,7 +153,7 @@ const Administration = () => {
     }
   };
 
-  const removeRole = async (userId: string, role: string) => {
+  const removeRole = async (userId: string, role: UserRole) => {
     try {
       const { error } = await supabase
         .from('user_roles')
@@ -177,7 +180,7 @@ const Administration = () => {
     }
   };
 
-  const getRoleBadgeVariant = (role: string) => {
+  const getRoleBadgeVariant = (role: UserRole) => {
     switch (role) {
       case 'superuser': return 'destructive';
       case 'admin': return 'default';
@@ -322,7 +325,7 @@ const Administration = () => {
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <Select
-                                    onValueChange={(role) => assignRole(userItem.id, role)}
+                                    onValueChange={(role: UserRole) => assignRole(userItem.id, role)}
                                   >
                                     <SelectTrigger className="w-32">
                                       <SelectValue placeholder="Add role" />
