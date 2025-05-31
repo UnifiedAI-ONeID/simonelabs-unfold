@@ -1,3 +1,4 @@
+
 import { loadStripe } from '@stripe/stripe-js';
 
 // Initialize Stripe with your publishable key
@@ -17,7 +18,10 @@ export const createCheckoutSession = async (priceId: string, userId: string) => 
     
     if (!response.ok) throw new Error(session.error);
     
-    const result = await stripe?.redirectToCheckout({
+    const stripeInstance = await stripe;
+    if (!stripeInstance) throw new Error('Stripe failed to initialize');
+    
+    const result = await stripeInstance.redirectToCheckout({
       sessionId: session.id,
     });
 
