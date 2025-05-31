@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { PasswordStrength } from '@/components/ui/password-strength';
 import { sanitizeText } from '@/lib/security';
 
-// Use the correct Turnstile site key for localhost/development
-const TURNSTILE_SITE_KEY = '1x00000000000000000000AA'; // This is the test site key for localhost
+// Production Turnstile site key - replace with your actual production site key
+const TURNSTILE_SITE_KEY = 'YOUR_PRODUCTION_SITE_KEY';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -268,7 +267,7 @@ const Auth = () => {
                   onError={handleTurnstileError}
                   onExpire={handleTurnstileExpire}
                   options={{
-                    theme: 'light',
+                    theme: 'auto',
                     size: 'normal',
                     appearance: 'always',
                     retry: 'auto',
