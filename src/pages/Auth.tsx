@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useTranslation } from 'react-i18next';
+import { PasswordStrength } from '@/components/ui/password-strength';
+import { sanitizeText } from '@/lib/security';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,14 +20,13 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { signUp, signIn, resetPassword } = useAuth();
   const { t } = useTranslation('auth');
+  const { secureSignUp, secureSignIn, secureResetPassword, isLoading } = useSecureAuth();
 
   const handleTurnstileSuccess = useCallback((token: string) => {
     setTurnstileToken(token);
@@ -33,8 +35,8 @@ const Auth = () => {
   const handleTurnstileError = useCallback(() => {
     setTurnstileToken(null);
     toast({
-      title: "CAPTCHA Error",
-      description: "Failed to verify CAPTCHA. Please try again.",
+      title: "Security verification failed",
+      description: "Please try the verification again.",
       variant: "destructive",
     });
   }, [toast]);
@@ -42,8 +44,8 @@ const Auth = () => {
   const handleTurnstileExpire = useCallback(() => {
     setTurnstileToken(null);
     toast({
-      title: "CAPTCHA Expired",
-      description: "Please complete the CAPTCHA verification again.",
+      title: "Verification expired",
+      description: "Please complete the security verification again.",
       variant: "destructive",
     });
   }, [toast]);
@@ -62,132 +64,41 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!turnstileToken && !isForgotPassword) {
-      toast({
-        title: "CAPTCHA Required",
-        description: "Please complete the CAPTCHA verification.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeText(email);
+    const sanitizedFullName = sanitizeText(fullName);
 
-    if (!email || (!isForgotPassword && !password) || (!isLogin && !fullName)) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      if (isForgotPassword) {
-        const { error } = await resetPassword(email);
-        
-        if (error) {
-          console.error('Password reset error:', error);
-          toast({
-            title: "Password Reset Failed",
-            description: error.message || "Please check your email and try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        toast({
-          title: t('success.passwordReset'),
-          description: "Please check your email for password reset instructions.",
-        });
+    if (isForgotPassword) {
+      const result = await secureResetPassword(sanitizedEmail);
+      if (result.success) {
         setIsForgotPassword(false);
         resetForm();
-        return;
       }
+      return;
+    }
 
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        
-        if (error) {
-          console.error('Login error:', {
-            message: error.message,
-            status: error.status,
-            code: error.code,
-          });
-          
-          if (typeof error.message === 'string' && error.message.includes('Invalid login credentials')) {
-            toast({
-              title: "Login Failed",
-              description: t('errors.invalidCredentials'),
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Login Error",
-              description: error.message || "An error occurred during login.",
-              variant: "destructive",
-            });
-          }
-          return;
-        }
-        
+    if (isLogin) {
+      const result = await secureSignIn(sanitizedEmail, password, turnstileToken || '');
+      if (result.success) {
         toast({
           title: "Welcome back!",
           description: t('success.loggedIn'),
         });
-
         const from = (location.state as any)?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
-      } else {
-        const { error } = await signUp(email, password, fullName);
-        
-        if (error) {
-          console.error('Registration error:', {
-            message: error.message,
-            status: error.status,
-            code: error.code,
-          });
-          
-          if (typeof error.message === 'string' && error.message.includes('User already registered')) {
-            toast({
-              title: "Account Exists",
-              description: t('errors.userExists'),
-              variant: "destructive",
-            });
-            setIsLogin(true);
-          } else {
-            toast({
-              title: "Registration Error",
-              description: error.message || "An error occurred during registration.",
-              variant: "destructive",
-            });
-          }
-          return;
-        }
-        
-        toast({
-          title: "Account created successfully!",
-          description: t('success.accountCreated'),
-        });
+      }
+    } else {
+      const result = await secureSignUp(sanitizedEmail, password, sanitizedFullName, turnstileToken || '');
+      if (result.success) {
         navigate('/dashboard');
       }
-    } catch (error: any) {
-      console.error('Auth process failed:', {
-        message: error.message,
-        stack: error.stack,
-      });
-      toast({
-        title: "Authentication Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-      if (turnstileRef.current?.reset) {
-        turnstileRef.current.reset();
-      }
-      setTurnstileToken(null);
     }
+
+    // Reset CAPTCHA after submission
+    if (turnstileRef.current?.reset) {
+      turnstileRef.current.reset();
+    }
+    setTurnstileToken(null);
   };
 
   const toggleMode = useCallback(() => {
@@ -229,7 +140,8 @@ const Auth = () => {
                   required={!isLogin}
                   placeholder={t('register.namePlaceholder')}
                   className="pl-10 rounded-xl border-border/60 focus:border-primary"
-                  disabled={loading}
+                  disabled={isLoading}
+                  maxLength={50}
                 />
               </div>
             </div>
@@ -249,7 +161,8 @@ const Auth = () => {
                 required
                 placeholder={isLogin ? t('login.emailPlaceholder') : t('register.emailPlaceholder')}
                 className="pl-10 rounded-xl border-border/60 focus:border-primary"
-                disabled={loading}
+                disabled={isLoading}
+                maxLength={100}
               />
             </div>
           </div>
@@ -268,23 +181,21 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder={isLogin ? t('login.passwordPlaceholder') : t('register.passwordPlaceholder')}
-                  minLength={6}
+                  minLength={8}
                   className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
-                  disabled={loading}
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={loading}
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {!isLogin && (
-                <p className="text-xs text-muted-foreground">
-                  {t('register.passwordRequirements')}
-                </p>
+                <PasswordStrength password={password} className="mt-2" />
               )}
             </div>
           )}
@@ -309,9 +220,9 @@ const Auth = () => {
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl py-3 font-medium transition-all duration-200"
-            disabled={loading || (!isForgotPassword && !turnstileToken)}
+            disabled={isLoading || (!isForgotPassword && !turnstileToken)}
           >
-            {loading ? (
+            {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 {isForgotPassword 
@@ -335,7 +246,7 @@ const Auth = () => {
             <button
               onClick={() => setIsForgotPassword(true)}
               className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
-              disabled={loading}
+              disabled={isLoading}
             >
               {t('login.forgotPassword')}
             </button>
@@ -345,7 +256,7 @@ const Auth = () => {
             <button
               onClick={() => setIsForgotPassword(false)}
               className="text-primary hover:text-primary/80 font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-              disabled={loading}
+              disabled={isLoading}
             >
               <ArrowLeft className="w-4 h-4" />
               {t('forgotPassword.backToLogin')}
@@ -356,7 +267,7 @@ const Auth = () => {
             <button
               onClick={toggleMode}
               className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
-              disabled={loading}
+              disabled={isLoading}
             >
               {isLogin
                 ? t('login.noAccount')
