@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,11 +13,14 @@ import CourseView from "./pages/CourseView";
 import LearnCourse from "./pages/LearnCourse";
 import CreateCourse from "./pages/CreateCourse";
 import CourseBuilder from "./pages/CourseBuilder";
+import AIGenerator from "./pages/AIGenerator";
+import VirtualLabs from "./pages/VirtualLabs";
+import Collaboration from "./pages/Collaboration";
+import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { Suspense } from "react";
 
-// Optimized query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -37,7 +39,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Loading component
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -60,14 +61,16 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/courses" element={<Courses />} />
                   <Route path="/course/:courseId" element={<CourseView />} />
-                  <Route path="/learn/:courseId" element={
-                    <ProtectedRoute>
-                      <LearnCourse />
-                    </ProtectedRoute>
-                  } />
+                  
+                  {/* Protected Routes */}
                   <Route path="/dashboard" element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/learn/:courseId" element={
+                    <ProtectedRoute>
+                      <LearnCourse />
                     </ProtectedRoute>
                   } />
                   <Route path="/create-course" element={
@@ -80,6 +83,35 @@ const App = () => (
                       <CourseBuilder />
                     </ProtectedRoute>
                   } />
+                  
+                  {/* AI Features */}
+                  <Route path="/ai-generator" element={
+                    <ProtectedRoute>
+                      <AIGenerator />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Virtual Labs */}
+                  <Route path="/virtual-labs" element={
+                    <ProtectedRoute>
+                      <VirtualLabs />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Collaboration */}
+                  <Route path="/collaboration" element={
+                    <ProtectedRoute>
+                      <Collaboration />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Analytics */}
+                  <Route path="/analytics" element={
+                    <ProtectedRoute>
+                      <Analytics />
+                    </ProtectedRoute>
+                  } />
+                  
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
