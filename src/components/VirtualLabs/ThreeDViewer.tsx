@@ -27,7 +27,7 @@ const ThreeDViewer = ({ modelUrl, title = '3D Model Viewer' }: ThreeDViewerProps
               size="sm"
               onClick={() => setAutoRotate(!autoRotate)}
             >
-              <RotateCcw className={`h-4 w-4 ${autoRotate ? 'animate-spin' : ''}`} />
+              <RotateCcw className={\`h-4 w-4 ${autoRotate ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </CardTitle>
