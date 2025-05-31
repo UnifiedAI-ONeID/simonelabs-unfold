@@ -2,8 +2,8 @@
   "navigation": {
     "courses": "Courses",
     "dashboard": "Dashboard",
-    "logout": "Logout",
-    "login": "Login",
-    "signup": "Sign Up"
+    "login": "Log In",
+    "signup": "Sign Up",
+    "logout": "Log Out"
   }
 }
