@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/components/Security/SecurityProvider";
 import Index from "./pages/Index";
+import StudentLanding from "./pages/StudentLanding";
+import EducatorLanding from "./pages/EducatorLanding";
+import AdministratorLanding from "./pages/AdministratorLanding";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
@@ -44,6 +47,9 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/student" element={<StudentLanding />} />
+                <Route path="/educator" element={<EducatorLanding />} />
+                <Route path="/administrator" element={<AdministratorLanding />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/captcha-test" element={<CaptchaTest />} />
                 <Route path="/pricing" element={<Pricing />} />

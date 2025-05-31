@@ -1,5 +1,5 @@
-
 import Navigation from "@/components/Navigation";
+import RoleSelection from "@/components/RoleSelection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Users, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -91,6 +91,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Role Selection Section */}
+        <RoleSelection />
 
         {/* Founders Section */}
         <section className="py-12 sm:py-16 lg:py-20 bg-card/50">
