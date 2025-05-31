@@ -114,7 +114,7 @@ const Auth = () => {
             code: error.code,
           });
           
-          if (error.message?.includes('Invalid login credentials')) {
+          if (typeof error.message === 'string' && error.message.includes('Invalid login credentials')) {
             toast({
               title: "Login Failed",
               description: t('errors.invalidCredentials'),
@@ -147,7 +147,7 @@ const Auth = () => {
             code: error.code,
           });
           
-          if (error.message?.includes('User already registered')) {
+          if (typeof error.message === 'string' && error.message.includes('User already registered')) {
             toast({
               title: "Account Exists",
               description: t('errors.userExists'),
@@ -215,7 +215,7 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="fullName\" className=\"text-sm font-medium">
+              <Label htmlFor="fullName" className="text-sm font-medium">
                 {t('register.nameLabel')}
               </Label>
               <div className="relative">
