@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +24,7 @@ import Collaboration from "./pages/Collaboration";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import CaptchaTest from "./pages/CaptchaTest";
+import SecurityDashboard from "./pages/SecurityDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 import "./i18n";
