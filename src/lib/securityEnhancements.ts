@@ -1,156 +1,210 @@
 
-// Enhanced security utilities with comprehensive protections
+import { supabase } from '@/integrations/supabase/client';
+import DOMPurify from 'dompurify';
 
-export interface SecurityConfig {
-  maxRequestSize: number;
-  rateLimitWindow: number;
-  maxRequestsPerWindow: number;
-  allowedOrigins: string[];
+// Rate limiting utilities
+interface RateLimitConfig {
+  maxRequests: number;
+  windowMs: number;
 }
 
-export const defaultSecurityConfig: SecurityConfig = {
-  maxRequestSize: 1024 * 1024, // 1MB
-  rateLimitWindow: 60000, // 1 minute
-  maxRequestsPerWindow: 100,
-  allowedOrigins: [
-    'https://rbaouxhsajpeegrrvlag.supabase.co',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ]
+const createRateLimiter = (config: RateLimitConfig) => {
+  const requests: number[] = [];
+  
+  return {
+    canMakeRequest(): boolean {
+      const now = Date.now();
+      const windowStart = now - config.windowMs;
+      
+      // Remove old requests
+      while (requests.length > 0 && requests[0] < windowStart) {
+        requests.shift();
+      }
+      
+      if (requests.length >= config.maxRequests) {
+        return false;
+      }
+      
+      requests.push(now);
+      return true;
+    },
+    
+    getRemainingRequests(): number {
+      const now = Date.now();
+      const windowStart = now - config.windowMs;
+      
+      // Remove old requests
+      while (requests.length > 0 && requests[0] < windowStart) {
+        requests.shift();
+      }
+      
+      return Math.max(0, config.maxRequests - requests.length);
+    }
+  };
 };
 
-// Enhanced CSP headers with comprehensive security
-export function getSecurityHeaders(): HeadersInit {
-  return {
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
-    'Content-Security-Policy': [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: https: blob:",
-      "connect-src 'self' https://rbaouxhsajpeegrrvlag.supabase.co https://api.stripe.com https://challenges.cloudflare.com wss://realtime.supabase.co",
-      "frame-src https://challenges.cloudflare.com https://js.stripe.com",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'"
-    ].join('; ')
-  };
-}
+// Authentication rate limiter (5 requests per minute)
+export const authRateLimiter = createRateLimiter({
+  maxRequests: 5,
+  windowMs: 60 * 1000 // 1 minute
+});
 
-// Request validation with size limits
-export function validateRequest(request: Request, config: SecurityConfig = defaultSecurityConfig): boolean {
-  // Check content length
-  const contentLength = request.headers.get('content-length');
-  if (contentLength && parseInt(contentLength) > config.maxRequestSize) {
-    console.warn('Request size exceeds limit:', contentLength);
-    return false;
-  }
+// General API rate limiter (100 requests per minute)
+export const apiRateLimiter = createRateLimiter({
+  maxRequests: 100,
+  windowMs: 60 * 1000 // 1 minute
+});
 
-  // Check origin for CORS
-  const origin = request.headers.get('origin');
-  if (origin && !config.allowedOrigins.includes(origin)) {
-    console.warn('Invalid origin:', origin);
-    return false;
-  }
-
-  return true;
-}
-
-// Rate limiting implementation
-const requestCounts = new Map<string, { count: number; timestamp: number }>();
-
-export function checkRateLimit(
-  identifier: string, 
-  config: SecurityConfig = defaultSecurityConfig
-): boolean {
-  const now = Date.now();
-  const windowStart = now - config.rateLimitWindow;
+// Enhanced input validation
+export const validateInput = {
+  email: (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 254;
+  },
   
-  // Clean old entries
-  for (const [key, value] of requestCounts.entries()) {
-    if (value.timestamp < windowStart) {
-      requestCounts.delete(key);
-    }
+  password: (password: string): boolean => {
+    return password.length >= 8 && password.length <= 128;
+  },
+  
+  text: (text: string, maxLength: number = 1000): boolean => {
+    return typeof text === 'string' && text.length <= maxLength && !containsScriptTags(text);
+  },
+  
+  uuid: (uuid: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  },
+  
+  courseContent: (content: any): boolean => {
+    if (typeof content !== 'object' || content === null) return false;
+    
+    // Sanitize JSON content
+    const sanitized = sanitizeObject(content);
+    return JSON.stringify(sanitized).length <= 50000; // 50KB limit
   }
-  
-  const current = requestCounts.get(identifier);
-  
-  if (!current || current.timestamp < windowStart) {
-    requestCounts.set(identifier, { count: 1, timestamp: now });
-    return true;
-  }
-  
-  if (current.count >= config.maxRequestsPerWindow) {
-    console.warn('Rate limit exceeded for:', identifier);
-    return false;
-  }
-  
-  current.count++;
-  return true;
-}
+};
 
-// Secure error response helper
-export function createSecureErrorResponse(
-  message: string, 
-  status: number = 400,
-  logDetails?: any
-): Response {
-  // Log detailed error for debugging (server-side only)
-  if (logDetails) {
-    console.error('Security error:', { message, status, details: logDetails });
-  }
+const containsScriptTags = (input: string): boolean => {
+  const scriptRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+  return scriptRegex.test(input);
+};
 
-  // Return generic error to client (don't expose internal details)
-  const safeMessage = status >= 500 ? 'Internal server error' : message;
+// Enhanced content sanitization
+export const sanitizeContent = {
+  html: (dirty: string): string => {
+    return DOMPurify.sanitize(dirty, {
+      ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'br'],
+      ALLOWED_ATTR: ['href', 'target', 'rel'],
+      FORBID_TAGS: ['script', 'object', 'embed', 'form', 'input', 'iframe', 'meta', 'link'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+      ALLOW_DATA_ATTR: false,
+    });
+  },
   
-  return new Response(
-    JSON.stringify({ 
-      success: false, 
-      error: safeMessage,
-      timestamp: new Date().toISOString()
-    }),
-    { 
-      status, 
-      headers: {
-        ...getSecurityHeaders(),
-        'Content-Type': 'application/json'
+  text: (text: string): string => {
+    return text.replace(/[<>'"&]/g, (char) => {
+      switch (char) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#x27;';
+        case '&': return '&amp;';
+        default: return char;
       }
-    }
-  );
-}
+    });
+  },
+  
+  json: (obj: any): any => {
+    return sanitizeObject(obj);
+  }
+};
 
-// Input sanitization for edge functions
-export function sanitizeInput(input: any): any {
-  if (typeof input === 'string') {
-    // Basic HTML/script tag removal
-    return input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<[^>]*>/g, '')
-      .trim()
-      .substring(0, 1000); // Limit length
-  }
-  
-  if (Array.isArray(input)) {
-    return input.map(sanitizeInput).slice(0, 100); // Limit array size
-  }
-  
-  if (typeof input === 'object' && input !== null) {
+const sanitizeObject = (obj: any): any => {
+  if (typeof obj === 'string') {
+    return sanitizeContent.text(obj);
+  } else if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item));
+  } else if (obj && typeof obj === 'object') {
     const sanitized: any = {};
-    let keyCount = 0;
-    for (const [key, value] of Object.entries(input)) {
-      if (keyCount >= 50) break; // Limit object size
-      const sanitizedKey = typeof key === 'string' ? key.substring(0, 100) : key;
-      sanitized[sanitizedKey] = sanitizeInput(value);
-      keyCount++;
+    for (const [key, value] of Object.entries(obj)) {
+      const cleanKey = sanitizeContent.text(key);
+      sanitized[cleanKey] = sanitizeObject(value);
     }
     return sanitized;
   }
+  return obj;
+};
+
+// Secure error handling
+export const createSecureError = (message: string, code?: string) => {
+  // Log detailed error server-side, return generic message to client
+  console.error(`Security Error [${code || 'UNKNOWN'}]:`, message);
   
-  return input;
-}
+  return {
+    message: 'An error occurred. Please try again.',
+    code: code || 'SECURITY_ERROR',
+    timestamp: new Date().toISOString()
+  };
+};
+
+// Security event logging
+export const logSecurityEvent = async (event: {
+  type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY';
+  details: string;
+  userAgent?: string;
+  ipAddress?: string;
+}) => {
+  try {
+    // In a production environment, you would send this to a security monitoring service
+    console.log('Security Event:', {
+      ...event,
+      timestamp: new Date().toISOString(),
+      sessionId: crypto.randomUUID()
+    });
+  } catch (error) {
+    console.error('Failed to log security event:', error);
+  }
+};
+
+// Enhanced authentication helper
+export const secureAuth = {
+  async requireAuth() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      throw new Error('Authentication required');
+    }
+    
+    return user;
+  },
+  
+  async validateSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (error || !session) {
+      await logSecurityEvent({
+        type: 'AUTH_ATTEMPT',
+        details: 'Invalid session detected'
+      });
+      return null;
+    }
+    
+    return session;
+  }
+};
+
+// Content Security Policy helpers
+export const cspHeaders = {
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://js.stripe.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' https://rbaouxhsajpeegrrvlag.supabase.co https://api.stripe.com https://challenges.cloudflare.com wss://realtime.supabase.co",
+    "frame-src https://challenges.cloudflare.com https://js.stripe.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ].join('; ')
+};
