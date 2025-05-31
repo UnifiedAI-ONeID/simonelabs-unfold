@@ -10,7 +10,7 @@ const Index = () => {
       name: "Fiona Wong",
       role: "Co-Founder & CEO",
       bio: "Former EdTech executive with 15 years of experience in educational innovation. Fiona's vision for accessible education drives SimoneLabs' mission to democratize learning globally.",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=face",
+      image: "https://i.pinimg.com/originals/77/71/68/7771683223d86b237a3304d6f32828b9.jpg",
       fallback: "FW"
     },
     {
