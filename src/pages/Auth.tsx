@@ -73,9 +73,30 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Sanitize inputs
-    const sanitizedEmail = sanitizeText(email);
-    const sanitizedFullName = sanitizeText(fullName);
+    // Enhanced input sanitization and validation
+    const sanitizedEmail = sanitizeText(email.trim().toLowerCase());
+    const sanitizedFullName = sanitizeText(fullName.trim());
+
+    // Basic client-side validation
+    if (!sanitizedEmail || !password) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (isForgotPassword) {
       // For password reset, we don't need CAPTCHA in this simplified version
@@ -109,11 +130,31 @@ const Auth = () => {
         const from = (location.state as any)?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
+        // Enhanced password validation for registration
+        if (password.length < 8) {
+          toast({
+            title: "Password too short",
+            description: "Password must be at least 8 characters long.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         // Validate password confirmation
         if (password !== confirmPassword) {
           toast({
             title: "Password mismatch",
             description: "Passwords do not match. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Validate full name for registration
+        if (!sanitizedFullName || sanitizedFullName.length < 2) {
+          toast({
+            title: "Invalid name",
+            description: "Please enter a valid full name (at least 2 characters).",
             variant: "destructive",
           });
           return;

@@ -3,6 +3,8 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { CSRFProtection, secureRequest } from '@/lib/csrf';
+import { authRateLimiter, logSecurityEvent, validateInput } from '@/lib/securityEnhancements';
 
 interface AuthData {
   email: string;
@@ -23,11 +25,16 @@ export const useSecureAuthWithCaptcha = () => {
   const validateCaptcha = async (token: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
-        body: { token }
+        body: { token },
+        headers: CSRFProtection.getHeaders()
       });
 
       if (error) {
         console.error('CAPTCHA validation error:', error);
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'CAPTCHA validation failed'
+        });
         return false;
       }
 
@@ -35,12 +42,44 @@ export const useSecureAuthWithCaptcha = () => {
       return result.success;
     } catch (error) {
       console.error('CAPTCHA validation network error:', error);
+      await logSecurityEvent({
+        type: 'VALIDATION_FAILURE',
+        details: 'CAPTCHA validation network error'
+      });
       return false;
     }
   };
 
   const signUpMutation = useMutation({
     mutationFn: async (authData: AuthData) => {
+      const clientId = `signup_${authData.email}`;
+      
+      // Enhanced rate limiting check
+      if (!authRateLimiter.canMakeRequest(clientId)) {
+        await logSecurityEvent({
+          type: 'RATE_LIMIT_EXCEEDED',
+          details: `Signup rate limit exceeded for ${authData.email}`
+        });
+        throw new Error('Too many signup attempts. Please wait before trying again.');
+      }
+
+      // Enhanced input validation
+      if (!validateInput.email(authData.email)) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'Invalid email format in signup'
+        });
+        throw new Error('Invalid email format');
+      }
+
+      if (!validateInput.password(authData.password)) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'Invalid password format in signup'
+        });
+        throw new Error('Password must be at least 8 characters long');
+      }
+
       // Validate required fields
       if (!authData.email || !authData.password || !authData.confirmPassword) {
         throw new Error('All fields are required');
@@ -57,19 +96,35 @@ export const useSecureAuthWithCaptcha = () => {
 
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'CAPTCHA validation failed in signup'
+        });
         throw new Error('CAPTCHA verification failed. Please try again.');
       }
 
-      // Proceed with signup only after CAPTCHA validation
+      // Proceed with signup only after all validations pass
       const { data, error } = await supabase.auth.signUp({
         email: authData.email,
         password: authData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
       });
 
       if (error) {
         console.error('Signup error:', error);
+        await logSecurityEvent({
+          type: 'AUTH_ATTEMPT',
+          details: `Signup failed for ${authData.email}: ${error.message}`
+        });
         throw new Error(error.message);
       }
+
+      await logSecurityEvent({
+        type: 'AUTH_ATTEMPT',
+        details: `Successful signup for ${authData.email}`
+      });
 
       return data;
     },
@@ -92,6 +147,26 @@ export const useSecureAuthWithCaptcha = () => {
 
   const signInMutation = useMutation({
     mutationFn: async (authData: AuthData) => {
+      const clientId = `signin_${authData.email}`;
+      
+      // Enhanced rate limiting check
+      if (!authRateLimiter.canMakeRequest(clientId)) {
+        await logSecurityEvent({
+          type: 'RATE_LIMIT_EXCEEDED',
+          details: `Signin rate limit exceeded for ${authData.email}`
+        });
+        throw new Error('Too many signin attempts. Please wait before trying again.');
+      }
+
+      // Enhanced input validation
+      if (!validateInput.email(authData.email)) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'Invalid email format in signin'
+        });
+        throw new Error('Invalid email format');
+      }
+
       // Validate required fields
       if (!authData.email || !authData.password) {
         throw new Error('Email and password are required');
@@ -104,10 +179,14 @@ export const useSecureAuthWithCaptcha = () => {
 
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'CAPTCHA validation failed in signin'
+        });
         throw new Error('CAPTCHA verification failed. Please try again.');
       }
 
-      // Proceed with signin only after CAPTCHA validation
+      // Proceed with signin only after all validations pass
       const { data, error } = await supabase.auth.signInWithPassword({
         email: authData.email,
         password: authData.password,
@@ -115,8 +194,17 @@ export const useSecureAuthWithCaptcha = () => {
 
       if (error) {
         console.error('Signin error:', error);
+        await logSecurityEvent({
+          type: 'AUTH_ATTEMPT',
+          details: `Signin failed for ${authData.email}: ${error.message}`
+        });
         throw new Error(error.message);
       }
+
+      await logSecurityEvent({
+        type: 'AUTH_ATTEMPT',
+        details: `Successful signin for ${authData.email}`
+      });
 
       return data;
     },

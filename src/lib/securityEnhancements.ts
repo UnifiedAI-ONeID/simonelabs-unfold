@@ -1,61 +1,84 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import DOMPurify from 'dompurify';
+import { CSRFProtection } from './csrf';
 
-// Rate limiting utilities
+// Rate limiting utilities with expanded scope
 interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
+  identifier?: string;
 }
 
-const createRateLimiter = (config: RateLimitConfig) => {
-  const requests: number[] = [];
+const createAdvancedRateLimiter = (config: RateLimitConfig) => {
+  const requests = new Map<string, number[]>();
   
   return {
-    canMakeRequest(): boolean {
+    canMakeRequest(identifier: string = 'default'): boolean {
       const now = Date.now();
       const windowStart = now - config.windowMs;
+      const key = `${config.identifier || 'general'}_${identifier}`;
       
-      // Remove old requests
-      while (requests.length > 0 && requests[0] < windowStart) {
-        requests.shift();
+      if (!requests.has(key)) {
+        requests.set(key, []);
       }
       
-      if (requests.length >= config.maxRequests) {
+      const userRequests = requests.get(key)!;
+      const validRequests = userRequests.filter(time => time > windowStart);
+      
+      if (validRequests.length >= config.maxRequests) {
         return false;
       }
       
-      requests.push(now);
+      validRequests.push(now);
+      requests.set(key, validRequests);
       return true;
     },
     
-    getRemainingRequests(): number {
+    getRemainingRequests(identifier: string = 'default'): number {
       const now = Date.now();
       const windowStart = now - config.windowMs;
+      const key = `${config.identifier || 'general'}_${identifier}`;
       
-      // Remove old requests
-      while (requests.length > 0 && requests[0] < windowStart) {
-        requests.shift();
+      if (!requests.has(key)) {
+        return config.maxRequests;
       }
       
-      return Math.max(0, config.maxRequests - requests.length);
+      const userRequests = requests.get(key)!;
+      const validRequests = userRequests.filter(time => time > windowStart);
+      requests.set(key, validRequests);
+      
+      return Math.max(0, config.maxRequests - validRequests.length);
     }
   };
 };
 
-// Authentication rate limiter (5 requests per minute)
-export const authRateLimiter = createRateLimiter({
+// Enhanced rate limiters
+export const authRateLimiter = createAdvancedRateLimiter({
   maxRequests: 5,
-  windowMs: 60 * 1000 // 1 minute
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  identifier: 'auth'
 });
 
-// General API rate limiter (100 requests per minute)
-export const apiRateLimiter = createRateLimiter({
+export const courseRateLimiter = createAdvancedRateLimiter({
+  maxRequests: 10,
+  windowMs: 60 * 1000, // 1 minute
+  identifier: 'course'
+});
+
+export const reviewRateLimiter = createAdvancedRateLimiter({
+  maxRequests: 3,
+  windowMs: 60 * 1000, // 1 minute
+  identifier: 'review'
+});
+
+export const apiRateLimiter = createAdvancedRateLimiter({
   maxRequests: 100,
-  windowMs: 60 * 1000 // 1 minute
+  windowMs: 60 * 1000, // 1 minute
+  identifier: 'api'
 });
 
-// Enhanced input validation
+// Enhanced input validation with CSRF integration
 export const validateInput = {
   email: (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -78,9 +101,12 @@ export const validateInput = {
   courseContent: (content: any): boolean => {
     if (typeof content !== 'object' || content === null) return false;
     
-    // Sanitize JSON content
     const sanitized = sanitizeObject(content);
     return JSON.stringify(sanitized).length <= 50000; // 50KB limit
+  },
+
+  csrfToken: (token: string): boolean => {
+    return CSRFProtection.validateToken(token);
   }
 };
 
@@ -135,43 +161,44 @@ const sanitizeObject = (obj: any): any => {
   return obj;
 };
 
-// Secure error handling
-export const createSecureError = (message: string, code?: string) => {
-  // Log detailed error server-side, return generic message to client
-  console.error(`Security Error [${code || 'UNKNOWN'}]:`, message);
-  
-  return {
-    message: 'An error occurred. Please try again.',
-    code: code || 'SECURITY_ERROR',
-    timestamp: new Date().toISOString()
-  };
-};
-
-// Security event logging
+// Enhanced security event logging
 export const logSecurityEvent = async (event: {
-  type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY';
+  type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY' | 'CSRF_VIOLATION';
   details: string;
   userAgent?: string;
   ipAddress?: string;
+  userId?: string;
 }) => {
   try {
-    // In a production environment, you would send this to a security monitoring service
-    console.log('Security Event:', {
+    const eventData = {
       ...event,
       timestamp: new Date().toISOString(),
-      sessionId: crypto.randomUUID()
-    });
+      sessionId: crypto.randomUUID(),
+      csrfToken: CSRFProtection.getToken()
+    };
+
+    console.log('Security Event:', eventData);
+
+    // In production, send to monitoring service
+    if (event.type === 'SUSPICIOUS_ACTIVITY' || event.type === 'CSRF_VIOLATION') {
+      // Could integrate with external monitoring service here
+      console.warn('High-priority security event detected:', eventData);
+    }
   } catch (error) {
     console.error('Failed to log security event:', error);
   }
 };
 
-// Enhanced authentication helper
+// Enhanced authentication helper with CSRF protection
 export const secureAuth = {
   async requireAuth() {
     const { data: { user }, error } = await supabase.auth.getUser();
     
     if (error || !user) {
+      await logSecurityEvent({
+        type: 'AUTH_ATTEMPT',
+        details: 'Unauthorized access attempt'
+      });
       throw new Error('Authentication required');
     }
     
@@ -193,7 +220,7 @@ export const secureAuth = {
   }
 };
 
-// Content Security Policy helpers
+// Enhanced Content Security Policy with stricter controls
 export const cspHeaders = {
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -205,6 +232,63 @@ export const cspHeaders = {
     "frame-src https://challenges.cloudflare.com https://js.stripe.com",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
-  ].join('; ')
+    "form-action 'self'",
+    "upgrade-insecure-requests",
+    "block-all-mixed-content"
+  ].join('; '),
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
+};
+
+// Secure operation wrapper with comprehensive protection
+export const secureOperation = async <T>(
+  operation: () => Promise<T>,
+  context: {
+    rateLimiter?: any;
+    identifier?: string;
+    requireAuth?: boolean;
+    requireCSRF?: boolean;
+  } = {}
+): Promise<T> => {
+  // Rate limiting check
+  if (context.rateLimiter && context.identifier) {
+    if (!context.rateLimiter.canMakeRequest(context.identifier)) {
+      await logSecurityEvent({
+        type: 'RATE_LIMIT_EXCEEDED',
+        details: `Rate limit exceeded for ${context.identifier}`
+      });
+      throw new Error('Rate limit exceeded. Please try again later.');
+    }
+  }
+
+  // Authentication check
+  if (context.requireAuth) {
+    await secureAuth.requireAuth();
+  }
+
+  // CSRF validation (if required)
+  if (context.requireCSRF) {
+    const token = CSRFProtection.getToken();
+    if (!token) {
+      await logSecurityEvent({
+        type: 'CSRF_VIOLATION',
+        details: 'Missing CSRF token'
+      });
+      throw new Error('CSRF token required');
+    }
+  }
+
+  try {
+    return await operation();
+  } catch (error: any) {
+    await logSecurityEvent({
+      type: 'VALIDATION_FAILURE',
+      details: `Operation failed: ${error.message}`
+    });
+    throw error;
+  }
 };

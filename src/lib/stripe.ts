@@ -1,8 +1,11 @@
 
 import { loadStripe } from '@stripe/stripe-js';
 
-// Initialize Stripe with your publishable key
-export const stripe = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+// Stripe publishable key (safe to be public)
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_your_publishable_key_here'; // Replace with your actual publishable key
+
+// Initialize Stripe with the publishable key
+export const stripe = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 export const createCheckoutSession = async (priceId: string, userId: string) => {
   try {
