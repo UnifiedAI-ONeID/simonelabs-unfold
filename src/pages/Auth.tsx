@@ -1,3 +1,4 @@
+
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useTranslation } from 'react-i18next';
-import Navigation from '@/components/Navigation';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -216,7 +216,7 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="fullName\" className=\"text-sm font-medium">
+              <Label htmlFor="fullName" className="text-sm font-medium">
                 {t('register.nameLabel')}
               </Label>
               <div className="relative">
