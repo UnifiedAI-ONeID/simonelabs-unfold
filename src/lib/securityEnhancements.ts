@@ -161,9 +161,12 @@ const sanitizeObject = (obj: any): any => {
   return obj;
 };
 
-// Enhanced security event logging
+// Enhanced security event logging with expanded event types
 export const logSecurityEvent = async (event: {
-  type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY' | 'CSRF_VIOLATION';
+  type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY' | 'CSRF_VIOLATION' | 
+        'SESSION_EXPIRED' | 'SESSION_INACTIVE' | 'SESSION_VALIDATION_ERROR' | 'LOGIN' | 'LOGOUT' | 'FAILED_LOGIN' |
+        'OPERATION_START' | 'OPERATION_SUCCESS' | 'OPERATION_FAILED' | 'WEBHOOK_PROCESSING' | 'WEBHOOK_SUCCESS' | 'WEBHOOK_ERROR' |
+        'INVALID_METHOD' | 'MISSING_SIGNATURE' | 'INVALID_SIGNATURE';
   details: string;
   userAgent?: string;
   ipAddress?: string;
