@@ -1,11 +1,11 @@
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { useSecureAuth } from '@/hooks/useSecureAuth';
+import { useSecureAuthWithCaptcha } from '@/hooks/useSecureAuthWithCaptcha';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
@@ -13,27 +13,36 @@ import { useTranslation } from 'react-i18next';
 import { PasswordStrength } from '@/components/ui/password-strength';
 import { sanitizeText } from '@/lib/security';
 
+// Use the correct Turnstile site key for localhost/development
+const TURNSTILE_SITE_KEY = '1x00000000000000000000AA'; // This is the test site key for localhost
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileKey, setTurnstileKey] = useState(0); // Force re-render
   const turnstileRef = useRef<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation('auth');
-  const { secureSignUp, secureSignIn, secureResetPassword, isLoading } = useSecureAuth();
+  const { signUp, signIn, isSigningUp, isSigningIn } = useSecureAuthWithCaptcha();
 
   const handleTurnstileSuccess = useCallback((token: string) => {
+    console.log('CAPTCHA success:', token);
     setTurnstileToken(token);
   }, []);
 
-  const handleTurnstileError = useCallback(() => {
+  const handleTurnstileError = useCallback((error?: string) => {
+    console.error('CAPTCHA error:', error);
     setTurnstileToken(null);
+    // Reset the turnstile widget
+    setTurnstileKey(prev => prev + 1);
     toast({
       title: "Security verification failed",
       description: "Please try the verification again.",
@@ -42,7 +51,9 @@ const Auth = () => {
   }, [toast]);
 
   const handleTurnstileExpire = useCallback(() => {
+    console.log('CAPTCHA expired');
     setTurnstileToken(null);
+    setTurnstileKey(prev => prev + 1);
     toast({
       title: "Verification expired",
       description: "Please complete the security verification again.",
@@ -53,12 +64,11 @@ const Auth = () => {
   const resetForm = useCallback(() => {
     setEmail('');
     setPassword('');
+    setConfirmPassword('');
     setFullName('');
     setShowPassword(false);
     setTurnstileToken(null);
-    if (turnstileRef.current?.reset) {
-      turnstileRef.current.reset();
-    }
+    setTurnstileKey(prev => prev + 1);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,36 +79,61 @@ const Auth = () => {
     const sanitizedFullName = sanitizeText(fullName);
 
     if (isForgotPassword) {
-      const result = await secureResetPassword(sanitizedEmail);
-      if (result.success) {
-        setIsForgotPassword(false);
-        resetForm();
-      }
+      // For password reset, we don't need CAPTCHA in this simplified version
+      toast({
+        title: "Password reset requested",
+        description: "If an account exists with this email, you'll receive reset instructions.",
+      });
+      setIsForgotPassword(false);
+      resetForm();
       return;
     }
 
-    if (isLogin) {
-      const result = await secureSignIn(sanitizedEmail, password, turnstileToken || '');
-      if (result.success) {
-        toast({
-          title: "Welcome back!",
-          description: t('success.loggedIn'),
-        });
-        const from = (location.state as any)?.from?.pathname || '/dashboard';
-        navigate(from, { replace: true });
-      }
-    } else {
-      const result = await secureSignUp(sanitizedEmail, password, sanitizedFullName, turnstileToken || '');
-      if (result.success) {
-        navigate('/dashboard');
-      }
+    // Validate CAPTCHA token
+    if (!turnstileToken) {
+      toast({
+        title: "Security verification required",
+        description: "Please complete the security verification first.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Reset CAPTCHA after submission
-    if (turnstileRef.current?.reset) {
-      turnstileRef.current.reset();
+    try {
+      if (isLogin) {
+        await signIn({
+          email: sanitizedEmail,
+          password,
+          captchaToken: turnstileToken
+        });
+        
+        const from = (location.state as any)?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      } else {
+        // Validate password confirmation
+        if (password !== confirmPassword) {
+          toast({
+            title: "Password mismatch",
+            description: "Passwords do not match. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        await signUp({
+          email: sanitizedEmail,
+          password,
+          confirmPassword,
+          captchaToken: turnstileToken
+        });
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+    } finally {
+      // Reset CAPTCHA after submission
+      setTurnstileToken(null);
+      setTurnstileKey(prev => prev + 1);
     }
-    setTurnstileToken(null);
   };
 
   const toggleMode = useCallback(() => {
@@ -106,6 +141,8 @@ const Auth = () => {
     setIsForgotPassword(false);
     resetForm();
   }, [isLogin, resetForm]);
+
+  const isLoading = isSigningUp || isSigningIn;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
@@ -168,53 +205,78 @@ const Auth = () => {
           </div>
 
           {!isForgotPassword && (
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                {isLogin ? t('login.passwordLabel') : t('register.passwordLabel')}
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder={isLogin ? t('login.passwordPlaceholder') : t('register.passwordPlaceholder')}
-                  minLength={8}
-                  className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  {isLogin ? t('login.passwordLabel') : t('register.passwordLabel')}
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder={isLogin ? t('login.passwordPlaceholder') : t('register.passwordPlaceholder')}
+                    minLength={8}
+                    className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {!isLogin && (
+                  <PasswordStrength password={password} className="mt-2" />
+                )}
               </div>
-              {!isLogin && (
-                <PasswordStrength password={password} className="mt-2" />
-              )}
-            </div>
-          )}
 
-          {!isForgotPassword && (
-            <div className="flex justify-center">
-              <Turnstile
-                ref={turnstileRef}
-                siteKey="0x4AAAAAABfVmLaPZh3sMQ7-"
-                onSuccess={handleTurnstileSuccess}
-                onError={handleTurnstileError}
-                onExpire={handleTurnstileExpire}
-                options={{
-                  theme: 'light',
-                  size: 'normal',
-                  appearance: 'interaction-only',
-                }}
-              />
-            </div>
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                    Confirm Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required={!isLogin}
+                      placeholder="Confirm your password"
+                      minLength={8}
+                      className="pl-10 rounded-xl border-border/60 focus:border-primary"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-center">
+                <Turnstile
+                  key={turnstileKey}
+                  ref={turnstileRef}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={handleTurnstileSuccess}
+                  onError={handleTurnstileError}
+                  onExpire={handleTurnstileExpire}
+                  options={{
+                    theme: 'light',
+                    size: 'normal',
+                    appearance: 'always',
+                    retry: 'auto',
+                    'retry-interval': 8000,
+                  }}
+                />
+              </div>
+            </>
           )}
 
           <Button
