@@ -108,9 +108,9 @@ export const validateSessionSecurity = async (): Promise<boolean> => {
       return false;
     }
 
-    // Check for suspicious session activity
-    const sessionAge = now - (session.created_at ? new Date(session.created_at).getTime() / 1000 : 0);
-    if (sessionAge > 24 * 60 * 60) { // 24 hours
+    // Check for suspicious session activity - use expires_at to estimate session age
+    const sessionMaxAge = 24 * 60 * 60; // 24 hours in seconds
+    if (session.expires_at && (session.expires_at - now) < (3600 - sessionMaxAge)) { // If session will expire soon and seems very old
       await logSecurityEvent({
         type: 'SESSION_EXPIRED',
         details: 'Session too old, requiring re-authentication'

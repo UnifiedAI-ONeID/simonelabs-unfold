@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 // Enhanced input sanitization with multiple layers
 export class InputSanitizer {
-  private static readonly DANGEROUS_PATTERNS = [
+  static readonly DANGEROUS_PATTERNS = [
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
     /javascript:/gi,
     /on\w+\s*=/gi,
