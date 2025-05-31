@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { SecurityNotifications } from "@/components/Security/SecurityNotifications";
 import { useTranslation } from "react-i18next";
 
 const Navigation = () => {
@@ -72,6 +73,7 @@ const Navigation = () => {
                 </Link>
                 
                 <div className="flex items-center space-x-2 ml-3 pl-3 border-l border-border/40">
+                  <SecurityNotifications />
                   <LanguageSwitcher />
                   <ThemeToggle />
                   <Button 
@@ -113,6 +115,7 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-2 sm:space-x-3">
             <div className="flex items-center space-x-2">
+              {user && <SecurityNotifications />}
               <LanguageSwitcher />
               <ThemeToggle />
             </div>
@@ -148,6 +151,14 @@ const Navigation = () => {
                   >
                     <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
                     <span>{t('navigation.dashboard')}</span>
+                  </Link>
+                  <Link
+                    to="/security"
+                    className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-4 text-foreground hover:text-primary transition-all duration-300 font-medium rounded-xl sm:rounded-2xl hover:bg-primary/10 group"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                    <span>Security Dashboard</span>
                   </Link>
                   <div className="border-t border-border/40 my-3 sm:my-4"></div>
                   <Button
