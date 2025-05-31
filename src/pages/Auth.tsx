@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +17,44 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileRef = useRef(null);
+  const turnstileRef = useRef<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const { signUp, signIn, resetPassword } = useAuth();
+
+  const handleTurnstileSuccess = useCallback((token: string) => {
+    setTurnstileToken(token);
+  }, []);
+
+  const handleTurnstileError = useCallback(() => {
+    setTurnstileToken(null);
+    toast({
+      title: "CAPTCHA Error",
+      description: "Failed to verify CAPTCHA. Please try again.",
+      variant: "destructive",
+    });
+  }, [toast]);
+
+  const handleTurnstileExpire = useCallback(() => {
+    setTurnstileToken(null);
+    toast({
+      title: "CAPTCHA Expired",
+      description: "Please complete the CAPTCHA verification again.",
+      variant: "destructive",
+    });
+  }, [toast]);
+
+  const resetForm = useCallback(() => {
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setShowPassword(false);
+    setTurnstileToken(null);
+    if (turnstileRef.current?.reset) {
+      turnstileRef.current.reset();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +68,15 @@ const Auth = () => {
       return;
     }
 
+    if (!email || !password || (!isLogin && !fullName)) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -42,6 +84,7 @@ const Auth = () => {
         const { error } = await resetPassword(email);
         
         if (error) {
+          console.error('Password reset error:', error);
           toast({
             title: "Password Reset Failed",
             description: error.message || "Please check your email and try again.",
@@ -66,7 +109,6 @@ const Auth = () => {
             message: error.message,
             status: error.status,
             code: error.code,
-            details: error
           });
           
           if (error.message?.includes('Invalid login credentials')) {
@@ -82,7 +124,6 @@ const Auth = () => {
               variant: "destructive",
             });
           }
-          setLoading(false);
           return;
         }
         
@@ -91,7 +132,6 @@ const Auth = () => {
           description: "You've been successfully logged in.",
         });
 
-        // Redirect to the intended page or dashboard
         const from = (location.state as any)?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
@@ -102,7 +142,6 @@ const Auth = () => {
             message: error.message,
             status: error.status,
             code: error.code,
-            details: error
           });
           
           if (error.message?.includes('User already registered')) {
@@ -119,7 +158,6 @@ const Auth = () => {
               variant: "destructive",
             });
           }
-          setLoading(false);
           return;
         }
         
@@ -133,7 +171,6 @@ const Auth = () => {
       console.error('Auth process failed:', {
         message: error.message,
         stack: error.stack,
-        details: error
       });
       toast({
         title: "Authentication Error",
@@ -142,30 +179,18 @@ const Auth = () => {
       });
     } finally {
       setLoading(false);
-      // Reset Turnstile after form submission
-      if (turnstileRef.current) {
-        (turnstileRef.current as any).reset();
+      if (turnstileRef.current?.reset) {
+        turnstileRef.current.reset();
       }
       setTurnstileToken(null);
     }
   };
 
-  const resetForm = () => {
-    setEmail('');
-    setPassword('');
-    setFullName('');
-    setShowPassword(false);
-    setTurnstileToken(null);
-    if (turnstileRef.current) {
-      (turnstileRef.current as any).reset();
-    }
-  };
-
-  const toggleMode = () => {
+  const toggleMode = useCallback(() => {
     setIsLogin(!isLogin);
     setIsForgotPassword(false);
     resetForm();
-  };
+  }, [isLogin, resetForm]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
@@ -187,7 +212,7 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="fullName\" className="text-sm font-medium">
+              <Label htmlFor="fullName" className="text-sm font-medium">
                 Full Name
               </Label>
               <div className="relative">
@@ -200,6 +225,7 @@ const Auth = () => {
                   required={!isLogin}
                   placeholder="Enter your full name"
                   className="pl-10 rounded-xl border-border/60 focus:border-primary"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -219,6 +245,7 @@ const Auth = () => {
                 required
                 placeholder="Enter your email"
                 className="pl-10 rounded-xl border-border/60 focus:border-primary"
+                disabled={loading}
               />
             </div>
           </div>
@@ -239,11 +266,13 @@ const Auth = () => {
                   placeholder="Enter your password"
                   minLength={6}
                   className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -260,22 +289,13 @@ const Auth = () => {
             <Turnstile
               ref={turnstileRef}
               siteKey="0x4AAAAAABfVmLaPZh3sMQ7-"
-              onSuccess={(token) => setTurnstileToken(token)}
-              onError={() => {
-                setTurnstileToken(null);
-                toast({
-                  title: "CAPTCHA Error",
-                  description: "Failed to verify CAPTCHA. Please try again.",
-                  variant: "destructive",
-                });
-              }}
-              onExpire={() => {
-                setTurnstileToken(null);
-                toast({
-                  title: "CAPTCHA Expired",
-                  description: "Please complete the CAPTCHA verification again.",
-                  variant: "destructive",
-                });
+              onSuccess={handleTurnstileSuccess}
+              onError={handleTurnstileError}
+              onExpire={handleTurnstileExpire}
+              options={{
+                theme: 'light',
+                size: 'normal',
+                appearance: 'interaction-only',
               }}
             />
           </div>
@@ -309,6 +329,7 @@ const Auth = () => {
             <button
               onClick={() => setIsForgotPassword(true)}
               className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
+              disabled={loading}
             >
               Forgot your password?
             </button>
@@ -318,6 +339,7 @@ const Auth = () => {
             <button
               onClick={() => setIsForgotPassword(false)}
               className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+              disabled={loading}
             >
               Back to Sign In
             </button>
@@ -327,6 +349,7 @@ const Auth = () => {
             <button
               onClick={toggleMode}
               className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+              disabled={loading}
             >
               {isLogin
                 ? "Don't have an account? Create one"
