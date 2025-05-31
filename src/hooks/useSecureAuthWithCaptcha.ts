@@ -36,10 +36,9 @@ export const useSecureAuthWithCaptcha = () => {
   const navigate = useNavigate();
 
   const validateCaptcha = async (token: string): Promise<boolean> => {
-    // Skip CAPTCHA validation in development or if using bypass token
-    if (process.env.NODE_ENV === 'development' || token === 'dev-bypass-token') {
-      console.log('CAPTCHA validation skipped in development mode');
-      return true;
+    if (!token) {
+      console.error('No CAPTCHA token provided');
+      return false;
     }
 
     try {
@@ -61,7 +60,16 @@ export const useSecureAuthWithCaptcha = () => {
       }
 
       const result: CaptchaValidationResponse = data;
-      return result.success;
+      const isValid = result.success;
+      
+      if (!isValid) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'CAPTCHA validation returned false'
+        });
+      }
+      
+      return isValid;
     } catch (error) {
       console.error('CAPTCHA validation network error:', error);
       await logSecurityEvent({
@@ -114,13 +122,13 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('Passwords do not match');
       }
 
-      // Validate CAPTCHA
+      // Validate CAPTCHA - always required
       if (!authData.captchaToken) {
         throw new Error('CAPTCHA verification is required');
       }
 
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
-      if (!isCaptchaValid && process.env.NODE_ENV === 'production') {
+      if (!isCaptchaValid) {
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
           details: 'CAPTCHA validation failed in signup'
@@ -207,13 +215,13 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('Email and password are required');
       }
 
-      // Validate CAPTCHA
+      // Validate CAPTCHA - always required
       if (!authData.captchaToken) {
         throw new Error('CAPTCHA verification is required');
       }
 
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
-      if (!isCaptchaValid && process.env.NODE_ENV === 'production') {
+      if (!isCaptchaValid) {
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
           details: 'CAPTCHA validation failed in signin'

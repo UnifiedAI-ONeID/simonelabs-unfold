@@ -1,3 +1,4 @@
+
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +10,8 @@ import { PasswordStrength } from '@/components/ui/password-strength';
 import { sanitizeText } from '@/lib/security';
 import { useToast } from '@/hooks/use-toast';
 
-// Use test site key for development - replace with your production key
-const TURNSTILE_SITE_KEY = process.env.NODE_ENV === 'production' 
-  ? '0x4AAAAAABfVmLaPZh3sMQ7-' 
-  : '1x00000000000000000000AA'; // Test key that always passes
+// Use production site key
+const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -61,14 +60,11 @@ const AuthForm = ({
     setCaptchaStatus('error');
     setTurnstileKey(prev => prev + 1);
     
-    // Don't show toast for development test key
-    if (process.env.NODE_ENV === 'production') {
-      toast({
-        title: "Security verification failed",
-        description: "Please try the verification again.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Security verification failed",
+      description: "Please try the verification again.",
+      variant: "destructive",
+    });
   }, [toast]);
 
   const handleTurnstileExpire = useCallback(() => {
@@ -77,13 +73,11 @@ const AuthForm = ({
     setCaptchaStatus('loading');
     setTurnstileKey(prev => prev + 1);
     
-    if (process.env.NODE_ENV === 'production') {
-      toast({
-        title: "Verification expired",
-        description: "Please complete the security verification again.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Verification expired",
+      description: "Please complete the security verification again.",
+      variant: "destructive",
+    });
   }, [toast]);
 
   const handleTurnstileLoad = useCallback(() => {
@@ -137,8 +131,8 @@ const AuthForm = ({
       return;
     }
 
-    // In development, allow submission without CAPTCHA for testing
-    if (process.env.NODE_ENV === 'production' && !turnstileToken) {
+    // CAPTCHA is required for all environments
+    if (!turnstileToken) {
       toast({
         title: "Security verification required",
         description: "Please complete the security verification first.",
@@ -182,7 +176,7 @@ const AuthForm = ({
         password,
         confirmPassword,
         fullName: sanitizedFullName,
-        captchaToken: turnstileToken || 'dev-bypass-token'
+        captchaToken: turnstileToken
       });
     } catch (error) {
       console.error('Auth error:', error);
@@ -205,7 +199,7 @@ const AuthForm = ({
   const getCaptchaStatusText = () => {
     switch (captchaStatus) {
       case 'success': return '✓ Verification complete';
-      case 'error': return '✗ Verification failed';
+      case 'error': return '✗ Verification failed - please try again';
       case 'ready': return '⏳ Please complete verification';
       case 'loading': return '🔄 Loading verification...';
       default: return '';
@@ -327,31 +321,17 @@ const AuthForm = ({
                       theme: 'auto',
                       size: 'normal',
                       appearance: 'always',
-                      retry: 'auto',
-                      'refresh-expired': 'auto',
+                      retry: 'auto'
                     }}
                   />
                 </div>
               </div>
               
-              {process.env.NODE_ENV === 'development' && (
-                <div className="text-center">
-                  <span className={`text-xs font-medium ${getCaptchaStatusColor()}`}>
-                    {getCaptchaStatusText()}
-                  </span>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Development mode: CAPTCHA bypass enabled
-                  </div>
-                </div>
-              )}
-              
-              {process.env.NODE_ENV === 'production' && (
-                <div className="text-center">
-                  <span className={`text-xs font-medium ${getCaptchaStatusColor()}`}>
-                    {getCaptchaStatusText()}
-                  </span>
-                </div>
-              )}
+              <div className="text-center">
+                <span className={`text-xs font-medium ${getCaptchaStatusColor()}`}>
+                  {getCaptchaStatusText()}
+                </span>
+              </div>
             </div>
           </>
         )}
@@ -359,7 +339,7 @@ const AuthForm = ({
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl py-3 h-12 font-medium transition-all duration-200 text-base"
-          disabled={isLoading || (process.env.NODE_ENV === 'production' && !isForgotPassword && !turnstileToken)}
+          disabled={isLoading || (!isForgotPassword && !turnstileToken)}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
