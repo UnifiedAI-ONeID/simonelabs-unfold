@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { PasswordStrength } from '@/components/ui/password-strength';
 import { sanitizeText } from '@/lib/security';
 
-// Production Turnstile site key - replace with your actual production site key
-const TURNSTILE_SITE_KEY = 'YOUR_PRODUCTION_SITE_KEY';
+// Production Turnstile site key
+const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
