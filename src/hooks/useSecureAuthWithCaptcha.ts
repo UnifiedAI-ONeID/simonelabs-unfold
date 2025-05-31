@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { CSRFProtection, secureRequest } from '@/lib/csrf';
+import { CSRFProtection } from '@/lib/csrf';
 import { authRateLimiter, logSecurityEvent, validateInput } from '@/lib/securityEnhancements';
 
 interface AuthData {
@@ -17,6 +17,19 @@ interface CaptchaValidationResponse {
   success: boolean;
   error?: string;
 }
+
+// Helper function to clean up authentication state
+const cleanupAuthState = () => {
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (error) {
+    console.error('Error cleaning up auth state:', error);
+  }
+};
 
 export const useSecureAuthWithCaptcha = () => {
   const { toast } = useToast();
@@ -62,6 +75,9 @@ export const useSecureAuthWithCaptcha = () => {
         });
         throw new Error('Too many signup attempts. Please wait before trying again.');
       }
+
+      // Clean up any existing auth state
+      cleanupAuthState();
 
       // Enhanced input validation
       if (!validateInput.email(authData.email)) {
@@ -156,6 +172,16 @@ export const useSecureAuthWithCaptcha = () => {
           details: `Signin rate limit exceeded for ${authData.email}`
         });
         throw new Error('Too many signin attempts. Please wait before trying again.');
+      }
+
+      // Clean up any existing auth state
+      cleanupAuthState();
+
+      // Attempt global sign out before new sign in
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log('Global signout attempt failed, continuing...');
       }
 
       // Enhanced input validation
