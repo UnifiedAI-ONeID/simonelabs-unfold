@@ -1,9 +1,9 @@
-
 import { memo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Star, Users } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface OptimizedCourseCardProps {
   course: {
@@ -23,8 +23,25 @@ interface OptimizedCourseCardProps {
 
 // Memoized component to prevent unnecessary re-renders
 const OptimizedCourseCard = memo(({ course, onEnroll, isEnrolling }: OptimizedCourseCardProps) => {
+  const { t } = useTranslation('courses');
+  
   const handleEnroll = () => {
     onEnroll(course.id);
+  };
+
+  const formatDuration = (duration: string | null) => {
+    if (!duration) return t('courseCard.selfPaced');
+    
+    try {
+      const match = duration.match(/(\d+)/);
+      if (match) {
+        const hours = parseInt(match[1]);
+        return `${Math.floor(hours / 60)}h ${hours % 60}m`;
+      }
+      return t('courseCard.selfPaced');
+    } catch {
+      return t('courseCard.selfPaced');
+    }
   };
 
   return (
@@ -55,7 +72,7 @@ const OptimizedCourseCard = memo(({ course, onEnroll, isEnrolling }: OptimizedCo
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4" />
-            <span>{course.student_count} students</span>
+            <span>{course.student_count} {t('courseCard.students')}</span>
           </div>
           
           {course.rating && (
@@ -68,13 +85,13 @@ const OptimizedCourseCard = memo(({ course, onEnroll, isEnrolling }: OptimizedCo
           {course.estimated_duration && (
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>{course.estimated_duration}</span>
+              <span>{formatDuration(course.estimated_duration)}</span>
             </div>
           )}
           
           {course.instructor_name && (
             <p className="text-xs">
-              Instructor: {course.instructor_name}
+              {t('courseView.instructor')}: {course.instructor_name}
             </p>
           )}
         </div>
@@ -86,7 +103,7 @@ const OptimizedCourseCard = memo(({ course, onEnroll, isEnrolling }: OptimizedCo
           disabled={isEnrolling}
           className="w-full"
         >
-          {isEnrolling ? "Enrolling..." : "Enroll Now"}
+          {isEnrolling ? t('courseCard.enrollingButton') : t('courseCard.enrollButton')}
         </Button>
       </CardFooter>
     </Card>

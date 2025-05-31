@@ -1,16 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, BookOpen, Brain, BarChart3, Trophy, Sparkles, User, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,7 +57,7 @@ const Navigation = () => {
               className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-4 py-2 rounded-xl hover:bg-primary/10 group"
             >
               <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span>Courses</span>
+              <span>{t('navigation.courses')}</span>
             </Link>
             
             {user ? (
@@ -65,10 +67,11 @@ const Navigation = () => {
                   className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-4 py-2 rounded-xl hover:bg-primary/10 group"
                 >
                   <User className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span>Dashboard</span>
+                  <span>{t('navigation.dashboard')}</span>
                 </Link>
                 
                 <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-border/40">
+                  <LanguageSwitcher />
                   <ThemeToggle />
                   <Button 
                     onClick={handleLogout} 
@@ -76,24 +79,25 @@ const Navigation = () => {
                     className="gentle-hover border-border/60 hover:bg-muted/50 rounded-xl group flex items-center gap-2"
                   >
                     <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                    <span>Logout</span>
+                    <span>{t('navigation.logout')}</span>
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center space-x-4 ml-4">
+                <LanguageSwitcher />
                 <ThemeToggle />
                 <Link to="/auth">
                   <Button 
                     variant="outline" 
                     className="gentle-hover border-border/60 hover:bg-muted/50 cta-text rounded-xl"
                   >
-                    Login
+                    {t('navigation.login')}
                   </Button>
                 </Link>
                 <Link to="/auth">
                   <Button className="simonelabs-primary-button cta-text rounded-xl shadow-lg">
-                    Get Started
+                    {t('navigation.signup')}
                   </Button>
                 </Link>
               </div>
@@ -102,6 +106,7 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-3">
+            <LanguageSwitcher />
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -122,7 +127,7 @@ const Navigation = () => {
                 onClick={() => setIsOpen(false)}
               >
                 <BookOpen className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                <span>Courses</span>
+                <span>{t('navigation.courses')}</span>
               </Link>
               
               {user ? (
@@ -134,7 +139,7 @@ const Navigation = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <span>Dashboard</span>
+                    <span>{t('navigation.dashboard')}</span>
                   </Link>
                   <div className="border-t border-border/40 my-4"></div>
                   <Button
@@ -146,19 +151,19 @@ const Navigation = () => {
                     className="w-full mt-4 border-border hover:bg-muted cta-text rounded-xl flex items-center gap-3 justify-center py-4"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
+                    <span>{t('navigation.logout')}</span>
                   </Button>
                 </>
               ) : (
                 <div className="space-y-3 pt-6 border-t border-border/40">
                   <Link to="/auth" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full border-border hover:bg-muted cta-text rounded-xl py-4">
-                      Login
+                      {t('navigation.login')}
                     </Button>
                   </Link>
                   <Link to="/auth" onClick={() => setIsOpen(false)}>
                     <Button className="w-full simonelabs-primary-button cta-text rounded-xl py-4 shadow-lg">
-                      Get Started
+                      {t('navigation.signup')}
                     </Button>
                   </Link>
                 </div>

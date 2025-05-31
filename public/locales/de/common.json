@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "courses": "Kurse",
+    "dashboard": "Dashboard",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "logout": "Abmelden"
+  },
+  "hero": {
+    "title": "Bildung für Alle, Überall",
+    "subtitle": "Transformieren Sie Ihr Lernerlebnis mit KI-gestützter Bildung, die sich an Ihre Bedürfnisse anpasst",
+    "cta": "Jetzt Lernen Beginnen"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "Adaptives Lernen",
+      "description": "KI-gestützte Inhalte, die sich an Ihren Lernstil und Ihr Tempo anpassen"
+    },
+    "expertCommunity": {
+      "title": "Experten-Community",
+      "description": "Lernen Sie gemeinsam mit Gleichgesinnten und Experten"
+    },
+    "globalAccess": {
+      "title": "Globaler Zugang",
+      "description": "Qualitativ hochwertige Bildung jederzeit und überall verfügbar"
+    }
+  }
+}

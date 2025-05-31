@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "courses": "코스",
+    "dashboard": "대시보드",
+    "login": "로그인",
+    "signup": "가입하기",
+    "logout": "로그아웃"
+  },
+  "hero": {
+    "title": "모든 사람을 위한 교육, 어디서나",
+    "subtitle": "AI 기반 교육으로 학습 경험을 변화시키고 당신의 필요에 맞게 적응합니다",
+    "cta": "지금 학습 시작하기"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "적응형 학습",
+      "description": "당신의 학습 스타일과 속도에 맞게 적응하는 AI 기반 콘텐츠"
+    },
+    "expertCommunity": {
+      "title": "전문가 커뮤니티",
+      "description": "동료 및 전문 강사와 함께 배우기"
+    },
+    "globalAccess": {
+      "title": "글로벌 액세스",
+      "description": "언제 어디서나 이용 가능한 고품질 교육"
+    }
+  }
+}

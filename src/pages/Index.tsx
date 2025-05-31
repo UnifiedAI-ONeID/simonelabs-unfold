@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Users, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
+  const { t } = useTranslation();
+
   const founders = [
     {
       name: "Fiona Wong",
@@ -37,18 +40,17 @@ const Index = () => {
           <div className="container mx-auto px-4 text-center relative z-10 space-y-12">
             <div className="space-y-6 max-w-3xl mx-auto">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
-                <span className="block text-foreground">Education for Everyone,</span>
-                <span className="block gradient-text mt-2">Everywhere</span>
+                <span className="block text-foreground">{t('hero.title')}</span>
               </h1>
               
               <p className="text-xl text-muted-foreground">
-                Transform your learning experience with AI-powered education that adapts to your needs
+                {t('hero.subtitle')}
               </p>
 
               <div className="flex justify-center gap-4">
                 <Link to="/auth">
                   <Button className="btn-primary text-lg px-8 py-4 h-auto rounded-xl group">
-                    <span>Start Learning Now</span>
+                    <span>{t('hero.cta')}</span>
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -60,9 +62,9 @@ const Index = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20">
                   <Brain className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Adaptive Learning</h3>
+                <h3 className="text-xl font-semibold">{t('features.adaptiveLearning.title')}</h3>
                 <p className="text-muted-foreground">
-                  AI-powered content that adapts to your learning style and pace
+                  {t('features.adaptiveLearning.description')}
                 </p>
               </div>
               
@@ -70,9 +72,9 @@ const Index = () => {
                 <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-accent/20">
                   <Users className="h-8 w-8 text-accent" />
                 </div>
-                <h3 className="text-xl font-semibold">Expert Community</h3>
+                <h3 className="text-xl font-semibold">{t('features.expertCommunity.title')}</h3>
                 <p className="text-muted-foreground">
-                  Learn together with peers and expert instructors
+                  {t('features.expertCommunity.description')}
                 </p>
               </div>
               
@@ -80,9 +82,9 @@ const Index = () => {
                 <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border">
                   <Globe className="h-8 w-8 text-secondary" />
                 </div>
-                <h3 className="text-xl font-semibold">Global Access</h3>
+                <h3 className="text-xl font-semibold">{t('features.globalAccess.title')}</h3>
                 <p className="text-muted-foreground">
-                  Quality education available anytime, anywhere
+                  {t('features.globalAccess.description')}
                 </p>
               </div>
             </div>

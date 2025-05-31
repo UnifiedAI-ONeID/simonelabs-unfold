@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "courses": "课程",
+    "dashboard": "控制面板",
+    "login": "登录",
+    "signup": "注册",
+    "logout": "退出"
+  },
+  "hero": {
+    "title": "教育为每个人，无处不在",
+    "subtitle": "通过适应您需求的人工智能教育，改变您的学习体验",
+    "cta": "开始学习"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "自适应学习",
+      "description": "人工智能驱动的内容，适应您的学习风格和节奏"
+    },
+    "expertCommunity": {
+      "title": "专家社区",
+      "description": "与同行和专家教师一起学习"
+    },
+    "globalAccess": {
+      "title": "全球访问",
+      "description": "随时随地获取高质量教育"
+    }
+  }
+}

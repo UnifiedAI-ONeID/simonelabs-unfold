@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Globe, DollarSign } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface PricingRegion {
   region: string;
@@ -16,6 +16,7 @@ interface PricingRegion {
 const LocalizedPricing = () => {
   const [userRegion, setUserRegion] = useState<string>('US/EU/UK');
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation('payment');
   
   const pricingRegions: PricingRegion[] = [
     {
@@ -134,16 +135,18 @@ const LocalizedPricing = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="w-5 h-5" />
-            Your Regional Pricing
+            {t('regional.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Detected Region: {currentPricing.region}</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                {t('regional.detectedRegion', { region: currentPricing.region })}
+              </p>
               {currentPricing.discount > 0 && (
                 <Badge variant="secondary" className="text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900">
-                  {currentPricing.discount}% Regional Discount Applied
+                  {t('regional.discount', { discount: currentPricing.discount })}
                 </Badge>
               )}
             </div>
@@ -154,7 +157,9 @@ const LocalizedPricing = () => {
                   {currentPricing.symbol}{currentPricing.basicPrice} - {currentPricing.symbol}{currentPricing.premiumPrice}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground">{currentPricing.currency}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('regional.currency', { currency: currentPricing.currency })}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -185,7 +190,7 @@ const LocalizedPricing = () => {
                   <span className="font-medium">{pricing.symbol}{pricing.premiumPrice}</span>
                 </div>
                 <div className="text-xs text-muted-foreground pt-2">
-                  Currency: {pricing.currency}
+                  {t('regional.currency', { currency: pricing.currency })}
                 </div>
               </div>
             </CardContent>
@@ -195,9 +200,7 @@ const LocalizedPricing = () => {
 
       <div className="text-center text-sm text-muted-foreground">
         <p>
-          Pricing automatically adjusted based on your location to make education more accessible worldwide.
-          <br />
-          All features and content remain the same regardless of pricing tier.
+          {t('regional.description')}
         </p>
       </div>
     </div>

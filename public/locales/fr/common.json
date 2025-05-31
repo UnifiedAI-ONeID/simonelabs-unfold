@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "courses": "Cours",
+    "dashboard": "Tableau de bord",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "hero": {
+    "title": "Éducation pour Tous, Partout",
+    "subtitle": "Transformez votre expérience d'apprentissage avec une éducation alimentée par l'IA qui s'adapte à vos besoins",
+    "cta": "Commencer à Apprendre"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "Apprentissage Adaptatif",
+      "description": "Contenu alimenté par l'IA qui s'adapte à votre style et rythme d'apprentissage"
+    },
+    "expertCommunity": {
+      "title": "Communauté d'Experts",
+      "description": "Apprenez ensemble avec des pairs et des instructeurs experts"
+    },
+    "globalAccess": {
+      "title": "Accès Mondial",
+      "description": "Éducation de qualité disponible à tout moment, n'importe où"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Flexible Learning Investment Options",
+  "subtitle": "Choose from subscriptions, individual courses, certifications, mentoring, and enterprise solutions. All designed to fit your learning journey and budget.",
+  "tabs": {
+    "plans": "Pricing Plans",
+    "regional": "Regional Pricing"
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "monthly": {
+      "name": "SimoneLabs Plus Monthly",
+      "description": "Unlimited access to most courses",
+      "period": "month"
+    },
+    "premium": {
+      "name": "SimoneLabs Plus Premium",
+      "description": "Everything plus live sessions & mentoring",
+      "period": "month",
+      "badge": "Most Popular"
+    },
+    "yearly": {
+      "name": "SimoneLabs Plus Yearly",
+      "description": "Save 43% with annual billing",
+      "period": "year",
+      "badge": "Best Value"
+    }
+  },
+  "courses": {
+    "title": "Courses",
+    "standard": {
+      "name": "Standard Course",
+      "description": "Individual course access",
+      "period": "one-time"
+    },
+    "premium": {
+      "name": "Premium Course",
+      "description": "In-depth course with certification",
+      "period": "one-time"
+    }
+  },
+  "buttons": {
+    "startSubscription": "Start Subscription",
+    "buyCourse": "Buy Course",
+    "getCertified": "Get Certified",
+    "bookSession": "Book Session",
+    "contactSales": "Contact Sales",
+    "processing": "Processing..."
+  },
+  "features": {
+    "moneyBack": "Money-Back Guarantee",
+    "moneyBackDescription": "30-day refund policy on all purchases",
+    "referral": "Referral Program",
+    "referralDescription": "Earn $10 credit for each friend you refer",
+    "localizedPricing": "Localized Pricing",
+    "localizedPricingDescription": "Special pricing for emerging markets"
+  },
+  "trust": {
+    "moneyBack": "30-day money-back guarantee",
+    "securePayment": "Secure payment processing",
+    "cancelAnytime": "Cancel anytime",
+    "support": "24/7 customer support"
+  },
+  "regional": {
+    "title": "Your Regional Pricing",
+    "detectedRegion": "Detected Region: {{region}}",
+    "discount": "{{discount}}% Regional Discount Applied",
+    "currency": "Currency: {{currency}}",
+    "description": "Pricing automatically adjusted based on your location to make education more accessible worldwide. All features and content remain the same regardless of pricing tier."
+  }
+}

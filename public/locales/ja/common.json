@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "courses": "コース",
+    "dashboard": "ダッシュボード",
+    "login": "ログイン",
+    "signup": "登録",
+    "logout": "ログアウト"
+  },
+  "hero": {
+    "title": "すべての人のための教育、どこでも",
+    "subtitle": "AIを活用した教育であなたの学習体験を変革し、あなたのニーズに適応します",
+    "cta": "今すぐ学習を始める"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "適応型学習",
+      "description": "あなたの学習スタイルとペースに適応するAI駆動のコンテンツ"
+    },
+    "expertCommunity": {
+      "title": "専門家コミュニティ",
+      "description": "仲間や専門家の講師と一緒に学ぶ"
+    },
+    "globalAccess": {
+      "title": "グローバルアクセス",
+      "description": "いつでもどこでも質の高い教育を利用可能"
+    }
+  }
+}

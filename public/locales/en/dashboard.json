@@ -1,0 +1,28 @@
+{
+  "welcome": "Welcome back, {{name}}!",
+  "subtitle": "Continue your learning journey",
+  "stats": {
+    "level": "Level",
+    "xp": "XP Points",
+    "completed": "Completed",
+    "inProgress": "In Progress"
+  },
+  "continueLearning": {
+    "title": "Continue Learning",
+    "browseButton": "Browse Courses",
+    "complete": "complete",
+    "continueButton": "Continue",
+    "noCourses": {
+      "title": "No courses in progress yet",
+      "button": "Start Learning"
+    }
+  },
+  "achievements": {
+    "title": "Recent Achievements",
+    "viewAll": "View All",
+    "noAchievements": {
+      "title": "No achievements yet",
+      "description": "Complete courses and quizzes to earn achievements!"
+    }
+  }
+}

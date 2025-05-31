@@ -1,0 +1,28 @@
+{
+  "welcome": "¡Bienvenido de nuevo, {{name}}!",
+  "subtitle": "Continúa tu viaje de aprendizaje",
+  "stats": {
+    "level": "Nivel",
+    "xp": "Puntos XP",
+    "completed": "Completados",
+    "inProgress": "En Progreso"
+  },
+  "continueLearning": {
+    "title": "Continuar Aprendiendo",
+    "browseButton": "Explorar Cursos",
+    "complete": "completado",
+    "continueButton": "Continuar",
+    "noCourses": {
+      "title": "Aún no hay cursos en progreso",
+      "button": "Comenzar a Aprender"
+    }
+  },
+  "achievements": {
+    "title": "Logros Recientes",
+    "viewAll": "Ver Todos",
+    "noAchievements": {
+      "title": "Aún no hay logros",
+      "description": "¡Completa cursos y cuestionarios para ganar logros!"
+    }
+  }
+}

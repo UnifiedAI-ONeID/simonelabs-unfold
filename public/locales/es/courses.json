@@ -1,0 +1,37 @@
+{
+  "title": "Explorar Cursos",
+  "subtitle": "Descubre cursos increíbles y comienza a aprender hoy",
+  "filters": {
+    "search": "Buscar cursos...",
+    "difficulty": {
+      "label": "Nivel de Dificultad",
+      "all": "Todos los Niveles",
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "category": {
+      "label": "Categoría",
+      "all": "Todas las Categorías"
+    }
+  },
+  "courseCard": {
+    "students": "estudiantes",
+    "enrollButton": "Inscribirse Ahora",
+    "enrollingButton": "Inscribiendo...",
+    "selfPaced": "A tu ritmo"
+  },
+  "noCourses": {
+    "title": "No se encontraron cursos",
+    "subtitle": "Intenta ajustar tus filtros de búsqueda"
+  },
+  "courseView": {
+    "enrollButton": "Inscribirse Ahora",
+    "continueButton": "Continuar Aprendiendo",
+    "alreadyEnrolled": "¡Estás inscrito!",
+    "whatYouWillLearn": "Lo que aprenderás",
+    "courseContent": "Contenido del Curso",
+    "sections": "secciones en este curso",
+    "instructor": "Instructor"
+  }
+}

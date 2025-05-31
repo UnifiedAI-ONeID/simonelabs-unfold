@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { useTranslation } from 'react-i18next';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,6 +23,7 @@ const Auth = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { signUp, signIn, resetPassword } = useAuth();
+  const { t } = useTranslation('auth');
 
   const handleTurnstileSuccess = useCallback((token: string) => {
     setTurnstileToken(token);
@@ -94,7 +96,7 @@ const Auth = () => {
         }
         
         toast({
-          title: "Password Reset Email Sent",
+          title: t('success.passwordReset'),
           description: "Please check your email for password reset instructions.",
         });
         setIsForgotPassword(false);
@@ -115,7 +117,7 @@ const Auth = () => {
           if (error.message?.includes('Invalid login credentials')) {
             toast({
               title: "Login Failed",
-              description: "Invalid email or password. Please check your credentials and try again.",
+              description: t('errors.invalidCredentials'),
               variant: "destructive",
             });
           } else {
@@ -130,7 +132,7 @@ const Auth = () => {
         
         toast({
           title: "Welcome back!",
-          description: "You've been successfully logged in.",
+          description: t('success.loggedIn'),
         });
 
         const from = (location.state as any)?.from?.pathname || '/dashboard';
@@ -148,7 +150,7 @@ const Auth = () => {
           if (error.message?.includes('User already registered')) {
             toast({
               title: "Account Exists",
-              description: "An account with this email already exists. Please sign in instead.",
+              description: t('errors.userExists'),
               variant: "destructive",
             });
             setIsLogin(true);
@@ -164,7 +166,7 @@ const Auth = () => {
         
         toast({
           title: "Account created successfully!",
-          description: "Welcome to SimoneLabs! You can now start learning.",
+          description: t('success.accountCreated'),
         });
         navigate('/dashboard');
       }
@@ -203,10 +205,10 @@ const Auth = () => {
           <h1 className="text-3xl font-bold gradient-text heading">SimoneLabs</h1>
           <p className="text-muted-foreground mt-2">
             {isForgotPassword 
-              ? 'Reset your password'
+              ? t('forgotPassword.title')
               : isLogin 
-                ? 'Welcome back!' 
-                : 'Join our learning community'}
+                ? t('login.title') 
+                : t('register.title')}
           </p>
         </div>
 
@@ -214,7 +216,7 @@ const Auth = () => {
           {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
               <Label htmlFor="fullName\" className="text-sm font-medium">
-                Full Name
+                {t('register.nameLabel')}
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -224,7 +226,7 @@ const Auth = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required={!isLogin}
-                  placeholder="Enter your full name"
+                  placeholder={t('register.namePlaceholder')}
                   className="pl-10 rounded-xl border-border/60 focus:border-primary"
                   disabled={loading}
                 />
@@ -234,7 +236,7 @@ const Auth = () => {
           
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
-              Email Address
+              {isLogin ? t('login.emailLabel') : t('register.emailLabel')}
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -244,7 +246,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder={isLogin ? t('login.emailPlaceholder') : t('register.emailPlaceholder')}
                 className="pl-10 rounded-xl border-border/60 focus:border-primary"
                 disabled={loading}
               />
@@ -254,7 +256,7 @@ const Auth = () => {
           {!isForgotPassword && (
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
-                Password
+                {isLogin ? t('login.passwordLabel') : t('register.passwordLabel')}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -264,7 +266,7 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter your password"
+                  placeholder={isLogin ? t('login.passwordPlaceholder') : t('register.passwordPlaceholder')}
                   minLength={6}
                   className="pl-10 pr-10 rounded-xl border-border/60 focus:border-primary"
                   disabled={loading}
@@ -280,7 +282,7 @@ const Auth = () => {
               </div>
               {!isLogin && (
                 <p className="text-xs text-muted-foreground">
-                  Password must be at least 6 characters long
+                  {t('register.passwordRequirements')}
                 </p>
               )}
             </div>
@@ -319,10 +321,10 @@ const Auth = () => {
               </div>
             ) : (
               isForgotPassword 
-                ? 'Send Reset Email' 
+                ? t('forgotPassword.submitButton') 
                 : isLogin 
-                  ? 'Sign In' 
-                  : 'Create Account'
+                  ? t('login.submitButton') 
+                  : t('register.submitButton')
             )}
           </Button>
         </form>
@@ -334,7 +336,7 @@ const Auth = () => {
               className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
               disabled={loading}
             >
-              Forgot your password?
+              {t('login.forgotPassword')}
             </button>
           )}
           
@@ -345,7 +347,7 @@ const Auth = () => {
               disabled={loading}
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Sign In
+              {t('forgotPassword.backToLogin')}
             </button>
           )}
           
@@ -356,8 +358,8 @@ const Auth = () => {
               disabled={loading}
             >
               {isLogin
-                ? "Don't have an account? Create one"
-                : 'Already have an account? Sign in'}
+                ? t('login.noAccount')
+                : t('register.haveAccount')}
             </button>
           )}
         </div>

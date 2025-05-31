@@ -1,0 +1,70 @@
+{
+  "title": "Opciones Flexibles de Inversión en Aprendizaje",
+  "subtitle": "Elige entre suscripciones, cursos individuales, certificaciones, mentoría y soluciones empresariales. Todo diseñado para adaptarse a tu viaje de aprendizaje y presupuesto.",
+  "tabs": {
+    "plans": "Planes de Precios",
+    "regional": "Precios Regionales"
+  },
+  "subscriptions": {
+    "title": "Suscripciones",
+    "monthly": {
+      "name": "SimoneLabs Plus Mensual",
+      "description": "Acceso ilimitado a la mayoría de los cursos",
+      "period": "mes"
+    },
+    "premium": {
+      "name": "SimoneLabs Plus Premium",
+      "description": "Todo más sesiones en vivo y mentoría",
+      "period": "mes",
+      "badge": "Más Popular"
+    },
+    "yearly": {
+      "name": "SimoneLabs Plus Anual",
+      "description": "Ahorra 43% con facturación anual",
+      "period": "año",
+      "badge": "Mejor Valor"
+    }
+  },
+  "courses": {
+    "title": "Cursos",
+    "standard": {
+      "name": "Curso Estándar",
+      "description": "Acceso a curso individual",
+      "period": "único pago"
+    },
+    "premium": {
+      "name": "Curso Premium",
+      "description": "Curso en profundidad con certificación",
+      "period": "único pago"
+    }
+  },
+  "buttons": {
+    "startSubscription": "Iniciar Suscripción",
+    "buyCourse": "Comprar Curso",
+    "getCertified": "Obtener Certificación",
+    "bookSession": "Reservar Sesión",
+    "contactSales": "Contactar Ventas",
+    "processing": "Procesando..."
+  },
+  "features": {
+    "moneyBack": "Garantía de Devolución",
+    "moneyBackDescription": "Política de reembolso de 30 días en todas las compras",
+    "referral": "Programa de Referidos",
+    "referralDescription": "Gana $10 de crédito por cada amigo que refieras",
+    "localizedPricing": "Precios Localizados",
+    "localizedPricingDescription": "Precios especiales para mercados emergentes"
+  },
+  "trust": {
+    "moneyBack": "Garantía de devolución de 30 días",
+    "securePayment": "Procesamiento de pago seguro",
+    "cancelAnytime": "Cancela cuando quieras",
+    "support": "Soporte al cliente 24/7"
+  },
+  "regional": {
+    "title": "Tus Precios Regionales",
+    "detectedRegion": "Región Detectada: {{region}}",
+    "discount": "{{discount}}% de Descuento Regional Aplicado",
+    "currency": "Moneda: {{currency}}",
+    "description": "Precios automáticamente ajustados según tu ubicación para hacer la educación más accesible en todo el mundo. Todas las características y contenido permanecen iguales independientemente del nivel de precios."
+  }
+}
