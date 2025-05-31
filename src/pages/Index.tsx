@@ -17,7 +17,7 @@ const Index = () => {
       name: "Simon Luke",
       role: "Co-Founder & CTO",
       bio: "AI and machine learning expert with a PhD in Educational Technology. Simon's innovative approach to adaptive learning systems forms the technological foundation of SimoneLabs.",
-      image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop&crop=face",
+      image: "https://images.unsplash.com/photo-1487309078313-fad80c3ec1e5?w=150&h=150&fit=crop&crop=face",
       fallback: "SL"
     }
   ];
