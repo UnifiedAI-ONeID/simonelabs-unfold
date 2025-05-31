@@ -24,9 +24,9 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database as DatabaseType } from '@/integrations/supabase/types';
 
-type UserRole = Database['public']['Enums']['app_role'];
+type UserRole = DatabaseType['public']['Enums']['app_role'];
 
 interface User {
   id: string;
