@@ -78,7 +78,14 @@
     "prismjs": "^1.29.0",
     "@tensorflow/tfjs": "^4.17.0",
     "openai": "^4.28.4",
-    "natural": "^6.10.5"
+    "natural": "^6.10.5",
+    "@stripe/stripe-js": "^3.0.7",
+    "chart.js": "^4.4.2",
+    "react-chartjs-2": "^5.2.0",
+    "react-markdown": "^9.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "@headlessui/react": "^1.7.18",
+    "framer-motion": "^11.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
