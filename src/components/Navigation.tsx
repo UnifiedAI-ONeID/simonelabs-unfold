@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, BookOpen, Brain, BarChart3, Trophy, Sparkles, User, Settings, LogOut } from "lucide-react";
@@ -8,11 +7,13 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { SecurityNotifications } from "@/components/Security/SecurityNotifications";
 import { useTranslation } from "react-i18next";
+import { useUserRoles } from "@/hooks/useUserRoles";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, signOut } = useAuth();
+  const { isSuperuser } = useUserRoles();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -71,6 +72,16 @@ const Navigation = () => {
                   <User className="h-4 w-4 group-hover:scale-110 transition-transform" />
                   <span className="text-sm">{t('navigation.dashboard')}</span>
                 </Link>
+                
+                {isSuperuser && (
+                  <Link 
+                    to="/administration" 
+                    className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-all duration-300 font-medium gentle-hover px-3 py-2 rounded-xl hover:bg-primary/10 group"
+                  >
+                    <Settings className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                    <span className="text-sm">Administration</span>
+                  </Link>
+                )}
                 
                 <div className="flex items-center space-x-2 ml-3 pl-3 border-l border-border/40">
                   <SecurityNotifications />
@@ -160,6 +171,16 @@ const Navigation = () => {
                     <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
                     <span>Security Dashboard</span>
                   </Link>
+                  {isSuperuser && (
+                    <Link
+                      to="/administration"
+                      className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-4 text-foreground hover:text-primary transition-all duration-300 font-medium rounded-xl sm:rounded-2xl hover:bg-primary/10 group"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Settings className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                      <span>Administration</span>
+                    </Link>
+                  )}
                   <div className="border-t border-border/40 my-3 sm:my-4"></div>
                   <Button
                     onClick={() => {
