@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,10 @@ import { PasswordStrength } from '@/components/ui/password-strength';
 import { sanitizeText } from '@/lib/security';
 import { useToast } from '@/hooks/use-toast';
 
-const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
+// Use test site key for development - replace with your production key
+const TURNSTILE_SITE_KEY = process.env.NODE_ENV === 'production' 
+  ? '0x4AAAAAABfVmLaPZh3sMQ7-' 
+  : '1x00000000000000000000AA'; // Test key that always passes
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -42,36 +44,52 @@ const AuthForm = ({
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
+  const [captchaStatus, setCaptchaStatus] = useState<'loading' | 'ready' | 'error' | 'success'>('loading');
   const turnstileRef = useRef<any>(null);
   const { toast } = useToast();
   const { t } = useTranslation('auth');
 
   const handleTurnstileSuccess = useCallback((token: string) => {
-    console.log('CAPTCHA success:', token);
+    console.log('CAPTCHA success:', token?.substring(0, 20) + '...');
     setTurnstileToken(token);
+    setCaptchaStatus('success');
   }, []);
 
   const handleTurnstileError = useCallback((error?: string) => {
     console.error('CAPTCHA error:', error);
     setTurnstileToken(null);
+    setCaptchaStatus('error');
     setTurnstileKey(prev => prev + 1);
-    toast({
-      title: "Security verification failed",
-      description: "Please try the verification again.",
-      variant: "destructive",
-    });
+    
+    // Don't show toast for development test key
+    if (process.env.NODE_ENV === 'production') {
+      toast({
+        title: "Security verification failed",
+        description: "Please try the verification again.",
+        variant: "destructive",
+      });
+    }
   }, [toast]);
 
   const handleTurnstileExpire = useCallback(() => {
     console.log('CAPTCHA expired');
     setTurnstileToken(null);
+    setCaptchaStatus('loading');
     setTurnstileKey(prev => prev + 1);
-    toast({
-      title: "Verification expired",
-      description: "Please complete the security verification again.",
-      variant: "destructive",
-    });
+    
+    if (process.env.NODE_ENV === 'production') {
+      toast({
+        title: "Verification expired",
+        description: "Please complete the security verification again.",
+        variant: "destructive",
+      });
+    }
   }, [toast]);
+
+  const handleTurnstileLoad = useCallback(() => {
+    console.log('CAPTCHA loaded');
+    setCaptchaStatus('ready');
+  }, []);
 
   const resetForm = useCallback(() => {
     setEmail('');
@@ -80,6 +98,7 @@ const AuthForm = ({
     setFullName('');
     setShowPassword(false);
     setTurnstileToken(null);
+    setCaptchaStatus('loading');
     setTurnstileKey(prev => prev + 1);
   }, []);
 
@@ -118,7 +137,8 @@ const AuthForm = ({
       return;
     }
 
-    if (!turnstileToken) {
+    // In development, allow submission without CAPTCHA for testing
+    if (process.env.NODE_ENV === 'production' && !turnstileToken) {
       toast({
         title: "Security verification required",
         description: "Please complete the security verification first.",
@@ -162,13 +182,33 @@ const AuthForm = ({
         password,
         confirmPassword,
         fullName: sanitizedFullName,
-        captchaToken: turnstileToken
+        captchaToken: turnstileToken || 'dev-bypass-token'
       });
     } catch (error) {
       console.error('Auth error:', error);
     } finally {
       setTurnstileToken(null);
+      setCaptchaStatus('loading');
       setTurnstileKey(prev => prev + 1);
+    }
+  };
+
+  const getCaptchaStatusColor = () => {
+    switch (captchaStatus) {
+      case 'success': return 'text-green-600';
+      case 'error': return 'text-red-600';
+      case 'ready': return 'text-blue-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getCaptchaStatusText = () => {
+    switch (captchaStatus) {
+      case 'success': return '✓ Verification complete';
+      case 'error': return '✗ Verification failed';
+      case 'ready': return '⏳ Please complete verification';
+      case 'loading': return '🔄 Loading verification...';
+      default: return '';
     }
   };
 
@@ -272,23 +312,46 @@ const AuthForm = ({
               </div>
             )}
 
-            <div className="flex justify-center py-2">
-              <div className="scale-90 sm:scale-100">
-                <Turnstile
-                  key={turnstileKey}
-                  ref={turnstileRef}
-                  siteKey={TURNSTILE_SITE_KEY}
-                  onSuccess={handleTurnstileSuccess}
-                  onError={handleTurnstileError}
-                  onExpire={handleTurnstileExpire}
-                  options={{
-                    theme: 'auto',
-                    size: 'normal',
-                    appearance: 'always',
-                    retry: 'auto',
-                  }}
-                />
+            <div className="space-y-3">
+              <div className="flex justify-center">
+                <div className="scale-90 sm:scale-100">
+                  <Turnstile
+                    key={turnstileKey}
+                    ref={turnstileRef}
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onSuccess={handleTurnstileSuccess}
+                    onError={handleTurnstileError}
+                    onExpire={handleTurnstileExpire}
+                    onLoad={handleTurnstileLoad}
+                    options={{
+                      theme: 'auto',
+                      size: 'normal',
+                      appearance: 'always',
+                      retry: 'auto',
+                      'refresh-expired': 'auto',
+                    }}
+                  />
+                </div>
               </div>
+              
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-center">
+                  <span className={`text-xs font-medium ${getCaptchaStatusColor()}`}>
+                    {getCaptchaStatusText()}
+                  </span>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Development mode: CAPTCHA bypass enabled
+                  </div>
+                </div>
+              )}
+              
+              {process.env.NODE_ENV === 'production' && (
+                <div className="text-center">
+                  <span className={`text-xs font-medium ${getCaptchaStatusColor()}`}>
+                    {getCaptchaStatusText()}
+                  </span>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -296,7 +359,7 @@ const AuthForm = ({
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl py-3 h-12 font-medium transition-all duration-200 text-base"
-          disabled={isLoading || (!isForgotPassword && !turnstileToken)}
+          disabled={isLoading || (process.env.NODE_ENV === 'production' && !isForgotPassword && !turnstileToken)}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
