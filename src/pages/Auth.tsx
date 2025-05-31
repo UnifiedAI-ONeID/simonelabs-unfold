@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { Turnstile } from '@turnstile/react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
