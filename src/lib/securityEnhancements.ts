@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import DOMPurify from 'dompurify';
 import { CSRFProtection } from './csrf';
@@ -166,7 +165,8 @@ export const logSecurityEvent = async (event: {
   type: 'AUTH_ATTEMPT' | 'VALIDATION_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'SUSPICIOUS_ACTIVITY' | 'CSRF_VIOLATION' | 
         'SESSION_EXPIRED' | 'SESSION_INACTIVE' | 'SESSION_VALIDATION_ERROR' | 'LOGIN' | 'LOGOUT' | 'FAILED_LOGIN' |
         'OPERATION_START' | 'OPERATION_SUCCESS' | 'OPERATION_FAILED' | 'WEBHOOK_PROCESSING' | 'WEBHOOK_SUCCESS' | 'WEBHOOK_ERROR' |
-        'INVALID_METHOD' | 'MISSING_SIGNATURE' | 'INVALID_SIGNATURE' | 'VALIDATION_SUCCESS';
+        'INVALID_METHOD' | 'MISSING_SIGNATURE' | 'INVALID_SIGNATURE' | 'VALIDATION_SUCCESS' | 'SECURITY_SETTING_CHANGED' |
+        'SESSION_TERMINATED' | 'ALL_SESSIONS_TERMINATED';
   details: string;
   userAgent?: string;
   ipAddress?: string;
