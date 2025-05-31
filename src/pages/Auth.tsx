@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Turnstile } from '@turnstile/react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,6 +16,8 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -22,6 +25,16 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!turnstileToken) {
+      toast({
+        title: "CAPTCHA Required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -129,6 +142,11 @@ const Auth = () => {
       });
     } finally {
       setLoading(false);
+      // Reset Turnstile after form submission
+      if (turnstileRef.current) {
+        (turnstileRef.current as any).reset();
+      }
+      setTurnstileToken(null);
     }
   };
 
@@ -137,6 +155,10 @@ const Auth = () => {
     setPassword('');
     setFullName('');
     setShowPassword(false);
+    setTurnstileToken(null);
+    if (turnstileRef.current) {
+      (turnstileRef.current as any).reset();
+    }
   };
 
   const toggleMode = () => {
@@ -165,7 +187,7 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && !isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="fullName\" className="text-sm font-medium">
+              <Label htmlFor="fullName" className="text-sm font-medium">
                 Full Name
               </Label>
               <div className="relative">
@@ -234,10 +256,34 @@ const Auth = () => {
             </div>
           )}
 
+          <div className="flex justify-center">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey="0x4AAAAAABfVmLaPZh3sMQ7-"
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => {
+                setTurnstileToken(null);
+                toast({
+                  title: "CAPTCHA Error",
+                  description: "Failed to verify CAPTCHA. Please try again.",
+                  variant: "destructive",
+                });
+              }}
+              onExpire={() => {
+                setTurnstileToken(null);
+                toast({
+                  title: "CAPTCHA Expired",
+                  description: "Please complete the CAPTCHA verification again.",
+                  variant: "destructive",
+                });
+              }}
+            />
+          </div>
+
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl py-3 font-medium transition-all duration-200"
-            disabled={loading}
+            disabled={loading || !turnstileToken}
           >
             {loading ? (
               <div className="flex items-center gap-2">
