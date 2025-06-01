@@ -34,6 +34,7 @@ export const useSecureAuthWithCaptcha = () => {
     console.log(`[${requestId}] 🛡️ Starting CAPTCHA validation...`);
     console.log(`[${requestId}] Token preview: ${token.substring(0, 20)}...`);
     console.log(`[${requestId}] Retry attempt: ${retryCount + 1}`);
+    console.log(`[${requestId}] Environment: ${import.meta.env.DEV ? 'Development' : 'Production'}`);
 
     if (!token) {
       console.error(`[${requestId}] ❌ No CAPTCHA token provided`);
@@ -45,7 +46,7 @@ export const useSecureAuthWithCaptcha = () => {
       return false;
     }
 
-    // Development bypass
+    // Development bypass with enhanced logging
     if (import.meta.env.DEV && token === 'dev-bypass-token') {
       console.log(`[${requestId}] 🔧 Development mode: bypassing CAPTCHA validation`);
       toast({
@@ -59,7 +60,12 @@ export const useSecureAuthWithCaptcha = () => {
     try {
       console.log(`[${requestId}] 📡 Sending request to validate-captcha function...`);
       
-      const requestData = { token: token };
+      const requestData = { 
+        token: token,
+        environment: import.meta.env.DEV ? 'development' : 'production',
+        timestamp: new Date().toISOString(),
+        retryCount: retryCount
+      };
       console.log(`[${requestId}] Request data:`, requestData);
       
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
@@ -74,7 +80,8 @@ export const useSecureAuthWithCaptcha = () => {
         data, 
         error,
         hasData: !!data,
-        hasError: !!error 
+        hasError: !!error,
+        responseType: typeof data
       });
 
       if (error) {
@@ -83,7 +90,7 @@ export const useSecureAuthWithCaptcha = () => {
         let userMessage = 'CAPTCHA verification failed. Please try again.';
         let shouldRetry = false;
         
-        // Handle different error types
+        // Enhanced error categorization
         if (error.message?.includes('timeout') || error.message?.includes('408')) {
           userMessage = 'CAPTCHA verification timed out. Retrying...';
           shouldRetry = retryCount < 2;
@@ -94,12 +101,16 @@ export const useSecureAuthWithCaptcha = () => {
           userMessage = 'CAPTCHA token expired. Please complete the verification again.';
         } else if (error.message?.includes('400')) {
           userMessage = 'Invalid CAPTCHA response. Please try again.';
+        } else if (error.message?.includes('TURNSTILE_SECRET_KEY')) {
+          userMessage = 'CAPTCHA service configuration error. Please contact support.';
+          console.error(`[${requestId}] 🚨 CRITICAL: TURNSTILE_SECRET_KEY not configured!`);
         }
         
-        // Automatic retry for certain error types
+        // Automatic retry with exponential backoff
         if (shouldRetry) {
-          console.log(`[${requestId}] 🔄 Retrying CAPTCHA validation (attempt ${retryCount + 2})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+          console.log(`[${requestId}] 🔄 Retrying CAPTCHA validation in ${delay}ms (attempt ${retryCount + 2})...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
           return validateCaptcha(token, retryCount + 1);
         }
         
@@ -148,7 +159,7 @@ export const useSecureAuthWithCaptcha = () => {
         environment: result.environment
       });
       
-      if (result.development) {
+      if (result.development || result.bypass) {
         toast({
           title: "Development Mode",
           description: "CAPTCHA bypassed for development testing.",
@@ -161,10 +172,11 @@ export const useSecureAuthWithCaptcha = () => {
     } catch (error) {
       console.error(`[${requestId}] 💥 CAPTCHA validation network error:`, error);
       
-      // Retry on network errors
+      // Enhanced retry logic for network errors
       if (retryCount < 2) {
-        console.log(`[${requestId}] 🔄 Retrying CAPTCHA validation due to network error (attempt ${retryCount + 2})...`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+        console.log(`[${requestId}] 🔄 Retrying CAPTCHA validation due to network error in ${delay}ms (attempt ${retryCount + 2})...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
         return validateCaptcha(token, retryCount + 1);
       }
       

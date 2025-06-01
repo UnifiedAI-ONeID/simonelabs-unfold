@@ -1,7 +1,7 @@
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Shield } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Shield, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface CaptchaErrorDisplayProps {
@@ -25,15 +25,34 @@ export const CaptchaErrorDisplay = ({
 
   if (!captchaError) return null;
 
+  const getErrorSeverity = (error: string) => {
+    if (error.includes('timeout') || error.includes('network')) return 'warning';
+    if (error.includes('configuration') || error.includes('service')) return 'destructive';
+    return 'destructive';
+  };
+
+  const getErrorIcon = (error: string) => {
+    if (error.includes('timeout') || error.includes('network')) return Info;
+    return AlertTriangle;
+  };
+
+  const ErrorIcon = getErrorIcon(captchaError);
+  const severity = getErrorSeverity(captchaError);
+
   return (
-    <Alert variant="destructive" className="text-sm">
-      <AlertTriangle className="h-4 w-4" />
+    <Alert variant={severity} className="text-sm">
+      <ErrorIcon className="h-4 w-4" />
       <AlertDescription className="flex flex-col gap-2">
         <span>{captchaError}</span>
         {retryCount > 0 && (
           <span className="text-xs opacity-75">
             {t('captcha.retryAttempt', `Retry attempt ${retryCount}`, { count: retryCount })}
           </span>
+        )}
+        {import.meta.env.DEV && (
+          <div className="text-xs opacity-60 bg-muted p-2 rounded">
+            Debug: Error type detected as "{severity}" | Retry count: {retryCount}
+          </div>
         )}
         <div className="flex gap-2 mt-2">
           <Button

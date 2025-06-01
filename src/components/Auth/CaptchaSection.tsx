@@ -1,12 +1,13 @@
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CaptchaWidget } from './CaptchaWidget';
 import { CaptchaDevControls } from './CaptchaDevControls';
 import { CaptchaErrorDisplay } from './CaptchaErrorDisplay';
 import { CaptchaStatusDisplay } from './CaptchaStatusDisplay';
+import { CaptchaDebugPanel } from './CaptchaDebugPanel';
 
 interface CaptchaSectionProps {
   captchaToken: string | null;
@@ -29,6 +30,23 @@ export const CaptchaSection = ({
   const [isManualTesting, setIsManualTesting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
+
+  // Enhanced logging for debugging
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('🛡️ CAPTCHA Section State:', {
+        hasToken: !!captchaToken,
+        tokenPreview: captchaToken?.substring(0, 20) + '...',
+        hasError: !!captchaError,
+        error: captchaError,
+        isLoading,
+        retryCount,
+        isManualTesting,
+        captchaKey
+      });
+    }
+  }, [captchaToken, captchaError, isLoading, retryCount, isManualTesting, captchaKey]);
 
   const handleCaptchaSuccess = useCallback((token: string) => {
     const requestId = crypto.randomUUID();
@@ -37,6 +55,7 @@ export const CaptchaSection = ({
     
     setCaptchaToken(token);
     setCaptchaError(null);
+    setLastError(null);
     setIsLoading(false);
     setRetryCount(0);
   }, [setCaptchaToken, setCaptchaError]);
@@ -47,47 +66,46 @@ export const CaptchaSection = ({
     
     setCaptchaToken(null);
     setIsLoading(false);
+    setLastError(error || 'Unknown error');
     
-    let errorMessage = t('errors.captchaFailed');
+    let errorMessage = t('errors.captchaFailed', 'Security verification failed. Please try again.');
     let shouldAutoRetry = false;
     
     if (error?.includes('timeout')) {
-      errorMessage = t('errors.captchaTimeout');
+      errorMessage = t('errors.captchaTimeout', 'Security verification timed out. Please try again.');
       shouldAutoRetry = retryCount < 2;
-      console.log(`[${requestId}] Timeout error, shouldAutoRetry: ${shouldAutoRetry}`);
     } else if (error?.includes('network')) {
-      errorMessage = t('errors.captchaNetwork');
+      errorMessage = t('errors.captchaNetwork', 'Network error during verification. Please check your connection.');
       shouldAutoRetry = retryCount < 1;
-      console.log(`[${requestId}] Network error, shouldAutoRetry: ${shouldAutoRetry}`);
     } else if (error?.includes('expired')) {
-      errorMessage = t('errors.captchaExpired');
+      errorMessage = t('errors.captchaExpired', 'Security verification expired. Please complete it again.');
       shouldAutoRetry = true;
-      console.log(`[${requestId}] Expired error, shouldAutoRetry: ${shouldAutoRetry}`);
     } else if (error) {
-      errorMessage = t('errors.captchaError', { error });
-      console.log(`[${requestId}] Generic error: ${error}`);
+      errorMessage = t('errors.captchaError', 'Security verification error: {{error}}', { error });
     }
     
     setCaptchaError(errorMessage);
     
-    // Auto-retry for certain error types
+    // Auto-retry for certain error types with exponential backoff
     if (shouldAutoRetry && retryCount < 3) {
       console.log(`[${requestId}] 🔄 Auto-retrying CAPTCHA (attempt ${retryCount + 2})...`);
+      const delay = Math.min(1000 * Math.pow(2, retryCount), 5000); // Max 5 second delay
       setTimeout(() => {
         setRetryCount(prev => prev + 1);
         setCaptchaKey(captchaKey + 1);
         setCaptchaError(null);
-      }, 2000);
+      }, delay);
     }
   }, [setCaptchaToken, setCaptchaError, setCaptchaKey, captchaKey, retryCount, t]);
 
   const handleRetry = useCallback(() => {
     const requestId = crypto.randomUUID();
-    console.log(`[${requestId}] 🔄 Manual retry requested`);
+    console.log(`[${requestId}] 🔄 Manual retry requested (attempt ${retryCount + 2})`);
     
     setIsLoading(true);
     setCaptchaToken(null);
     setCaptchaError(null);
+    setLastError(null);
     setRetryCount(prev => prev + 1);
     setCaptchaKey(captchaKey + 1);
     
@@ -95,7 +113,7 @@ export const CaptchaSection = ({
     setTimeout(() => {
       setIsLoading(false);
     }, 10000);
-  }, [setCaptchaToken, setCaptchaError, setCaptchaKey, captchaKey]);
+  }, [setCaptchaToken, setCaptchaError, setCaptchaKey, captchaKey, retryCount]);
 
   const handleDevBypass = useCallback(() => {
     if (import.meta.env.DEV) {
@@ -104,8 +122,10 @@ export const CaptchaSection = ({
       
       setCaptchaToken('dev-bypass-token');
       setCaptchaError(null);
+      setLastError(null);
       setIsManualTesting(true);
       setIsLoading(false);
+      setRetryCount(0);
     }
   }, [setCaptchaToken, setCaptchaError]);
 
@@ -120,12 +140,20 @@ export const CaptchaSection = ({
   }, []);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Shield className="h-4 w-4 text-primary" />
-        <Label className="text-sm font-medium">{t('captcha.label')}</Label>
+        <Label className="text-sm font-medium">{t('captcha.label', 'Security Verification')}</Label>
         {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+        {retryCount > 0 && (
+          <span className="text-xs text-muted-foreground">
+            (Attempt {retryCount + 1})
+          </span>
+        )}
       </div>
+
+      {/* Debug panel for development */}
+      {import.meta.env.DEV && <CaptchaDebugPanel />}
       
       <CaptchaDevControls 
         onDevBypass={handleDevBypass}
@@ -162,6 +190,13 @@ export const CaptchaSection = ({
         captchaError={captchaError}
         isManualTesting={isManualTesting}
       />
+
+      {/* Additional debug info for development */}
+      {import.meta.env.DEV && lastError && (
+        <div className="text-xs text-red-600 bg-red-50 p-2 rounded border">
+          <strong>Last Error:</strong> {lastError}
+        </div>
+      )}
     </div>
   );
 };
