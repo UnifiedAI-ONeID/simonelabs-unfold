@@ -87,19 +87,11 @@ serve(async (req) => {
         return createErrorResponse('Request body is required');
       }
 
-      // Handle both direct JSON and stringified JSON
-      try {
-        parsedBody = JSON.parse(body);
-      } catch (parseError) {
-        // If body is already an object (shouldn't happen but let's be safe)
-        console.log(`[${requestId}] Body parsing failed, trying as direct object`);
-        parsedBody = body;
-      }
-      
+      parsedBody = JSON.parse(body);
       console.log(`[${requestId}] Request body parsed successfully`);
-    } catch (readError) {
-      console.error(`[${requestId}] Failed to read request:`, readError);
-      return createErrorResponse('Failed to read request body');
+    } catch (parseError) {
+      console.error(`[${requestId}] Failed to parse request body:`, parseError);
+      return createErrorResponse('Invalid JSON format');
     }
 
     const { token } = parsedBody;
@@ -128,14 +120,14 @@ serve(async (req) => {
       });
     }
 
-    // Get secret key
+    // Get secret key - now properly configured
     const secretKey = Deno.env.get('TURNSTILE_SECRET_KEY');
     if (!secretKey) {
       console.error(`[${requestId}] TURNSTILE_SECRET_KEY not configured`);
       return createErrorResponse('CAPTCHA service configuration error', 500);
     }
 
-    console.log(`[${requestId}] Secret key found, proceeding with Turnstile validation`);
+    console.log(`[${requestId}] Secret key configured, proceeding with Turnstile validation`);
 
     // Get client IP
     const clientIP = req.headers.get('CF-Connecting-IP') || 
