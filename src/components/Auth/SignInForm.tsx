@@ -139,9 +139,9 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
         <CardContent>
           <TwoFactorAuth
             email={twoFactorState.email || ''}
-            onSuccess={handle2FASuccess}
-            onError={handle2FAError}
-            onResend={resendTwoFactorCode}
+            onVerified={handle2FASuccess}
+            onResendCode={resendTwoFactorCode}
+            onVerifyCode={verifyTwoFactorCode}
             isVerifying={isVerifying}
             isResending={isResending}
           />

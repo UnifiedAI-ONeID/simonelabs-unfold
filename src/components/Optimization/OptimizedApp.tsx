@@ -8,7 +8,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingFallback } from './LoadingFallback';
 import { SecureHeaders } from '@/components/Security/SecureHeaders';
 import { PerformanceMonitor } from '@/components/Performance/PerformanceMonitor';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import Navigation from '@/components/Navigation';
 
 // Lazy imports

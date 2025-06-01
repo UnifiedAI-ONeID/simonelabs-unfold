@@ -34,8 +34,8 @@ export const CaptchaSection = ({
     console.error('CAPTCHA error:', error);
     setCaptchaToken(null);
     setCaptchaError(error || 'CAPTCHA verification failed');
-    setCaptchaKey(prev => prev + 1);
-  }, [setCaptchaToken, setCaptchaError, setCaptchaKey]);
+    setCaptchaKey(captchaKey + 1);
+  }, [setCaptchaToken, setCaptchaError, setCaptchaKey, captchaKey]);
 
   return (
     <div className="space-y-2">

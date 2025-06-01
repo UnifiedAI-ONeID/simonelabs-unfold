@@ -6,7 +6,20 @@ export const PerformanceMonitor = () => {
     // Monitor Core Web Vitals
     const observer = new PerformanceObserver((list) => {
       list.getEntries().forEach((entry) => {
-        console.log(`${entry.name}: ${entry.value}ms`);
+        // Handle different types of performance entries
+        if (entry.entryType === 'navigation') {
+          const navigationEntry = entry as PerformanceNavigationTiming;
+          console.log(`Navigation: ${navigationEntry.name} - ${navigationEntry.duration}ms`);
+        } else if (entry.entryType === 'paint') {
+          const paintEntry = entry as PerformancePaintTiming;
+          console.log(`Paint: ${paintEntry.name} - ${paintEntry.startTime}ms`);
+        } else if (entry.entryType === 'largest-contentful-paint') {
+          const lcpEntry = entry as any; // LCP entries have renderTime or loadTime
+          const time = lcpEntry.renderTime || lcpEntry.loadTime;
+          console.log(`LCP: ${entry.name} - ${time}ms`);
+        } else {
+          console.log(`${entry.name}: ${entry.startTime}ms`);
+        }
       });
     });
 
@@ -21,7 +34,7 @@ export const PerformanceMonitor = () => {
     if ('memory' in performance) {
       const checkMemory = () => {
         const memory = (performance as any).memory;
-        if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
+        if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
           console.warn('High memory usage detected');
         }
       };
