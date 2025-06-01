@@ -63,7 +63,8 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
       console.log('Starting signin process...');
       const result = await signIn(email, password, captchaToken);
       
-      if (result?.data?.requires2FA && result.data.sessionId) {
+      // Check if the result has 2FA properties
+      if (result?.data && 'requires2FA' in result.data && result.data.requires2FA && 'sessionId' in result.data && result.data.sessionId) {
         console.log('2FA required, initiating verification...');
         await initiateTwoFactor(email, result.data.sessionId);
       } else if (result?.data?.user && !result.error) {
