@@ -16,6 +16,10 @@ interface AuthData {
 interface CaptchaValidationResponse {
   success: boolean;
   error?: string;
+  development?: boolean;
+  bypass?: boolean;
+  challenge_ts?: string;
+  details?: any;
 }
 
 // Helper function to clean up authentication state
@@ -35,7 +39,7 @@ export const useSecureAuthWithCaptcha = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const validateCaptcha = async (token: string): Promise<boolean> => {
+  const validateCaptcha = async (token: string, retryCount = 0): Promise<boolean> => {
     if (!token) {
       console.error('No CAPTCHA token provided');
       return false;
@@ -48,7 +52,7 @@ export const useSecureAuthWithCaptcha = () => {
     }
 
     try {
-      console.log('Validating CAPTCHA token...');
+      console.log(`CAPTCHA validation attempt ${retryCount + 1}...`);
       
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
         body: { token },
@@ -61,14 +65,27 @@ export const useSecureAuthWithCaptcha = () => {
       if (error) {
         console.error('CAPTCHA validation error:', error);
         
-        // Provide user-friendly error messages
+        // Enhanced error handling with retry logic for certain errors
         let userMessage = 'CAPTCHA verification failed. Please try again.';
-        if (error.message?.includes('configuration')) {
-          userMessage = 'CAPTCHA service is not properly configured. Please contact support.';
+        let shouldRetry = false;
+        
+        if (error.message?.includes('timeout') || error.message?.includes('408')) {
+          userMessage = 'CAPTCHA verification timed out. Retrying...';
+          shouldRetry = retryCount < 2;
         } else if (error.message?.includes('network') || error.message?.includes('503')) {
           userMessage = 'CAPTCHA service is temporarily unavailable. Please try again in a moment.';
-        } else if (error.message?.includes('expired')) {
+          shouldRetry = retryCount < 1;
+        } else if (error.message?.includes('expired') || error.message?.includes('duplicate')) {
           userMessage = 'CAPTCHA token expired. Please complete the verification again.';
+        } else if (error.message?.includes('configuration')) {
+          userMessage = 'CAPTCHA service is not properly configured. Please contact support.';
+        }
+        
+        // Automatic retry for network/timeout errors
+        if (shouldRetry) {
+          console.log(`Retrying CAPTCHA validation (attempt ${retryCount + 2})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Progressive delay
+          return validateCaptcha(token, retryCount + 1);
         }
         
         toast({
@@ -79,8 +96,9 @@ export const useSecureAuthWithCaptcha = () => {
 
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
-          details: `CAPTCHA validation failed: ${error.message}`
+          details: `CAPTCHA validation failed: ${error.message} (attempt ${retryCount + 1})`
         });
+        
         return false;
       }
 
@@ -88,24 +106,51 @@ export const useSecureAuthWithCaptcha = () => {
       const isValid = result.success;
       
       if (!isValid) {
-        console.log('CAPTCHA validation returned false');
+        console.log('CAPTCHA validation returned false:', result);
+        
+        let errorMessage = 'Please complete the security verification again.';
+        if (result.details?.errorCodes?.includes('timeout-or-duplicate')) {
+          errorMessage = 'CAPTCHA token expired. Please try again.';
+        } else if (result.details?.errorCodes?.includes('invalid-input-response')) {
+          errorMessage = 'Invalid CAPTCHA response. Please refresh and try again.';
+        }
+        
         toast({
           title: "CAPTCHA Failed",
-          description: "Please complete the security verification again.",
+          description: errorMessage,
           variant: "destructive",
         });
         
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
-          details: 'CAPTCHA validation returned false'
+          details: `CAPTCHA validation returned false: ${JSON.stringify(result)} (attempt ${retryCount + 1})`
         });
       } else {
-        console.log('CAPTCHA validation successful');
+        console.log('CAPTCHA validation successful:', {
+          development: result.development,
+          bypass: result.bypass,
+          challenge_ts: result.challenge_ts
+        });
+        
+        if (result.development) {
+          toast({
+            title: "Development Mode",
+            description: "CAPTCHA bypassed for development testing.",
+            variant: "default",
+          });
+        }
       }
       
       return isValid;
     } catch (error) {
       console.error('CAPTCHA validation network error:', error);
+      
+      // Retry on network errors
+      if (retryCount < 2) {
+        console.log(`Retrying CAPTCHA validation due to network error (attempt ${retryCount + 2})...`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+        return validateCaptcha(token, retryCount + 1);
+      }
       
       toast({
         title: "Network Error",
@@ -115,8 +160,9 @@ export const useSecureAuthWithCaptcha = () => {
       
       await logSecurityEvent({
         type: 'VALIDATION_FAILURE',
-        details: 'CAPTCHA validation network error'
+        details: `CAPTCHA validation network error: ${error} (attempt ${retryCount + 1})`
       });
+      
       return false;
     }
   };
@@ -168,14 +214,17 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('CAPTCHA verification is required');
       }
 
+      console.log('Starting CAPTCHA validation for signup...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
           details: 'CAPTCHA validation failed in signup'
         });
-        throw new Error('CAPTCHA verification failed. Please try again.');
+        throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
+
+      console.log('CAPTCHA validation passed, proceeding with signup...');
 
       // Proceed with signup only after all validations pass
       const { data, error } = await supabase.auth.signUp({
@@ -261,14 +310,17 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('CAPTCHA verification is required');
       }
 
+      console.log('Starting CAPTCHA validation for signin...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
           details: 'CAPTCHA validation failed in signin'
         });
-        throw new Error('CAPTCHA verification failed. Please try again.');
+        throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
+
+      console.log('CAPTCHA validation passed, proceeding with signin...');
 
       // Proceed with signin only after all validations pass
       const { data, error } = await supabase.auth.signInWithPassword({
