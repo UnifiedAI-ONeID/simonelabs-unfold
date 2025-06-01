@@ -1,0 +1,38 @@
+
+{
+  "title": "探索課程",
+  "subtitle": "發現精彩課程，今天就開始學習",
+  "filters": {
+    "search": "搜索課程...",
+    "difficulty": {
+      "label": "難度等級",
+      "all": "所有等級",
+      "beginner": "初級",
+      "intermediate": "中級",
+      "advanced": "高級"
+    },
+    "category": {
+      "label": "類別",
+      "all": "所有類別"
+    }
+  },
+  "courseCard": {
+    "students": "學生",
+    "enrollButton": "立即報名",
+    "enrollingButton": "報名中...",
+    "selfPaced": "自主進度"
+  },
+  "noCourses": {
+    "title": "未找到課程",
+    "subtitle": "嘗試調整您的搜索篩選器"
+  },
+  "courseView": {
+    "enrollButton": "立即報名",
+    "continueButton": "繼續學習",
+    "alreadyEnrolled": "您已報名！",
+    "whatYouWillLearn": "您將學到什麼",
+    "courseContent": "課程內容",
+    "sections": "本課程的章節",
+    "instructor": "講師"
+  }
+}

@@ -1,3 +1,4 @@
+
 import { useTranslation } from 'react-i18next';
 import {
   Select,
@@ -13,7 +14,8 @@ const languages = {
   es: 'Español',
   fr: 'Français',
   de: 'Deutsch',
-  zh: '中文',
+  zh: '中文 (简体)',
+  'zh-TW': '中文 (繁體)',
   ja: '日本語',
   ko: '한국어',
   ar: 'العربية'

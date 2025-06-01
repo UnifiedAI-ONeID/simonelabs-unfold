@@ -1,0 +1,22 @@
+
+{
+  "hero": {
+    "title": "人人可享，隨處可得的教育",
+    "subtitle": "透過適應您需求的AI驅動教育，改變您的學習體驗",
+    "cta": "立即開始學習"
+  },
+  "features": {
+    "adaptiveLearning": {
+      "title": "適應性學習",
+      "description": "AI驅動的內容，適應您的學習風格和進度"
+    },
+    "expertCommunity": {
+      "title": "專家社群",
+      "description": "與同伴和專業講師一起學習"
+    },
+    "globalAccess": {
+      "title": "全球接入",
+      "description": "隨時隨地提供優質教育"
+    }
+  }
+}

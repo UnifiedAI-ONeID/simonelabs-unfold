@@ -1,0 +1,45 @@
+
+{
+  "plans": {
+    "basic": {
+      "name": "基礎方案",
+      "price": "免費",
+      "features": [
+        "訪問基礎課程",
+        "社群支援",
+        "基本進度追蹤"
+      ]
+    },
+    "premium": {
+      "name": "高級方案",
+      "price": "$9.99/月",
+      "features": [
+        "訪問所有課程",
+        "AI導師",
+        "詳細分析",
+        "優先支援",
+        "離線存取"
+      ]
+    },
+    "enterprise": {
+      "name": "企業方案",
+      "price": "聯繫我們",
+      "features": [
+        "自定義集成",
+        "團隊管理",
+        "高級分析",
+        "專屬支援",
+        "SLA保證"
+      ]
+    }
+  },
+  "buttons": {
+    "choosePlan": "選擇方案",
+    "upgrade": "升級",
+    "contactSales": "聯繫銷售"
+  },
+  "billing": {
+    "monthly": "月付",
+    "yearly": "年付"
+  }
+}

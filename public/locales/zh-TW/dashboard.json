@@ -1,0 +1,29 @@
+
+{
+  "welcome": "歡迎回來，{{name}}！",
+  "subtitle": "繼續您的學習之旅",
+  "stats": {
+    "level": "等級",
+    "xp": "經驗值",
+    "completed": "已完成",
+    "inProgress": "進行中"
+  },
+  "continueLearning": {
+    "title": "繼續學習",
+    "browseButton": "瀏覽課程",
+    "complete": "完成",
+    "continueButton": "繼續",
+    "noCourses": {
+      "title": "尚未有進行中的課程",
+      "button": "開始學習"
+    }
+  },
+  "achievements": {
+    "title": "最近成就",
+    "viewAll": "查看全部",
+    "noAchievements": {
+      "title": "尚未有成就",
+      "description": "完成課程和測驗以獲得成就！"
+    }
+  }
+}
