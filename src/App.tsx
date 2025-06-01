@@ -1,7 +1,10 @@
+
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
+import SignIn from '@/pages/SignIn';
+import CreateAccount from '@/pages/CreateAccount';
 import RoleSelectionPage from '@/pages/RoleSelectionPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StudentDashboard from '@/pages/StudentDashboard';
@@ -34,7 +37,15 @@ const App: React.FC = () => {
     },
     {
       path: "/auth",
-      element: <Auth />,
+      element: <SignIn />,
+    },
+    {
+      path: "/signin",
+      element: <SignIn />,
+    },
+    {
+      path: "/create-account",
+      element: <CreateAccount />,
     },
     {
       path: "/captcha-debug",
