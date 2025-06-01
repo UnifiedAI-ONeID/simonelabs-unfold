@@ -18,7 +18,7 @@ interface ValidationError {
 interface UseSecureValidationReturn {
   validate: <T>(data: unknown, schema: z.ZodSchema<T>) => Promise<{ success: true; data: T } | { success: false; errors: ValidationError[] }>;
   sanitizeInput: (input: string, type?: 'text' | 'html' | 'json') => string;
-  validateFile: (file: File, allowedTypes: string[], maxSize: number) => { isValid: boolean; errors: string[] };
+  validateFile: (file: File, allowedTypes?: string[], maxSize?: number) => { isValid: boolean; errors: string[] };
   isValidating: boolean;
 }
 
@@ -98,8 +98,8 @@ export const useSecureValidation = (): UseSecureValidationReturn => {
 
   const validateFile = useCallback((
     file: File, 
-    allowedTypes: string[], 
-    maxSize: number
+    allowedTypes?: string[], 
+    maxSize?: number
   ): { isValid: boolean; errors: string[] } => {
     const result = validateFileUpload(file, allowedTypes, maxSize);
     

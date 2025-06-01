@@ -87,6 +87,37 @@ export class SecureInputValidator {
   }
 }
 
+// Sanitization functions for different content types
+export const sanitizeTextContent = (input: string): string => {
+  return SecureInputValidator.sanitizeInput(input);
+};
+
+export const sanitizeHtmlContent = (input: string): string => {
+  // More aggressive HTML sanitization
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/javascript:/gi, '')
+    .trim()
+    .substring(0, 2000);
+};
+
+export const sanitizeJsonContent = (obj: any): any => {
+  if (typeof obj === 'string') {
+    return sanitizeTextContent(obj);
+  } else if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeJsonContent(item));
+  } else if (obj && typeof obj === 'object') {
+    const sanitized: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = sanitizeJsonContent(value);
+    }
+    return sanitized;
+  }
+  return obj;
+};
+
 // Request frequency validation with progressive penalties
 const requestMap = new Map<string, { count: number; lastRequest: number; penalty: number }>();
 
@@ -130,10 +161,15 @@ export const validateRequestFrequency = (
   return false;
 };
 
-// File validation
-export const validateFileUpload = (file: File): { isValid: boolean; error?: string } => {
-  const maxSize = 10 * 1024 * 1024; // 10MB
-  const allowedTypes = [
+// File validation - updated signature to match expected usage
+export const validateFileUpload = (
+  file: File, 
+  allowedTypes?: string[], 
+  maxSize?: number
+): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+  const maxFileSize = maxSize || 10 * 1024 * 1024; // 10MB default
+  const defaultAllowedTypes = [
     'image/jpeg',
     'image/png', 
     'image/gif',
@@ -142,21 +178,22 @@ export const validateFileUpload = (file: File): { isValid: boolean; error?: stri
     'text/plain',
     'text/csv'
   ];
+  const allowedFileTypes = allowedTypes || defaultAllowedTypes;
 
-  if (file.size > maxSize) {
+  if (file.size > maxFileSize) {
     logSecurityEvent({
       type: 'VALIDATION_FAILURE',
-      details: `File size violation: ${file.size} > ${maxSize}`
+      details: `File size violation: ${file.size} > ${maxFileSize}`
     });
-    return { isValid: false, error: 'File too large (max 10MB)' };
+    errors.push('File too large (max 10MB)');
   }
 
-  if (!allowedTypes.includes(file.type)) {
+  if (!allowedFileTypes.includes(file.type)) {
     logSecurityEvent({
       type: 'VALIDATION_FAILURE',
       details: `Invalid file type: ${file.type}`
     });
-    return { isValid: false, error: 'File type not allowed' };
+    errors.push('File type not allowed');
   }
 
   // Check file extension matches MIME type
@@ -177,8 +214,8 @@ export const validateFileUpload = (file: File): { isValid: boolean; error?: stri
       type: 'VALIDATION_FAILURE',
       details: `File extension mismatch: ${extension} vs ${file.type}`
     });
-    return { isValid: false, error: 'File extension does not match content type' };
+    errors.push('File extension does not match content type');
   }
 
-  return { isValid: true };
+  return { isValid: errors.length === 0, errors };
 };

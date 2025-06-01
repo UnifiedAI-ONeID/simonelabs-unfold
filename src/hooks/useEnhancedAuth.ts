@@ -4,6 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedSessionSecurity } from '@/lib/enhancedSessionSecurity';
 import { logSecurityEvent } from '@/lib/securityEnhancements';
+import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedAuthState {
   user: User | null;
@@ -12,6 +13,7 @@ interface EnhancedAuthState {
   isAuthenticated: boolean;
   sessionId?: string;
   role?: string;
+  pendingAuth?: { email: string; sessionId: string };
 }
 
 export const useEnhancedAuth = () => {
@@ -21,6 +23,7 @@ export const useEnhancedAuth = () => {
     loading: true,
     isAuthenticated: false
   });
+  const { toast } = useToast();
 
   useEffect(() => {
     // Get initial session
@@ -178,6 +181,88 @@ export const useEnhancedAuth = () => {
     }
   };
 
+  const signIn = async (email: string, password: string, captchaToken?: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      // Check if 2FA is required (this would be handled by your 2FA system)
+      const requires2FA = data.user?.user_metadata?.requires_2fa;
+      if (requires2FA) {
+        const sessionId = crypto.randomUUID();
+        setAuthState(prev => ({
+          ...prev,
+          pendingAuth: { email, sessionId }
+        }));
+        return { data: { requires2FA: true, sessionId, user: data.user } };
+      }
+
+      return { data };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      return { error: { message: error.message } };
+    }
+  };
+
+  const signUp = async (email: string, password: string, confirmPassword?: string, captchaToken?: string) => {
+    try {
+      if (password !== confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            role: 'student'
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      toast({
+        title: "Account created successfully!",
+        description: "Please check your email to verify your account.",
+      });
+
+      return { data };
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      return { error: { message: error.message } };
+    }
+  };
+
+  const complete2FA = async () => {
+    // This would complete the 2FA process and sign in the user
+    if (authState.pendingAuth) {
+      setAuthState(prev => ({
+        ...prev,
+        pendingAuth: undefined
+      }));
+    }
+  };
+
   const signOut = async () => {
     try {
       const userId = authState.user?.id;
@@ -219,7 +304,10 @@ export const useEnhancedAuth = () => {
 
   return {
     ...authState,
+    signIn,
+    signUp,
     signOut,
+    complete2FA,
     validateCurrentSession
   };
 };
