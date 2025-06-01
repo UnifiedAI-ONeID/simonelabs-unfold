@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,40 +22,88 @@ serve(async (req) => {
 
     console.log('Verifying 2FA code for:', email)
 
-    // In a real implementation, you would:
-    // 1. Retrieve the stored code from the database
-    // 2. Verify it matches and hasn't expired
-    // 3. Track attempts to prevent brute force attacks
-    
-    // For demonstration, we'll simulate verification
-    // In production, retrieve from database
-    const storage = new Map()
-    const storedData = storage.get(`${email}:${sessionId}`)
-    
-    if (!storedData) {
-      throw new Error('No verification code found or code has expired')
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Retrieve the verification code from database
+    const { data: storedData, error: fetchError } = await supabase
+      .from('verification_codes')
+      .select('*')
+      .eq('email', email)
+      .eq('session_id', sessionId)
+      .eq('used', false)
+      .single()
+
+    if (fetchError || !storedData) {
+      console.log('No valid verification code found')
+      return new Response(
+        JSON.stringify({ 
+          valid: false, 
+          message: 'No verification code found or code has expired' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      )
     }
 
-    const { code: storedCode, expiresAt, attempts } = storedData
-
     // Check if code has expired
-    if (new Date() > new Date(expiresAt)) {
-      storage.delete(`${email}:${sessionId}`)
-      throw new Error('Verification code has expired')
+    if (new Date() > new Date(storedData.expires_at)) {
+      console.log('Verification code has expired')
+      
+      // Mark as used to prevent further attempts
+      await supabase
+        .from('verification_codes')
+        .update({ used: true })
+        .eq('id', storedData.id)
+
+      return new Response(
+        JSON.stringify({ 
+          valid: false, 
+          message: 'Verification code has expired' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      )
     }
 
     // Check attempts (prevent brute force)
-    if (attempts >= 3) {
-      storage.delete(`${email}:${sessionId}`)
-      throw new Error('Too many failed attempts. Please request a new code.')
+    if (storedData.attempts >= 3) {
+      console.log('Too many failed attempts')
+      
+      // Mark as used to prevent further attempts
+      await supabase
+        .from('verification_codes')
+        .update({ used: true })
+        .eq('id', storedData.id)
+
+      return new Response(
+        JSON.stringify({ 
+          valid: false, 
+          message: 'Too many failed attempts. Please request a new code.' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      )
     }
 
     // Verify the code
-    const isValid = code === storedCode
+    const isValid = code === storedData.code
 
     if (isValid) {
-      // Code is valid, remove from storage
-      storage.delete(`${email}:${sessionId}`)
+      // Code is valid, mark as used
+      await supabase
+        .from('verification_codes')
+        .update({ used: true })
+        .eq('id', storedData.id)
+
       console.log('2FA verification successful for:', email)
       
       return new Response(
@@ -69,14 +118,20 @@ serve(async (req) => {
       )
     } else {
       // Invalid code, increment attempts
-      storedData.attempts = attempts + 1
-      storage.set(`${email}:${sessionId}`, storedData)
+      const newAttempts = storedData.attempts + 1
+      
+      await supabase
+        .from('verification_codes')
+        .update({ attempts: newAttempts })
+        .eq('id', storedData.id)
+
+      console.log(`Invalid code attempt ${newAttempts} for:`, email)
       
       return new Response(
         JSON.stringify({ 
           valid: false, 
           message: 'Invalid verification code',
-          attemptsRemaining: 3 - storedData.attempts
+          attemptsRemaining: 3 - newAttempts
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

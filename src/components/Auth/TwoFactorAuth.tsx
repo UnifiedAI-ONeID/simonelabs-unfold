@@ -1,11 +1,11 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Shield, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Shield, CheckCircle, AlertCircle, RefreshCw, Bug } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface TwoFactorAuthProps {
@@ -28,7 +28,20 @@ export const TwoFactorAuth = ({
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [debugCode, setDebugCode] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Check for debug code in development
+  useEffect(() => {
+    const checkDebugCode = async () => {
+      if (import.meta.env.DEV) {
+        // In development, we can show the debug code
+        // This would typically come from the server response, but for now we'll simulate it
+        console.log('Development mode: Check console logs for 2FA debug code');
+      }
+    };
+    checkDebugCode();
+  }, []);
 
   const handleVerifyCode = useCallback(async () => {
     if (code.length !== 6 || isSubmitting) return;
@@ -80,6 +93,13 @@ export const TwoFactorAuth = ({
     }
   }, [handleVerifyCode, isSubmitting]);
 
+  // Development helper - auto-fill debug code
+  const handleUseDebugCode = useCallback(() => {
+    if (debugCode) {
+      setCode(debugCode);
+    }
+  }, [debugCode]);
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -93,6 +113,20 @@ export const TwoFactorAuth = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Development Debug Helper */}
+        {import.meta.env.DEV && (
+          <Alert>
+            <Bug className="h-4 w-4" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Development Mode</p>
+                <p className="text-xs">Check the browser console or edge function logs for the verification code.</p>
+                <p className="text-xs">Edge function logs can be found in the Supabase dashboard.</p>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="verification-code" className="text-center block">
             Enter Verification Code
