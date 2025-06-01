@@ -1,3 +1,4 @@
+
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -58,7 +59,6 @@ export const useSecureAuthWithCaptcha = () => {
     try {
       console.log(`[${requestId}] 📡 Sending request to validate-captcha function...`);
       
-      // Create proper request body object
       const requestData = { token: token };
       console.log(`[${requestId}] Request data:`, requestData);
       
@@ -180,7 +180,7 @@ export const useSecureAuthWithCaptcha = () => {
 
   const signUpMutation = useMutation({
     mutationFn: async (authData: AuthData) => {
-      const userRole = 'student'; // Default role for new users
+      const userRole = 'student';
       const clientIP = await getClientIP();
       
       // Enhanced rate limiting check
@@ -199,11 +199,6 @@ export const useSecureAuthWithCaptcha = () => {
       const emailValidation = SecureInputValidator.validateField(authData.email, 'email');
       if (!emailValidation.isValid) {
         throw new Error(emailValidation.error);
-      }
-
-      const passwordValidation = SecureInputValidator.validateField(authData.password, 'password');
-      if (!passwordValidation.isValid) {
-        throw new Error(passwordValidation.error);
       }
 
       if (!authData.email || !authData.password || !authData.confirmPassword) {
@@ -250,7 +245,7 @@ export const useSecureAuthWithCaptcha = () => {
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
       });
-      navigate('/dashboard');
+      navigate('/signin');
     },
     onError: (error: any) => {
       console.error('❌ Sign up mutation error:', error);

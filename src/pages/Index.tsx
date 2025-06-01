@@ -1,3 +1,4 @@
+
 import Navigation from "@/components/Navigation";
 import RoleSelection from "@/components/RoleSelection";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { WelcomeAssistant } from "@/components/AI/WelcomeAssistant";
 import { useState, useEffect } from "react";
 
 const Index = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const { isAuthenticated, user } = useEnhancedAuth();
   const [showWelcome, setShowWelcome] = useState(false);
 
@@ -33,16 +34,16 @@ const Index = () => {
 
   const founders = [
     {
-      name: "Fiona Wong",
-      role: "Co-Founder & CEO",
-      bio: "Former EdTech executive with 15 years of experience in educational innovation. Fiona's vision for accessible education drives SimoneLabs' mission to democratize learning globally.",
+      name: t('founders.fiona.name', 'Fiona Wong'),
+      role: t('founders.fiona.role', 'Co-Founder & CEO'),
+      bio: t('founders.fiona.bio', 'Former EdTech executive with 15 years of experience in educational innovation. Fiona\'s vision for accessible education drives SimoneLabs\' mission to democratize learning globally.'),
       image: "https://i.pinimg.com/originals/77/71/68/7771683223d86b237a3304d6f32828b9.jpg",
       fallback: "FW"
     },
     {
-      name: "Simon Luke",
-      role: "Co-Founder & CTO",
-      bio: "AI and machine learning expert with a PhD in Educational Technology. Simon's innovative approach to adaptive learning systems forms the technological foundation of SimoneLabs.",
+      name: t('founders.simon.name', 'Simon Luke'),
+      role: t('founders.simon.role', 'Co-Founder & CTO'),
+      bio: t('founders.simon.bio', 'AI and machine learning expert with a PhD in Educational Technology. Simon\'s innovative approach to adaptive learning systems forms the technological foundation of SimoneLabs.'),
       image: "https://images.unsplash.com/photo-1487309078313-fad80c3ec1e5?w=150&h=150&fit=crop&crop=face",
       fallback: "SL"
     }
@@ -76,7 +77,7 @@ const Index = () => {
                 {isAuthenticated ? (
                   <Link to={user?.user_metadata?.role ? "/dashboard" : "/role-selection"}>
                     <Button className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl group">
-                      <span>Go to Dashboard</span>
+                      <span>{t('navigation.dashboard', 'Go to Dashboard')}</span>
                       <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
@@ -84,13 +85,13 @@ const Index = () => {
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <Link to="/create-account">
                       <Button className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl group">
-                        <span>Create Account</span>
+                        <span>{t('auth.createAccount', 'Create Account')}</span>
                         <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                       </Button>
                     </Link>
                     <Link to="/signin">
                       <Button variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl">
-                        <span>Sign In</span>
+                        <span>{t('auth.signIn', 'Sign In')}</span>
                       </Button>
                     </Link>
                   </div>
@@ -139,7 +140,7 @@ const Index = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-                Meet Our Founders
+                {t('founders.title', 'Meet Our Founders')}
               </h2>
             </div>
             
@@ -176,7 +177,7 @@ const Index = () => {
         <footer className="bg-card border-t py-6 sm:py-8" role="contentinfo">
           <div className="container mx-auto px-4">
             <div className="text-center text-muted-foreground">
-              <p className="text-sm sm:text-base">&copy; 2024 SimoneLabs. Making education accessible worldwide.</p>
+              <p className="text-sm sm:text-base">{t('footer.copyright', '© 2024 SimoneLabs. Making education accessible worldwide.')}</p>
             </div>
           </div>
         </footer>

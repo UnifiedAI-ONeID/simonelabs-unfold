@@ -1,6 +1,6 @@
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, XCircle, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface CaptchaStatusDisplayProps {
@@ -16,21 +16,33 @@ export const CaptchaStatusDisplay = ({
 }: CaptchaStatusDisplayProps) => {
   const { t } = useTranslation('auth');
 
-  if (!captchaToken || captchaError) return null;
+  if (captchaToken) {
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <Badge variant="default" className="flex items-center gap-1 text-xs">
+          <CheckCircle className="h-3 w-3" />
+          {isManualTesting ? t('captcha.devMode', 'Dev Mode') : t('captcha.verified', 'Verified')}
+        </Badge>
+        {isManualTesting && (
+          <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+            <Shield className="h-3 w-3" />
+            {t('captcha.testMode', 'Test Mode')}
+          </Badge>
+        )}
+      </div>
+    );
+  }
 
-  return (
-    <Alert className="border-green-200 bg-green-50">
-      <CheckCircle className="h-4 w-4 text-green-600" />
-      <AlertDescription className="text-green-800">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">{t('captcha.verified')}</span>
-          {isManualTesting && (
-            <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-              {t('captcha.devModeLabel')}
-            </span>
-          )}
-        </div>
-      </AlertDescription>
-    </Alert>
-  );
+  if (captchaError) {
+    return (
+      <div className="flex items-center justify-center">
+        <Badge variant="destructive" className="flex items-center gap-1 text-xs">
+          <XCircle className="h-3 w-3" />
+          {t('captcha.failed', 'Failed')}
+        </Badge>
+      </div>
+    );
+  }
+
+  return null;
 };

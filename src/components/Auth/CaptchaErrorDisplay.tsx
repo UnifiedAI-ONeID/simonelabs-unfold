@@ -1,7 +1,7 @@
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw, Bug, Loader2 } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface CaptchaErrorDisplayProps {
@@ -26,50 +26,37 @@ export const CaptchaErrorDisplay = ({
   if (!captchaError) return null;
 
   return (
-    <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
-      <AlertDescription>
-        <div className="space-y-2">
-          <p className="text-sm">{captchaError}</p>
-          {retryCount > 0 && (
-            <p className="text-xs text-muted-foreground">
-              {t('captcha.retryAttempt', { count: retryCount })}
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button 
-              type="button"
-              variant="outline" 
-              size="sm" 
-              onClick={onRetry}
-              disabled={isLoading}
-              className="text-xs"
+    <Alert variant="destructive" className="text-sm">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertDescription className="flex flex-col gap-2">
+        <span>{captchaError}</span>
+        {retryCount > 0 && (
+          <span className="text-xs opacity-75">
+            {t('captcha.retryAttempt', { count: retryCount }, `Retry attempt ${retryCount}`)}
+          </span>
+        )}
+        <div className="flex gap-2 mt-2">
+          <Button
+            onClick={onRetry}
+            size="sm"
+            variant="outline"
+            disabled={isLoading}
+            className="h-8 text-xs"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            {t('captcha.retry', 'Retry')}
+          </Button>
+          {import.meta.env.DEV && !isManualTesting && (
+            <Button
+              onClick={onDevBypass}
+              size="sm"
+              variant="secondary"
+              className="h-8 text-xs"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                  {t('captcha.retrying')}
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  {t('captcha.retryButton')}
-                </>
-              )}
+              <Shield className="h-3 w-3 mr-1" />
+              {t('captcha.devBypass', 'Dev Bypass')}
             </Button>
-            {import.meta.env.DEV && !isManualTesting && (
-              <Button 
-                type="button"
-                variant="outline" 
-                size="sm" 
-                onClick={onDevBypass}
-                className="text-xs"
-              >
-                <Bug className="h-3 w-3 mr-1" />
-                {t('captcha.useDevBypass')}
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </AlertDescription>
     </Alert>
