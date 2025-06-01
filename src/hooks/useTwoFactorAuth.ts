@@ -50,6 +50,16 @@ export const useTwoFactorAuth = () => {
         details: `2FA code sent to ${email}`
       });
 
+      // Show debug code in development
+      if (import.meta.env.DEV && data?.debug_code) {
+        console.log('Development 2FA Code:', data.debug_code);
+        toast({
+          title: "Development Mode",
+          description: `2FA Code: ${data.debug_code}`,
+          duration: 10000,
+        });
+      }
+
       return { success: true };
     } catch (error: any) {
       console.error('2FA initiation error:', error);
@@ -104,6 +114,14 @@ export const useTwoFactorAuth = () => {
           type: 'VALIDATION_FAILURE',
           details: `Invalid 2FA code for ${twoFactorState.email}`
         });
+        
+        if (data?.attemptsRemaining !== undefined) {
+          toast({
+            title: "Invalid Code",
+            description: `${data.attemptsRemaining} attempts remaining`,
+            variant: "destructive",
+          });
+        }
       }
 
       return isValid;

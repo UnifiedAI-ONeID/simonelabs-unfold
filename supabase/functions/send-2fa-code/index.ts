@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from 'npm:resend@2.0.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -57,10 +58,46 @@ serve(async (req) => {
       throw new Error('Failed to store verification code')
     }
 
-    console.log(`2FA Code stored for ${email}: ${verificationCode}`)
+    console.log(`2FA Code generated for ${email}: ${verificationCode}`)
     
-    // TODO: In production, send email here using SendGrid, Resend, or similar service
-    // For now, we'll log the code for testing purposes
+    // Send email using Resend if API key is available
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    if (resendApiKey) {
+      try {
+        const resend = new Resend(resendApiKey)
+        
+        const { data: emailData, error: emailError } = await resend.emails.send({
+          from: 'SimoneLabs <noreply@yourdomain.com>',
+          to: [email],
+          subject: 'Your SimoneLabs Verification Code',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #333; text-align: center;">SimoneLabs</h1>
+              <h2 style="color: #666; text-align: center;">Verification Code</h2>
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                <h3 style="color: #333; font-size: 32px; letter-spacing: 4px; margin: 0;">${verificationCode}</h3>
+              </div>
+              <p style="color: #666; text-align: center;">This code will expire in 10 minutes.</p>
+              <p style="color: #999; font-size: 12px; text-align: center;">
+                If you didn't request this code, please ignore this email.
+              </p>
+            </div>
+          `
+        })
+
+        if (emailError) {
+          console.error('Email sending error:', emailError)
+          // Don't throw error here - still return success even if email fails
+        } else {
+          console.log('Email sent successfully:', emailData)
+        }
+      } catch (emailError) {
+        console.error('Email service error:', emailError)
+        // Don't throw error here - still return success even if email fails
+      }
+    } else {
+      console.log('RESEND_API_KEY not configured - email not sent')
+    }
     
     return new Response(
       JSON.stringify({ 

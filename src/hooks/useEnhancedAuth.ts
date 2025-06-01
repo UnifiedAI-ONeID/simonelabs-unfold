@@ -15,6 +15,12 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+interface PendingAuth {
+  email: string;
+  sessionId: string;
+  tempSession: any;
+}
+
 export const useEnhancedAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -22,6 +28,7 @@ export const useEnhancedAuth = () => {
     loading: true,
     isAuthenticated: false
   });
+  const [pendingAuth, setPendingAuth] = useState<PendingAuth | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,18 +40,23 @@ export const useEnhancedAuth = () => {
 
         console.log('Auth state change:', event, session?.user?.email);
 
+        // Only set authenticated state if we have a session and no pending 2FA
         if (event === 'SIGNED_OUT') {
           await cleanupAuthState();
+          setPendingAuth(null);
         }
 
+        // Only consider user fully authenticated if not pending 2FA
+        const isFullyAuthenticated = !!session?.user && !pendingAuth;
+
         setAuthState({
-          user: session?.user ?? null,
-          session,
+          user: isFullyAuthenticated ? session?.user ?? null : null,
+          session: isFullyAuthenticated ? session : null,
           loading: false,
-          isAuthenticated: !!session?.user
+          isAuthenticated: isFullyAuthenticated
         });
 
-        if (session?.user && event === 'SIGNED_IN') {
+        if (session?.user && event === 'SIGNED_IN' && !pendingAuth) {
           setTimeout(async () => {
             if (mounted) {
               const isValid = await validateSessionSecurity();
@@ -67,14 +79,17 @@ export const useEnhancedAuth = () => {
         }
 
         if (mounted) {
+          // Only consider authenticated if we have a session and no pending auth
+          const isFullyAuthenticated = !!session?.user && !pendingAuth;
+          
           setAuthState({
-            user: session?.user ?? null,
-            session,
+            user: isFullyAuthenticated ? session?.user ?? null : null,
+            session: isFullyAuthenticated ? session : null,
             loading: false,
-            isAuthenticated: !!session?.user
+            isAuthenticated: isFullyAuthenticated
           });
 
-          if (session?.user) {
+          if (session?.user && !pendingAuth) {
             const isValid = await validateSessionSecurity();
             if (!isValid && mounted) {
               setAuthState(prev => ({ ...prev, user: null, session: null, isAuthenticated: false }));
@@ -95,7 +110,7 @@ export const useEnhancedAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [pendingAuth]);
 
   const validateCaptcha = async (token: string): Promise<boolean> => {
     if (!token) {
@@ -164,7 +179,6 @@ export const useEnhancedAuth = () => {
         throw new Error('Passwords do not match');
       }
 
-      // Validate CAPTCHA token if provided
       if (captchaToken) {
         console.log('Validating CAPTCHA for signup...');
         const isCaptchaValid = await validateCaptcha(captchaToken);
@@ -197,15 +211,15 @@ export const useEnhancedAuth = () => {
         throw error;
       }
 
-      console.log('Signup successful, 2FA will be required:', data);
+      console.log('Signup successful:', data);
       await logSecurityEvent({
         type: 'AUTH_ATTEMPT',
-        details: `Successful signup for ${sanitizedEmail} - 2FA required`
+        details: `Successful signup for ${sanitizedEmail}`
       });
 
       toast({
         title: "Account created successfully!",
-        description: "Please complete 2FA verification to secure your account.",
+        description: "Please check your email to verify your account before signing in.",
       });
 
       return { data, error: null };
@@ -230,7 +244,6 @@ export const useEnhancedAuth = () => {
 
       const sanitizedEmail = InputSanitizer.sanitizeText(email).toLowerCase();
 
-      // Validate CAPTCHA token if provided
       if (captchaToken) {
         console.log('Validating CAPTCHA for signin...');
         const isCaptchaValid = await validateCaptcha(captchaToken);
@@ -259,26 +272,84 @@ export const useEnhancedAuth = () => {
         throw error;
       }
 
-      console.log('Signin successful, 2FA will be required:', data);
-      await logSecurityEvent({
-        type: 'AUTH_ATTEMPT',
-        details: `Successful signin for ${sanitizedEmail} - 2FA required`
-      });
+      if (data.user) {
+        // Store pending auth state - user is not fully authenticated until 2FA
+        const sessionId = crypto.randomUUID();
+        setPendingAuth({
+          email: sanitizedEmail,
+          sessionId,
+          tempSession: data.session
+        });
 
-      toast({
-        title: "Sign in successful!",
-        description: "Please complete 2FA verification to access your account.",
-      });
+        console.log('Initial signin successful, setting up 2FA for:', sanitizedEmail);
+        await logSecurityEvent({
+          type: 'AUTH_ATTEMPT',
+          details: `Initial signin successful for ${sanitizedEmail} - 2FA required`
+        });
+
+        // Immediately sign out to prevent unauthorized access
+        await supabase.auth.signOut();
+
+        return { 
+          data: { 
+            ...data, 
+            requires2FA: true,
+            sessionId 
+          }, 
+          error: null 
+        };
+      }
 
       return { data, error: null };
     } catch (error: any) {
       console.error('Signin process error:', error);
+      setPendingAuth(null);
       toast({
         title: "Sign in failed",
         description: error.message,
         variant: "destructive",
       });
       return { data: null, error };
+    }
+  };
+
+  const complete2FA = async () => {
+    if (!pendingAuth) {
+      throw new Error('No pending authentication found');
+    }
+
+    try {
+      console.log('Completing 2FA authentication for:', pendingAuth.email);
+      
+      // Re-authenticate the user with the stored session
+      const { data, error } = await supabase.auth.setSession(pendingAuth.tempSession);
+      
+      if (error) {
+        throw error;
+      }
+
+      // Clear pending auth state
+      setPendingAuth(null);
+
+      await logSecurityEvent({
+        type: 'AUTH_ATTEMPT',
+        details: `2FA authentication completed successfully for ${pendingAuth.email}`
+      });
+
+      toast({
+        title: "Sign in successful!",
+        description: "Two-factor authentication completed successfully.",
+      });
+
+      return { data, error: null };
+    } catch (error: any) {
+      console.error('2FA completion error:', error);
+      setPendingAuth(null);
+      await logSecurityEvent({
+        type: 'AUTH_ATTEMPT',
+        details: `2FA completion failed for ${pendingAuth?.email}: ${error.message}`
+      });
+      throw error;
     }
   };
 
@@ -290,6 +361,7 @@ export const useEnhancedAuth = () => {
         details: 'User initiated signout'
       });
 
+      setPendingAuth(null);
       await cleanupAuthState();
       
       toast({
@@ -325,9 +397,11 @@ export const useEnhancedAuth = () => {
 
   return {
     ...authState,
+    pendingAuth,
     signUp,
     signIn,
     signOut,
+    complete2FA,
     getUserRole,
     getRoleBasedRedirect
   };

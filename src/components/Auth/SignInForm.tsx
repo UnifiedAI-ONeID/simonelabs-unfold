@@ -25,7 +25,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
-  const { signIn, user } = useEnhancedAuth();
+  const { signIn, user, pendingAuth, complete2FA } = useEnhancedAuth();
   const {
     twoFactorState,
     isVerifying,
@@ -63,13 +63,12 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
       console.log('Starting signin process...');
       const result = await signIn(email, password, captchaToken);
       
-      if (result?.data?.user && !result.error) {
-        console.log('Signin successful, checking 2FA requirement...');
-        
-        // Check if user needs to complete 2FA
-        const sessionId = crypto.randomUUID();
-        await initiateTwoFactor(email, sessionId);
-        console.log('2FA initiated successfully');
+      if (result?.data?.requires2FA && result.data.sessionId) {
+        console.log('2FA required, initiating verification...');
+        await initiateTwoFactor(email, result.data.sessionId);
+      } else if (result?.data?.user && !result.error) {
+        console.log('Signin successful without 2FA');
+        handleSuccessfulAuth();
       }
     } catch (error: any) {
       console.error('Signin error:', error);
@@ -79,8 +78,20 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     }
   };
 
-  const handle2FASuccess = () => {
-    console.log('2FA verification successful, checking user role...');
+  const handle2FASuccess = async () => {
+    try {
+      console.log('2FA verification successful, completing authentication...');
+      await complete2FA();
+      handleSuccessfulAuth();
+    } catch (error: any) {
+      console.error('2FA completion error:', error);
+      resetTwoFactor();
+      resetCaptcha();
+    }
+  };
+
+  const handleSuccessfulAuth = () => {
+    console.log('Authentication complete, checking user role...');
     
     // Check if user has a role assigned
     const userRole = user?.user_metadata?.role;
@@ -125,7 +136,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   }, []);
 
   // Show 2FA component if required
-  if (twoFactorState.isRequired) {
+  if (twoFactorState.isRequired || pendingAuth) {
     return (
       <Card className="w-full max-w-md mx-auto simonelabs-glass-card">
         <CardHeader className="text-center">
@@ -138,7 +149,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
         </CardHeader>
         <CardContent>
           <TwoFactorAuth
-            email={twoFactorState.email || ''}
+            email={twoFactorState.email || pendingAuth?.email || ''}
             onVerified={handle2FASuccess}
             onResendCode={resendTwoFactorCode}
             onVerifyCode={verifyTwoFactorCode}
