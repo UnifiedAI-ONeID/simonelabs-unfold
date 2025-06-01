@@ -65,11 +65,13 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
       }
 
       if (isLogin) {
+        // Sign in existing user
         const { error } = await signIn(email, password);
         if (!error && onSuccess) {
           onSuccess();
         }
       } else {
+        // Create new account
         if (!passwordValidation?.isValid) {
           throw new Error('Please ensure your password meets all requirements');
         }
@@ -111,17 +113,32 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
     return true;
   };
 
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setPasswordValidation(null);
+    setCaptchaToken(null);
+    setCaptchaError(null);
+    setCaptchaKey(prev => prev + 1);
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    resetForm();
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          {isLogin ? 'Secure Sign In' : 'Create Secure Account'}
+          {isLogin ? 'Sign In to Your Account' : 'Create Your Account'}
         </CardTitle>
         <CardDescription>
           {isLogin 
-            ? 'Sign in to your account with enhanced security'
-            : 'Create a new account with strong security measures'
+            ? 'Welcome back! Please sign in to your existing account'
+            : 'Join our community! Create a new account to get started'
           }
         </CardDescription>
       </CardHeader>
@@ -134,7 +151,7 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
         >
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 name="email"
@@ -144,12 +161,14 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
                 required
                 autoComplete="email"
                 className="w-full"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">
+                {isLogin ? 'Password' : 'Create Password'}
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -279,7 +298,7 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
               >
                 {isSubmitting 
                   ? (isLogin ? 'Signing In...' : 'Creating Account...') 
-                  : (isLogin ? 'Sign In Securely' : 'Create Secure Account')
+                  : (isLogin ? 'Sign In to Existing Account' : 'Create New Account')
                 }
               </Button>
               
@@ -303,18 +322,10 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
           <Button
             type="button"
             variant="link"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setPassword('');
-              setConfirmPassword('');
-              setPasswordValidation(null);
-              setCaptchaToken(null);
-              setCaptchaError(null);
-              setCaptchaKey(prev => prev + 1);
-            }}
+            onClick={toggleMode}
           >
             {isLogin 
-              ? "Don't have an account? Sign up" 
+              ? "New user? Create an account" 
               : "Already have an account? Sign in"
             }
           </Button>
