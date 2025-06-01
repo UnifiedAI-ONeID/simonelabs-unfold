@@ -72,9 +72,13 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         throw new Error('Passwords do not match');
       }
       
-      const { error } = await signUp(email, password, confirmPassword);
+      const { error } = await signUp(email, password, confirmPassword, captchaToken);
       if (!error && onSuccess) {
         onSuccess();
+      } else if (error) {
+        // Reset CAPTCHA on error
+        setCaptchaToken(null);
+        setCaptchaKey(prev => prev + 1);
       }
     } catch (error: any) {
       console.error('Create account error:', error);

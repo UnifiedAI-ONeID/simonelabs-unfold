@@ -51,9 +51,13 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
         throw new Error('Please complete the CAPTCHA verification');
       }
 
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(email, password, captchaToken);
       if (!error && onSuccess) {
         onSuccess();
+      } else if (error) {
+        // Reset CAPTCHA on error
+        setCaptchaToken(null);
+        setCaptchaKey(prev => prev + 1);
       }
     } catch (error: any) {
       console.error('Sign in error:', error);

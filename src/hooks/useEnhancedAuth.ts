@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,7 +96,50 @@ export const useEnhancedAuth = () => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, confirmPassword: string, role?: string) => {
+  const validateCaptcha = async (token: string): Promise<boolean> => {
+    if (!token) {
+      console.error('No CAPTCHA token provided');
+      return false;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-captcha', {
+        body: { token },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (error) {
+        console.error('CAPTCHA validation error:', error);
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: `CAPTCHA validation failed: ${error.message}`
+        });
+        return false;
+      }
+
+      const isValid = data?.success === true;
+      
+      if (!isValid) {
+        await logSecurityEvent({
+          type: 'VALIDATION_FAILURE',
+          details: 'CAPTCHA validation returned false'
+        });
+      }
+      
+      return isValid;
+    } catch (error) {
+      console.error('CAPTCHA validation network error:', error);
+      await logSecurityEvent({
+        type: 'VALIDATION_FAILURE',
+        details: 'CAPTCHA validation network error'
+      });
+      return false;
+    }
+  };
+
+  const signUp = async (email: string, password: string, confirmPassword: string, captchaToken?: string, role?: string) => {
     try {
       if (!authRateLimiter.canMakeRequest(email)) {
         throw new Error('Too many signup attempts. Please wait before trying again.');
@@ -112,6 +154,14 @@ export const useEnhancedAuth = () => {
 
       if (password !== confirmPassword) {
         throw new Error('Passwords do not match');
+      }
+
+      // Validate CAPTCHA token if provided
+      if (captchaToken) {
+        const isCaptchaValid = await validateCaptcha(captchaToken);
+        if (!isCaptchaValid) {
+          throw new Error('CAPTCHA verification failed. Please try again.');
+        }
       }
 
       await cleanupAuthState();
@@ -154,13 +204,21 @@ export const useEnhancedAuth = () => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, captchaToken?: string) => {
     try {
       if (!authRateLimiter.canMakeRequest(email)) {
         throw new Error('Too many signin attempts. Please wait before trying again.');
       }
 
       const sanitizedEmail = InputSanitizer.sanitizeText(email).toLowerCase();
+
+      // Validate CAPTCHA token if provided
+      if (captchaToken) {
+        const isCaptchaValid = await validateCaptcha(captchaToken);
+        if (!isCaptchaValid) {
+          throw new Error('CAPTCHA verification failed. Please try again.');
+        }
+      }
 
       await cleanupAuthState();
 
