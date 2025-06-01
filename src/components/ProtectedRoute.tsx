@@ -5,9 +5,10 @@ import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requiredRole?: string | string[];
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const { isAuthenticated, loading, user } = useEnhancedAuth();
   const location = useLocation();
 
@@ -29,6 +30,35 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // If user is authenticated but has no role, redirect to role selection
   if (user && !user.user_metadata?.role) {
     return <Navigate to="/role-selection" replace />;
+  }
+
+  // Check role-based access if requiredRole is specified
+  if (requiredRole && user?.user_metadata?.role) {
+    const userRole = user.user_metadata.role;
+    
+    // Handle single role requirement
+    if (typeof requiredRole === 'string') {
+      if (userRole !== requiredRole) {
+        // Redirect to appropriate dashboard based on user's actual role
+        const redirectPath = userRole === 'student' ? '/student' : 
+                           userRole === 'educator' ? '/educator' : 
+                           userRole === 'admin' || userRole === 'superuser' ? '/administration' : 
+                           '/dashboard';
+        return <Navigate to={redirectPath} replace />;
+      }
+    }
+    
+    // Handle multiple role requirements
+    if (Array.isArray(requiredRole)) {
+      if (!requiredRole.includes(userRole)) {
+        // Redirect to appropriate dashboard based on user's actual role
+        const redirectPath = userRole === 'student' ? '/student' : 
+                           userRole === 'educator' ? '/educator' : 
+                           userRole === 'admin' || userRole === 'superuser' ? '/administration' : 
+                           '/dashboard';
+        return <Navigate to={redirectPath} replace />;
+      }
+    }
   }
 
   return <>{children}</>;
