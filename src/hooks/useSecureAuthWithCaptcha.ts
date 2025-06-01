@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { CSRFProtection } from '@/lib/csrf';
-import { authRateLimiter, logSecurityEvent, validateInput } from '@/lib/securityEnhancements';
+import { AdvancedRateLimiter } from '@/lib/advancedRateLimiting';
+import { logSecurityEvent, validateInput } from '@/lib/securityEnhancements';
+import { SecureInputValidator } from '@/lib/enhancedInputValidation';
 
 interface AuthData {
   email: string;
@@ -178,19 +180,30 @@ export const useSecureAuthWithCaptcha = () => {
 
   const signUpMutation = useMutation({
     mutationFn: async (authData: AuthData) => {
-      const clientId = `signup_${authData.email}`;
+      const userRole = 'student'; // Default role for new users
+      const clientIP = await getClientIP();
       
-      if (!authRateLimiter.canMakeRequest(clientId)) {
-        throw new Error('Too many signup attempts. Please wait before trying again.');
+      // Enhanced rate limiting check
+      const rateLimitResult = AdvancedRateLimiter.checkLimit(
+        authData.email,
+        'auth',
+        'anonymous',
+        clientIP
+      );
+
+      if (!rateLimitResult.allowed) {
+        throw new Error(rateLimitResult.reason || 'Rate limit exceeded');
       }
 
-      // Input validation
-      if (!validateInput.email(authData.email)) {
-        throw new Error('Invalid email format');
+      // Enhanced input validation
+      const emailValidation = SecureInputValidator.validateField(authData.email, 'email');
+      if (!emailValidation.isValid) {
+        throw new Error(emailValidation.error);
       }
 
-      if (!validateInput.password(authData.password)) {
-        throw new Error('Password must be at least 8 characters long');
+      const passwordValidation = SecureInputValidator.validateField(authData.password, 'password');
+      if (!passwordValidation.isValid) {
+        throw new Error(passwordValidation.error);
       }
 
       if (!authData.email || !authData.password || !authData.confirmPassword) {
@@ -206,19 +219,22 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('CAPTCHA verification is required');
       }
 
-      console.log('🚀 Starting signup process with CAPTCHA validation...');
+      console.log('🚀 Starting signup process with enhanced security validation...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
         throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
 
-      console.log('✅ CAPTCHA validation passed, proceeding with signup...');
+      console.log('✅ Enhanced security validation passed, proceeding with signup...');
 
       const { data, error } = await supabase.auth.signUp({
         email: authData.email,
         password: authData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            role: userRole
+          }
         }
       });
 
@@ -248,15 +264,24 @@ export const useSecureAuthWithCaptcha = () => {
 
   const signInMutation = useMutation({
     mutationFn: async (authData: AuthData) => {
-      const clientId = `signin_${authData.email}`;
+      const clientIP = await getClientIP();
       
-      if (!authRateLimiter.canMakeRequest(clientId)) {
-        throw new Error('Too many signin attempts. Please wait before trying again.');
+      // Enhanced rate limiting check
+      const rateLimitResult = AdvancedRateLimiter.checkLimit(
+        authData.email,
+        'auth',
+        'anonymous',
+        clientIP
+      );
+
+      if (!rateLimitResult.allowed) {
+        throw new Error(rateLimitResult.reason || 'Rate limit exceeded');
       }
 
-      // Input validation
-      if (!validateInput.email(authData.email)) {
-        throw new Error('Invalid email format');
+      // Enhanced input validation
+      const emailValidation = SecureInputValidator.validateField(authData.email, 'email');
+      if (!emailValidation.isValid) {
+        throw new Error(emailValidation.error);
       }
 
       if (!authData.email || !authData.password) {
@@ -268,13 +293,13 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('CAPTCHA verification is required');
       }
 
-      console.log('🚀 Starting signin process with CAPTCHA validation...');
+      console.log('🚀 Starting signin process with enhanced security validation...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
         throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
 
-      console.log('✅ CAPTCHA validation passed, proceeding with signin...');
+      console.log('✅ Enhanced security validation passed, proceeding with signin...');
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: authData.email,
@@ -304,6 +329,16 @@ export const useSecureAuthWithCaptcha = () => {
       });
     },
   });
+
+  const getClientIP = async (): Promise<string> => {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      return data.ip || '127.0.0.1';
+    } catch {
+      return '127.0.0.1';
+    }
+  };
 
   return {
     signUp: signUpMutation.mutate,

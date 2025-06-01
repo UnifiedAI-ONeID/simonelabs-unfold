@@ -1,8 +1,7 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Enhanced security headers
-const getSecurityHeaders = () => ({
+// Enhanced security headers with comprehensive protection
+const getEnhancedSecurityHeaders = () => ({
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -10,7 +9,12 @@ const getSecurityHeaders = () => ({
   'X-Frame-Options': 'DENY',
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'cross-origin',
+  'Content-Security-Policy': "default-src 'none'; script-src 'none'; object-src 'none'; frame-ancestors 'none';"
 });
 
 const createErrorResponse = (message: string, status: number = 400, details?: any) => {
@@ -28,7 +32,7 @@ const createErrorResponse = (message: string, status: number = 400, details?: an
     { 
       status, 
       headers: { 
-        ...getSecurityHeaders(), 
+        ...getEnhancedSecurityHeaders(), 
         'Content-Type': 'application/json' 
       }
     }
@@ -48,7 +52,7 @@ const createSuccessResponse = (data: any) => {
     JSON.stringify(response),
     { 
       headers: { 
-        ...getSecurityHeaders(), 
+        ...getEnhancedSecurityHeaders(), 
         'Content-Type': 'application/json' 
       }
     }
@@ -65,7 +69,7 @@ interface TurnstileResponse {
 }
 
 serve(async (req) => {
-  const headers = getSecurityHeaders();
+  const headers = getEnhancedSecurityHeaders();
   const requestId = crypto.randomUUID();
 
   console.log(`[${requestId}] === CAPTCHA validation request started ===`);
@@ -180,6 +184,26 @@ serve(async (req) => {
     
     console.log(`[${requestId}] Client IP: ${clientIP}`);
 
+    // Enhanced rate limiting check
+    const rateLimitKey = `captcha_${clientIP}`;
+    const maxRequests = 10; // 10 requests per 5 minutes
+    const windowMs = 5 * 60 * 1000;
+    
+    // Simple rate limiting implementation
+    const now = Date.now();
+    const requests = globalThis.captchaRequests || new Map();
+    const userRequests = requests.get(rateLimitKey) || [];
+    const recentRequests = userRequests.filter((time: number) => now - time < windowMs);
+    
+    if (recentRequests.length >= maxRequests) {
+      console.log(`[${requestId}] Rate limit exceeded for IP: ${clientIP}`);
+      return createErrorResponse('Rate limit exceeded. Please wait before trying again.', 429);
+    }
+    
+    recentRequests.push(now);
+    requests.set(rateLimitKey, recentRequests);
+    globalThis.captchaRequests = requests;
+
     // Prepare verification request
     const formData = new URLSearchParams({
       secret: secretKey,
@@ -260,7 +284,8 @@ serve(async (req) => {
         challenge_ts: result.challenge_ts,
         hostname: result.hostname,
         action: result.action,
-        verification_timestamp: new Date().toISOString()
+        verification_timestamp: new Date().toISOString(),
+        client_ip: clientIP
       });
 
     } catch (fetchError) {
