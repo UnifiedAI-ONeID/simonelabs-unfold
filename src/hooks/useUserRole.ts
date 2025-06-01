@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 
-export type UserRole = 'student' | 'educator' | 'administrator';
+export type UserRole = 'student' | 'educator' | 'admin' | 'superuser';
 
 export const useUserRole = () => {
   const { user, isAuthenticated } = useEnhancedAuth();
@@ -34,8 +34,9 @@ export const useUserRole = () => {
         return '/student';
       case 'educator':
         return '/educator';
-      case 'administrator':
-        return '/administrator';
+      case 'admin':
+      case 'superuser':
+        return '/administration';
       default:
         return '/student';
     }

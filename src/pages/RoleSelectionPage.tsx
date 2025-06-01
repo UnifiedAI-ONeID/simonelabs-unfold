@@ -30,13 +30,6 @@ const RoleSelectionPage = () => {
       title: "Educator",
       description: "Create and monetize your expertise with powerful teaching tools",
       features: ["Course creation tools", "Student analytics", "Revenue sharing"]
-    },
-    {
-      id: 'administrator' as UserRole,
-      icon: Shield,
-      title: "Administrator",
-      description: "Manage enterprise learning with advanced security and control",
-      features: ["User management", "Security dashboard", "Analytics"]
     }
   ];
 
@@ -64,9 +57,6 @@ const RoleSelectionPage = () => {
         case 'educator':
           navigate('/educator');
           break;
-        case 'administrator':
-          navigate('/administrator');
-          break;
         default:
           navigate('/dashboard');
       }
@@ -91,7 +81,7 @@ const RoleSelectionPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {roles.map((role) => (
               <div
                 key={role.id}
