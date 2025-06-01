@@ -1,4 +1,6 @@
 
+import { useTranslation } from 'react-i18next';
+
 interface FormValidationMessageProps {
   isFormValid: boolean;
   isSubmitting: boolean;
@@ -14,15 +16,17 @@ export const FormValidationMessage = ({
   password,
   captchaToken
 }: FormValidationMessageProps) => {
+  const { t } = useTranslation('auth');
+
   if (isFormValid || isSubmitting) return null;
 
   return (
     <div className="text-sm text-muted-foreground space-y-1">
-      <p className="text-center">Complete all requirements to continue:</p>
+      <p className="text-center">{t('validation.completeRequirements')}</p>
       <ul className="text-xs space-y-1">
-        {!email && <li>• Enter your email address</li>}
-        {!password && <li>• Enter your password</li>}
-        {!captchaToken && <li>• Complete CAPTCHA verification</li>}
+        {!email && <li>• {t('validation.enterEmail')}</li>}
+        {!password && <li>• {t('validation.enterPassword')}</li>}
+        {!captchaToken && <li>• {t('validation.completeCaptcha')}</li>}
       </ul>
     </div>
   );

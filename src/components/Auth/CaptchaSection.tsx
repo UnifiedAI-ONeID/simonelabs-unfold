@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { CheckCircle, AlertCircle, RefreshCw, Bug, Loader2, Shield } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
 
@@ -25,6 +26,7 @@ export const CaptchaSection = ({
   captchaKey,
   setCaptchaKey
 }: CaptchaSectionProps) => {
+  const { t } = useTranslation('auth');
   const [isManualTesting, setIsManualTesting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -42,20 +44,20 @@ export const CaptchaSection = ({
     setCaptchaToken(null);
     setIsLoading(false);
     
-    let errorMessage = 'CAPTCHA verification failed. Please try again.';
+    let errorMessage = t('errors.captchaFailed');
     let shouldAutoRetry = false;
     
     if (error?.includes('timeout')) {
-      errorMessage = 'CAPTCHA timed out. Please try again.';
+      errorMessage = t('errors.captchaTimeout');
       shouldAutoRetry = retryCount < 2;
     } else if (error?.includes('network')) {
-      errorMessage = 'Network error. Please check your connection and try again.';
+      errorMessage = t('errors.captchaNetwork');
       shouldAutoRetry = retryCount < 1;
     } else if (error?.includes('expired')) {
-      errorMessage = 'CAPTCHA token expired. Please refresh and try again.';
+      errorMessage = t('errors.captchaExpired');
       shouldAutoRetry = true;
     } else if (error) {
-      errorMessage = `CAPTCHA error: ${error}`;
+      errorMessage = t('errors.captchaError', { error });
     }
     
     setCaptchaError(errorMessage);
@@ -68,7 +70,7 @@ export const CaptchaSection = ({
         setCaptchaError(null);
       }, 2000);
     }
-  }, [setCaptchaToken, setCaptchaError, setCaptchaKey, captchaKey, retryCount]);
+  }, [setCaptchaToken, setCaptchaError, setCaptchaKey, captchaKey, retryCount, t]);
 
   const handleRetry = useCallback(() => {
     setIsLoading(true);
@@ -106,7 +108,7 @@ export const CaptchaSection = ({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Shield className="h-4 w-4 text-primary" />
-        <Label className="text-sm font-medium">Security Verification</Label>
+        <Label className="text-sm font-medium">{t('captcha.label')}</Label>
         {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
       </div>
       
@@ -116,9 +118,9 @@ export const CaptchaSection = ({
           <Bug className="h-4 w-4 text-orange-600" />
           <AlertDescription>
             <div className="space-y-2">
-              <p className="text-sm font-medium text-orange-800">Development Mode</p>
+              <p className="text-sm font-medium text-orange-800">{t('captcha.devMode')}</p>
               <p className="text-xs text-orange-700">
-                CAPTCHA may not work with test keys. Use the bypass button for testing.
+                {t('captcha.devDescription')}
               </p>
               <Button 
                 type="button"
@@ -128,7 +130,7 @@ export const CaptchaSection = ({
                 className="text-xs border-orange-300 text-orange-700 hover:bg-orange-100"
               >
                 <Bug className="h-3 w-3 mr-1" />
-                Bypass CAPTCHA (Dev Only)
+                {t('captcha.bypassButton')}
               </Button>
             </div>
           </AlertDescription>
@@ -155,7 +157,7 @@ export const CaptchaSection = ({
               <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading security check...
+                  {t('captcha.loading')}
                 </div>
               </div>
             )}
@@ -163,8 +165,8 @@ export const CaptchaSection = ({
         ) : (
           <div className="p-4 border border-dashed border-green-300 bg-green-50 rounded-lg text-center">
             <Bug className="h-6 w-6 mx-auto mb-2 text-green-600" />
-            <p className="text-sm text-green-700 font-medium">Development Bypass Active</p>
-            <p className="text-xs text-green-600 mt-1">CAPTCHA verification skipped for testing</p>
+            <p className="text-sm text-green-700 font-medium">{t('captcha.devBypassActive')}</p>
+            <p className="text-xs text-green-600 mt-1">{t('captcha.devBypassDescription')}</p>
           </div>
         )}
       </div>
@@ -177,7 +179,7 @@ export const CaptchaSection = ({
               <p className="text-sm">{captchaError}</p>
               {retryCount > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Retry attempt {retryCount}/3
+                  {t('captcha.retryAttempt', { count: retryCount })}
                 </p>
               )}
               <div className="flex gap-2">
@@ -192,12 +194,12 @@ export const CaptchaSection = ({
                   {isLoading ? (
                     <>
                       <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                      Retrying...
+                      {t('captcha.retrying')}
                     </>
                   ) : (
                     <>
                       <RefreshCw className="h-3 w-3 mr-1" />
-                      Retry CAPTCHA
+                      {t('captcha.retryButton')}
                     </>
                   )}
                 </Button>
@@ -210,7 +212,7 @@ export const CaptchaSection = ({
                     className="text-xs"
                   >
                     <Bug className="h-3 w-3 mr-1" />
-                    Use Dev Bypass
+                    {t('captcha.useDevBypass')}
                   </Button>
                 )}
               </div>
@@ -224,10 +226,10 @@ export const CaptchaSection = ({
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">CAPTCHA verified successfully</span>
+              <span className="text-sm font-medium">{t('captcha.verified')}</span>
               {isManualTesting && (
                 <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-                  Dev Mode
+                  {t('captcha.devModeLabel')}
                 </span>
               )}
             </div>

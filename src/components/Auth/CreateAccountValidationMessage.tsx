@@ -1,5 +1,6 @@
 
 import { PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
+import { useTranslation } from 'react-i18next';
 
 interface CreateAccountValidationMessageProps {
   isFormValid: boolean;
@@ -20,17 +21,19 @@ export const CreateAccountValidationMessage = ({
   passwordValidation,
   captchaToken
 }: CreateAccountValidationMessageProps) => {
+  const { t } = useTranslation('auth');
+
   if (isFormValid || isSubmitting) return null;
 
   return (
     <div className="text-sm text-muted-foreground space-y-1">
-      <p className="text-center">Complete all requirements to continue:</p>
+      <p className="text-center">{t('validation.completeRequirements')}</p>
       <ul className="text-xs space-y-1">
-        {!email && <li>• Enter your email address</li>}
-        {!password && <li>• Enter your password</li>}
-        {!passwordValidation?.isValid && <li>• Password must meet security requirements</li>}
-        {confirmPassword && password !== confirmPassword && <li>• Passwords must match</li>}
-        {!captchaToken && <li>• Complete CAPTCHA verification</li>}
+        {!email && <li>• {t('validation.enterEmail')}</li>}
+        {!password && <li>• {t('validation.enterPassword')}</li>}
+        {!passwordValidation?.isValid && <li>• {t('validation.passwordSecurityRequirements')}</li>}
+        {confirmPassword && password !== confirmPassword && <li>• {t('validation.passwordMustMatch')}</li>}
+        {!captchaToken && <li>• {t('validation.completeCaptcha')}</li>}
       </ul>
     </div>
   );
