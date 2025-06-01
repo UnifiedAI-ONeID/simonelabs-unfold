@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { Eye, EyeOff, Shield, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, EyeOff, Shield, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
 import { SecureFormWrapper } from '@/components/Security/SecureFormWrapper';
@@ -25,6 +25,8 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,6 +40,19 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
       setPasswordValidation(null);
     }
   }, [isLogin]);
+
+  const handleCaptchaSuccess = useCallback((token: string) => {
+    console.log('CAPTCHA completed successfully:', token.substring(0, 20) + '...');
+    setCaptchaToken(token);
+    setCaptchaError(null);
+  }, []);
+
+  const handleCaptchaError = useCallback((error?: string) => {
+    console.error('CAPTCHA error:', error);
+    setCaptchaToken(null);
+    setCaptchaError(error || 'CAPTCHA verification failed');
+    setCaptchaKey(prev => prev + 1); // Reset CAPTCHA widget
+  }, []);
 
   const handleSubmit = async (formData: any) => {
     if (isSubmitting) return;
@@ -59,6 +74,10 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
           throw new Error('Please ensure your password meets all requirements');
         }
         
+        if (password !== confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
+        
         const { error } = await signUp(email, password, confirmPassword);
         if (!error && onSuccess) {
           onSuccess();
@@ -66,10 +85,11 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
+      // Reset CAPTCHA on error
+      setCaptchaToken(null);
+      setCaptchaKey(prev => prev + 1);
     } finally {
       setIsSubmitting(false);
-      // Reset CAPTCHA
-      setCaptchaToken(null);
     }
   };
 
@@ -79,6 +99,16 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
       case 'medium': return 'text-yellow-600';
       default: return 'text-red-600';
     }
+  };
+
+  const isFormValid = () => {
+    if (!email || !password) return false;
+    if (!captchaToken) return false;
+    if (!isLogin) {
+      if (!confirmPassword || !passwordValidation?.isValid) return false;
+      if (password !== confirmPassword) return false;
+    }
+    return true;
   };
 
   return (
@@ -100,7 +130,7 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
           onSubmit={handleSubmit}
           rateLimitKey={isLogin ? 'signin' : 'signup'}
           maxSubmissions={3}
-          windowMs={300000} // 5 minutes
+          windowMs={300000}
         >
           <div className="space-y-4">
             <div className="space-y-2">
@@ -114,6 +144,7 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
                 required
                 autoComplete="email"
                 className="w-full"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -129,6 +160,7 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
                   required
                   autoComplete={isLogin ? 'current-password' : 'new-password'}
                   className="w-full pr-10"
+                  placeholder={isLogin ? 'Enter your password' : 'Create a strong password'}
                 />
                 <Button
                   type="button"
@@ -183,6 +215,7 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
                     required
                     autoComplete="new-password"
                     className="w-full pr-10"
+                    placeholder="Confirm your password"
                   />
                   <Button
                     type="button"
@@ -194,6 +227,14 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+                {!isLogin && confirmPassword && password !== confirmPassword && (
+                  <Alert variant="destructive">
+                    <XCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Passwords do not match
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             )}
 
@@ -201,27 +242,60 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
               <Label>Security Verification</Label>
               <div className="flex justify-center">
                 <Turnstile
+                  key={captchaKey}
                   siteKey={TURNSTILE_SITE_KEY}
-                  onSuccess={setCaptchaToken}
-                  onError={() => setCaptchaToken(null)}
+                  onSuccess={handleCaptchaSuccess}
+                  onError={handleCaptchaError}
                   options={{
                     theme: 'auto',
-                    size: 'normal'
+                    size: 'normal',
+                    retry: 'auto'
                   }}
                 />
               </div>
+              {captchaError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {captchaError}. Please try again.
+                  </AlertDescription>
+                </Alert>
+              )}
+              {captchaToken && (
+                <Alert>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    CAPTCHA verified successfully
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting || !captchaToken || (!isLogin && !passwordValidation?.isValid)}
-            >
-              {isSubmitting 
-                ? (isLogin ? 'Signing In...' : 'Creating Account...') 
-                : (isLogin ? 'Sign In Securely' : 'Create Secure Account')
-              }
-            </Button>
+            <div className="space-y-2">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!isFormValid() || isSubmitting}
+              >
+                {isSubmitting 
+                  ? (isLogin ? 'Signing In...' : 'Creating Account...') 
+                  : (isLogin ? 'Sign In Securely' : 'Create Secure Account')
+                }
+              </Button>
+              
+              {!isFormValid() && !isSubmitting && (
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p className="text-center">Complete all requirements to continue:</p>
+                  <ul className="text-xs space-y-1">
+                    {!email && <li>• Enter your email address</li>}
+                    {!password && <li>• Enter your password</li>}
+                    {!isLogin && !passwordValidation?.isValid && <li>• Password must meet security requirements</li>}
+                    {!isLogin && confirmPassword && password !== confirmPassword && <li>• Passwords must match</li>}
+                    {!captchaToken && <li>• Complete CAPTCHA verification</li>}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </SecureFormWrapper>
 
@@ -235,6 +309,8 @@ export const EnhancedAuthForm = ({ onSuccess }: EnhancedAuthFormProps) => {
               setConfirmPassword('');
               setPasswordValidation(null);
               setCaptchaToken(null);
+              setCaptchaError(null);
+              setCaptchaKey(prev => prev + 1);
             }}
           >
             {isLogin 

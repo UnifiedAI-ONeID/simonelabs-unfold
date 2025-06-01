@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut } from "lucide-react";
@@ -48,6 +47,9 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
               Pricing
+            </Link>
+            <Link to="/captcha-debug" className="text-sm font-medium hover:text-primary transition-colors text-orange-600">
+              CAPTCHA Debug
             </Link>
             {isAuthenticated ? (
               <>
@@ -101,6 +103,13 @@ const Navigation = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Pricing
+              </Link>
+              <Link
+                to="/captcha-debug"
+                className="text-sm font-medium hover:text-primary transition-colors px-2 py-1 text-orange-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                CAPTCHA Debug
               </Link>
               {isAuthenticated ? (
                 <>

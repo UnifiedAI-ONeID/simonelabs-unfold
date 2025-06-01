@@ -1,196 +1,93 @@
+import React, { useEffect } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Index from '@/pages/Index';
+import Auth from '@/pages/Auth';
+import RoleSelectionPage from '@/pages/RoleSelectionPage';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import StudentDashboard from '@/pages/StudentDashboard';
+import EducatorDashboard from '@/pages/EducatorDashboard';
+import AdministrationDashboard from '@/pages/AdministrationDashboard';
+import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { WelcomeAssistant } from '@/components/AI/WelcomeAssistant';
+import CaptchaTest from '@/pages/CaptchaTest';
+import CaptchaDebug from "@/pages/CaptchaDebug";
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
-import { SecurityProvider } from "@/components/Security/SecurityProvider";
-import Index from "./pages/Index";
-import StudentLanding from "./pages/StudentLanding";
-import EducatorLanding from "./pages/EducatorLanding";
-import AdministratorLanding from "./pages/AdministratorLanding";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Courses from "./pages/Courses";
-import CourseView from "./pages/CourseView";
-import CreateCourse from "./pages/CreateCourse";
-import StudyTools from "./pages/StudyTools";
-import Analytics from "./pages/Analytics";
-import Achievements from "./pages/Achievements";
-import VirtualLabs from "./pages/VirtualLabs";
-import AIGenerator from "./pages/AIGenerator";
-import CourseBuilder from "./pages/CourseBuilder";
-import LearnCourse from "./pages/LearnCourse";
-import LearningAnalytics from "./pages/LearningAnalytics";
-import Collaboration from "./pages/Collaboration";
-import Pricing from "./pages/Pricing";
-import NotFound from "./pages/NotFound";
-import CaptchaTest from "./pages/CaptchaTest";
-import SecurityDashboard from "./pages/SecurityDashboard";
-import SecuritySettings from "./pages/SecuritySettings";
-import Administration from "./pages/Administration";
-import ProtectedRoute from "./components/ProtectedRoute";
-import "./App.css";
-import "./i18n";
-import RoleSelectionPage from "./pages/RoleSelectionPage";
+const App: React.FC = () => {
+  const { isAuthenticated, user } = useEnhancedAuth();
+  const [showWelcome, setShowWelcome] = React.useState(false);
 
-const queryClient = new QueryClient();
+  useEffect(() => {
+    if (isAuthenticated && user && !localStorage.getItem('welcomeShown')) {
+      setShowWelcome(true);
+      localStorage.setItem('welcomeShown', 'true');
+    }
+  }, [isAuthenticated, user]);
 
-function App() {
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+  };
+
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Index />,
+    },
+    {
+      path: "/auth",
+      element: <Auth />,
+    },
+    {
+      path: "/captcha-debug",
+      element: <CaptchaDebug />,
+    },
+    {
+      path: "/role-selection",
+      element: <RoleSelectionPage />,
+    },
+    {
+      path: "/student",
+      element: (
+        <ProtectedRoute>
+          <StudentDashboard />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/educator",
+      element: (
+        <ProtectedRoute>
+          <EducatorDashboard />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/administration",
+      element: (
+        <ProtectedRoute>
+          <AdministrationDashboard />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/dashboard",
+      element: (
+        <ProtectedRoute>
+          <div>Dashboard</div>
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/captcha-test",
+      element: <CaptchaTest />,
+    },
+  ]);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <SecurityProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/student" element={<StudentLanding />} />
-                <Route path="/educator" element={<EducatorLanding />} />
-                <Route path="/administrator" element={<AdministratorLanding />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/role-selection" element={<RoleSelectionPage />} />
-                <Route path="/captcha-test" element={<CaptchaTest />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/courses"
-                  element={
-                    <ProtectedRoute>
-                      <Courses />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/courses/:courseId"
-                  element={
-                    <ProtectedRoute>
-                      <CourseView />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/create-course"
-                  element={
-                    <ProtectedRoute>
-                      <CreateCourse />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/study-tools"
-                  element={
-                    <ProtectedRoute>
-                      <StudyTools />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/analytics"
-                  element={
-                    <ProtectedRoute>
-                      <Analytics />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/achievements"
-                  element={
-                    <ProtectedRoute>
-                      <Achievements />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/virtual-labs"
-                  element={
-                    <ProtectedRoute>
-                      <VirtualLabs />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/ai-generator"
-                  element={
-                    <ProtectedRoute>
-                      <AIGenerator />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/course-builder"
-                  element={
-                    <ProtectedRoute>
-                      <CourseBuilder />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/learn/:courseId"
-                  element={
-                    <ProtectedRoute>
-                      <LearnCourse />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/learning-analytics/:courseId"
-                  element={
-                    <ProtectedRoute>
-                      <LearningAnalytics />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/collaboration/:courseId"
-                  element={
-                    <ProtectedRoute>
-                      <Collaboration />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/security"
-                  element={
-                    <ProtectedRoute>
-                      <SecurityDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/security/settings"
-                  element={
-                    <ProtectedRoute>
-                      <SecuritySettings />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/administration"
-                  element={
-                    <ProtectedRoute>
-                      <Administration />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </SecurityProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <>
+      <RouterProvider router={router} />
+      {showWelcome && <WelcomeAssistant onClose={handleCloseWelcome} />}
+    </>
   );
-}
+};
 
 export default App;
