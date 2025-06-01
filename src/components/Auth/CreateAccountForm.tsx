@@ -110,11 +110,11 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   };
 
   const handle2FAVerified = () => {
-    console.log('2FA verification complete for new user, redirecting to role selection...');
+    console.log('2FA verification complete for new user, redirecting to signin...');
     resetTwoFactor();
     
-    // New users always go to role selection first
-    navigate('/role-selection');
+    // Redirect to signin page after successful signup and 2FA
+    navigate('/signin');
     
     if (onSuccess) {
       onSuccess();

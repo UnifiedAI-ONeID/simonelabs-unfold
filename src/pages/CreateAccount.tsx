@@ -28,14 +28,15 @@ const CreateAccount = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      // New users always go to role selection first
+      // If user is already authenticated, redirect to role selection
       navigate('/role-selection', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
   const handleCreateAccountSuccess = () => {
-    // New users always go to role selection
-    navigate('/role-selection', { replace: true });
+    // After successful signup and 2FA, user will be redirected to signin page
+    // No need to do anything here as the redirect is handled in CreateAccountForm
+    console.log('Account creation process completed');
   };
 
   if (loading) {
