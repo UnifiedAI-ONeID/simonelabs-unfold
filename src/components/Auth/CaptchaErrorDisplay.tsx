@@ -32,7 +32,7 @@ export const CaptchaErrorDisplay = ({
         <span>{captchaError}</span>
         {retryCount > 0 && (
           <span className="text-xs opacity-75">
-            {t('captcha.retryAttempt', { count: retryCount }, `Retry attempt ${retryCount}`)}
+            {t('captcha.retryAttempt', `Retry attempt ${retryCount}`, { count: retryCount })}
           </span>
         )}
         <div className="flex gap-2 mt-2">
