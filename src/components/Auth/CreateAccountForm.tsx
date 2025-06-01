@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,9 +77,12 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         return;
       }
 
-      if (data?.session) {
-        console.log('Account creation successful, initiating 2FA...');
-        await initiateTwoFactor(email, data.session.access_token);
+      // Redirect to email verification page after successful signup
+      console.log('Account creation successful, redirecting to email verification...');
+      navigate('/email-verification');
+      
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error: any) {
       console.error('Create account error:', error);
@@ -92,9 +94,9 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   };
 
   const handle2FAVerified = () => {
-    console.log('2FA verification complete for new user, redirecting to signin...');
+    console.log('2FA verification complete for new user, redirecting to email verification...');
     resetTwoFactor();
-    navigate('/signin');
+    navigate('/email-verification');
     
     if (onSuccess) {
       onSuccess();

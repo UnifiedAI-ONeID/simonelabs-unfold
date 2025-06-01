@@ -5,6 +5,7 @@ import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import SignIn from '@/pages/SignIn';
 import CreateAccount from '@/pages/CreateAccount';
+import EmailVerification from '@/pages/EmailVerification';
 import RoleSelectionPage from '@/pages/RoleSelectionPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StudentDashboard from '@/pages/StudentDashboard';
@@ -46,6 +47,10 @@ const App: React.FC = () => {
     {
       path: "/create-account",
       element: <CreateAccount />,
+    },
+    {
+      path: "/email-verification",
+      element: <EmailVerification />,
     },
     {
       path: "/captcha-debug",
