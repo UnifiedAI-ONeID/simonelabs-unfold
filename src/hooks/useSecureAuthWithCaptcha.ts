@@ -20,6 +20,7 @@ interface CaptchaValidationResponse {
   bypass?: boolean;
   challenge_ts?: string;
   details?: any;
+  environment?: string;
 }
 
 export const useSecureAuthWithCaptcha = () => {
@@ -27,22 +28,38 @@ export const useSecureAuthWithCaptcha = () => {
   const navigate = useNavigate();
 
   const validateCaptcha = async (token: string, retryCount = 0): Promise<boolean> => {
+    const requestId = crypto.randomUUID();
+    console.log(`[${requestId}] 🛡️ Starting CAPTCHA validation...`);
+    console.log(`[${requestId}] Token preview: ${token.substring(0, 20)}...`);
+    console.log(`[${requestId}] Retry attempt: ${retryCount + 1}`);
+
     if (!token) {
-      console.error('No CAPTCHA token provided');
+      console.error(`[${requestId}] ❌ No CAPTCHA token provided`);
+      toast({
+        title: "CAPTCHA Required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
       return false;
     }
 
     // Development bypass
     if (import.meta.env.DEV && token === 'dev-bypass-token') {
-      console.log('Development mode: bypassing CAPTCHA validation');
+      console.log(`[${requestId}] 🔧 Development mode: bypassing CAPTCHA validation`);
+      toast({
+        title: "Development Mode",
+        description: "CAPTCHA bypassed for development testing.",
+        variant: "default",
+      });
       return true;
     }
 
     try {
-      console.log(`CAPTCHA validation attempt ${retryCount + 1} for token: ${token.substring(0, 20)}...`);
+      console.log(`[${requestId}] 📡 Sending request to validate-captcha function...`);
       
-      // Prepare request body
-      const requestBody = { token };
+      // Prepare request body - ensure proper JSON format
+      const requestBody = JSON.stringify({ token });
+      console.log(`[${requestId}] Request body prepared:`, requestBody);
       
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
         body: requestBody,
@@ -52,27 +69,35 @@ export const useSecureAuthWithCaptcha = () => {
         }
       });
 
-      console.log('Supabase function response:', { data, error });
+      console.log(`[${requestId}] 📨 Supabase function response:`, { 
+        data, 
+        error,
+        hasData: !!data,
+        hasError: !!error 
+      });
 
       if (error) {
-        console.error('CAPTCHA validation error:', error);
+        console.error(`[${requestId}] ❌ Supabase function error:`, error);
         
         let userMessage = 'CAPTCHA verification failed. Please try again.';
         let shouldRetry = false;
         
+        // Handle different error types
         if (error.message?.includes('timeout') || error.message?.includes('408')) {
           userMessage = 'CAPTCHA verification timed out. Retrying...';
           shouldRetry = retryCount < 2;
-        } else if (error.message?.includes('503')) {
+        } else if (error.message?.includes('503') || error.message?.includes('unavailable')) {
           userMessage = 'CAPTCHA service temporarily unavailable. Please try again.';
           shouldRetry = retryCount < 1;
         } else if (error.message?.includes('expired') || error.message?.includes('duplicate')) {
           userMessage = 'CAPTCHA token expired. Please complete the verification again.';
+        } else if (error.message?.includes('400')) {
+          userMessage = 'Invalid CAPTCHA response. Please try again.';
         }
         
-        // Automatic retry for network/timeout errors
+        // Automatic retry for certain error types
         if (shouldRetry) {
-          console.log(`Retrying CAPTCHA validation (attempt ${retryCount + 2})...`);
+          console.log(`[${requestId}] 🔄 Retrying CAPTCHA validation (attempt ${retryCount + 2})...`);
           await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
           return validateCaptcha(token, retryCount + 1);
         }
@@ -92,15 +117,18 @@ export const useSecureAuthWithCaptcha = () => {
       }
 
       const result: CaptchaValidationResponse = data;
+      console.log(`[${requestId}] 📋 Validation result:`, result);
       
       if (!result || !result.success) {
-        console.log('CAPTCHA validation returned false:', result);
+        console.log(`[${requestId}] ❌ CAPTCHA validation returned false:`, result);
         
         let errorMessage = 'Please complete the security verification again.';
         if (result?.details?.errorCodes?.includes('timeout-or-duplicate')) {
           errorMessage = 'CAPTCHA token expired. Please try again.';
         } else if (result?.details?.errorCodes?.includes('invalid-input-response')) {
           errorMessage = 'Invalid CAPTCHA response. Please refresh and try again.';
+        } else if (result?.error) {
+          errorMessage = result.error;
         }
         
         toast({
@@ -112,10 +140,11 @@ export const useSecureAuthWithCaptcha = () => {
         return false;
       }
 
-      console.log('CAPTCHA validation successful:', {
+      console.log(`[${requestId}] ✅ CAPTCHA validation successful!`, {
         development: result.development,
         bypass: result.bypass,
-        challenge_ts: result.challenge_ts
+        challenge_ts: result.challenge_ts,
+        environment: result.environment
       });
       
       if (result.development) {
@@ -129,11 +158,11 @@ export const useSecureAuthWithCaptcha = () => {
       return true;
       
     } catch (error) {
-      console.error('CAPTCHA validation network error:', error);
+      console.error(`[${requestId}] 💥 CAPTCHA validation network error:`, error);
       
       // Retry on network errors
       if (retryCount < 2) {
-        console.log(`Retrying CAPTCHA validation due to network error (attempt ${retryCount + 2})...`);
+        console.log(`[${requestId}] 🔄 Retrying CAPTCHA validation due to network error (attempt ${retryCount + 2})...`);
         await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
         return validateCaptcha(token, retryCount + 1);
       }
@@ -178,13 +207,13 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('CAPTCHA verification is required');
       }
 
-      console.log('Starting CAPTCHA validation for signup...');
+      console.log('🚀 Starting signup process with CAPTCHA validation...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
         throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
 
-      console.log('CAPTCHA validation passed, proceeding with signup...');
+      console.log('✅ CAPTCHA validation passed, proceeding with signup...');
 
       const { data, error } = await supabase.auth.signUp({
         email: authData.email,
@@ -195,7 +224,7 @@ export const useSecureAuthWithCaptcha = () => {
       });
 
       if (error) {
-        console.error('Signup error:', error);
+        console.error('❌ Signup error:', error);
         throw new Error(error.message);
       }
 
@@ -209,7 +238,7 @@ export const useSecureAuthWithCaptcha = () => {
       navigate('/dashboard');
     },
     onError: (error: any) => {
-      console.error('Sign up mutation error:', error);
+      console.error('❌ Sign up mutation error:', error);
       toast({
         title: "Sign up failed",
         description: error.message,
@@ -240,13 +269,13 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('CAPTCHA verification is required');
       }
 
-      console.log('Starting CAPTCHA validation for signin...');
+      console.log('🚀 Starting signin process with CAPTCHA validation...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
         throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
 
-      console.log('CAPTCHA validation passed, proceeding with signin...');
+      console.log('✅ CAPTCHA validation passed, proceeding with signin...');
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: authData.email,
@@ -254,7 +283,7 @@ export const useSecureAuthWithCaptcha = () => {
       });
 
       if (error) {
-        console.error('Signin error:', error);
+        console.error('❌ Signin error:', error);
         throw new Error(error.message);
       }
 
@@ -268,7 +297,7 @@ export const useSecureAuthWithCaptcha = () => {
       navigate('/dashboard');
     },
     onError: (error: any) => {
-      console.error('Sign in mutation error:', error);
+      console.error('❌ Sign in mutation error:', error);
       toast({
         title: "Sign in failed",
         description: error.message,
