@@ -1,16 +1,19 @@
 
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Users, Shield } from "lucide-react";
+import { GraduationCap, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEnhancedAuth } from "@/hooks/useEnhancedAuth";
 
 const RoleSelection = () => {
+  const { isAuthenticated } = useEnhancedAuth();
+
   const roles = [
     {
       icon: GraduationCap,
       title: "Student",
       description: "Learn new skills with AI-powered courses and interactive content",
       features: ["Personalized learning paths", "Interactive courses", "Study groups", "Progress tracking"],
-      link: "/student",
+      link: isAuthenticated ? "/dashboard" : "/student",
       color: "from-primary/10 to-primary/5",
       iconColor: "text-primary"
     },
@@ -19,18 +22,9 @@ const RoleSelection = () => {
       title: "Educator",
       description: "Create and monetize your expertise with powerful teaching tools",
       features: ["Course creation tools", "Student analytics", "Revenue sharing", "AI assistance"],
-      link: "/educator",
+      link: isAuthenticated ? "/dashboard" : "/educator",
       color: "from-accent/10 to-accent/5",
       iconColor: "text-accent"
-    },
-    {
-      icon: Shield,
-      title: "Administrator",
-      description: "Manage enterprise learning with advanced security and control",
-      features: ["User management", "Security dashboard", "Analytics", "Compliance tools"],
-      link: "/administrator",
-      color: "from-secondary/10 to-secondary/5",
-      iconColor: "text-secondary"
     }
   ];
 
@@ -42,11 +36,11 @@ const RoleSelection = () => {
             Choose Your Learning Journey
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Whether you're here to learn, teach, or manage, we have the perfect solution for your needs.
+            Whether you're here to learn or teach, we have the perfect solution for your needs.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {roles.map((role, index) => (
             <div key={index} className={`bg-gradient-to-br ${role.color} rounded-2xl p-8 border border-border hover:shadow-lg transition-all duration-300 group`}>
               <div className={`w-16 h-16 bg-card rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300`}>
@@ -69,12 +63,20 @@ const RoleSelection = () => {
               
               <Link to={role.link} className="block">
                 <Button className="w-full btn-primary rounded-xl group-hover:shadow-lg transition-all duration-300">
-                  Get Started as {role.title}
+                  {isAuthenticated ? `Go to ${role.title} Dashboard` : `Get Started as ${role.title}`}
                 </Button>
               </Link>
             </div>
           ))}
         </div>
+        
+        {isAuthenticated && (
+          <div className="text-center mt-8">
+            <p className="text-sm text-muted-foreground">
+              Need administrative access? Contact your system administrator.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,6 +32,7 @@ import Administration from "./pages/Administration";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 import "./i18n";
+import RoleSelectionPage from "./pages/RoleSelectionPage";
 
 const queryClient = new QueryClient();
 

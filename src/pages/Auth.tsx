@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { EnhancedAuthForm } from '@/components/Auth/EnhancedAuthForm';
 import { getSecurityHeaders } from '@/lib/securityConfig';
@@ -8,7 +8,8 @@ import { getSecurityHeaders } from '@/lib/securityConfig';
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, loading } = useEnhancedAuth();
+  const [searchParams] = useSearchParams();
+  const { isAuthenticated, loading, user, getRoleBasedRedirect } = useEnhancedAuth();
 
   useEffect(() => {
     // Apply security headers
@@ -29,15 +30,35 @@ const Auth = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      const from = (location.state as any)?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
+    if (!loading && isAuthenticated && user) {
+      // Check if user has a role assigned
+      const userRole = user.user_metadata?.role;
+      
+      if (!userRole) {
+        // Redirect to role selection if no role assigned
+        navigate('/role-selection', { replace: true });
+      } else {
+        // Redirect to role-based landing page
+        const roleBasedRedirect = getRoleBasedRedirect();
+        const from = (location.state as any)?.from?.pathname || roleBasedRedirect;
+        navigate(from, { replace: true });
+      }
     }
-  }, [isAuthenticated, loading, navigate, location]);
+  }, [isAuthenticated, loading, navigate, location, user, getRoleBasedRedirect]);
 
   const handleAuthSuccess = () => {
-    const from = (location.state as any)?.from?.pathname || '/dashboard';
-    navigate(from, { replace: true });
+    // Check if user has a role assigned
+    const userRole = user?.user_metadata?.role;
+    
+    if (!userRole) {
+      // Redirect to role selection if no role assigned
+      navigate('/role-selection', { replace: true });
+    } else {
+      // Redirect to role-based landing page
+      const roleBasedRedirect = getRoleBasedRedirect();
+      const from = (location.state as any)?.from?.pathname || roleBasedRedirect;
+      navigate(from, { replace: true });
+    }
   };
 
   if (loading) {

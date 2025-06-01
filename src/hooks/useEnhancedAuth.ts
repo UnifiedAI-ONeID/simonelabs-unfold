@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -103,7 +102,7 @@ export const useEnhancedAuth = () => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, confirmPassword: string) => {
+  const signUp = async (email: string, password: string, confirmPassword: string, role?: string) => {
     try {
       // Rate limiting
       if (!authRateLimiter.canMakeRequest(email)) {
@@ -130,7 +129,8 @@ export const useEnhancedAuth = () => {
         email: sanitizedEmail,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: `${window.location.origin}/role-selection`,
+          data: role ? { role } : undefined
         }
       });
 
@@ -233,10 +233,30 @@ export const useEnhancedAuth = () => {
     }
   };
 
+  const getUserRole = () => {
+    return authState.user?.user_metadata?.role || 'student';
+  };
+
+  const getRoleBasedRedirect = () => {
+    const role = getUserRole();
+    switch (role) {
+      case 'student':
+        return '/student';
+      case 'educator':
+        return '/educator';
+      case 'administrator':
+        return '/administrator';
+      default:
+        return '/dashboard';
+    }
+  };
+
   return {
     ...authState,
     signUp,
     signIn,
-    signOut
+    signOut,
+    getUserRole,
+    getRoleBasedRedirect
   };
 };
