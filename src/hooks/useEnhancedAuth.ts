@@ -197,15 +197,15 @@ export const useEnhancedAuth = () => {
         throw error;
       }
 
-      console.log('Signup successful:', data);
+      console.log('Signup successful, 2FA will be required:', data);
       await logSecurityEvent({
         type: 'AUTH_ATTEMPT',
-        details: `Successful signup for ${sanitizedEmail}`
+        details: `Successful signup for ${sanitizedEmail} - 2FA required`
       });
 
       toast({
         title: "Account created successfully!",
-        description: "Please check your email to verify your account.",
+        description: "Please complete 2FA verification to secure your account.",
       });
 
       return { data, error: null };
@@ -259,15 +259,15 @@ export const useEnhancedAuth = () => {
         throw error;
       }
 
-      console.log('Signin successful:', data);
+      console.log('Signin successful, 2FA will be required:', data);
       await logSecurityEvent({
         type: 'AUTH_ATTEMPT',
-        details: `Successful signin for ${sanitizedEmail}`
+        details: `Successful signin for ${sanitizedEmail} - 2FA required`
       });
 
       toast({
-        title: "Welcome back!",
-        description: "You have been signed in successfully.",
+        title: "Sign in successful!",
+        description: "Please complete 2FA verification to access your account.",
       });
 
       return { data, error: null };
@@ -297,7 +297,6 @@ export const useEnhancedAuth = () => {
         description: "You have been signed out of your account.",
       });
 
-      // Fixed: Redirect to signin instead of auth to prevent loops
       window.location.href = '/signin';
     } catch (error: any) {
       console.error('Signout error:', error);

@@ -8,8 +8,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Eye, EyeOff, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
+import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
 import { SecureFormWrapper } from '@/components/Security/SecureFormWrapper';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
 
@@ -25,8 +27,18 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaKey, setCaptchaKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const { signIn } = useEnhancedAuth();
+  const { 
+    twoFactorState, 
+    isVerifying, 
+    isResending,
+    initiateTwoFactor, 
+    verifyTwoFactorCode, 
+    resendTwoFactorCode,
+    resetTwoFactor
+  } = useTwoFactorAuth();
 
   const handleCaptchaSuccess = useCallback((token: string) => {
     console.log('CAPTCHA completed successfully:', token.substring(0, 20) + '...');
@@ -53,19 +65,20 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
         throw new Error('Please complete the CAPTCHA verification');
       }
 
-      console.log('All validations passed, calling signIn...');
-      const { error } = await signIn(email, password, captchaToken);
+      console.log('Attempting initial sign in...');
+      const { data, error } = await signIn(email, password, captchaToken);
       
-      if (!error) {
-        console.log('Sign in successful');
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
+      if (error) {
         console.error('Sign in failed:', error);
-        // Reset CAPTCHA on error
         setCaptchaToken(null);
         setCaptchaKey(prev => prev + 1);
+        return;
+      }
+
+      if (data?.session) {
+        console.log('Initial sign in successful, initiating 2FA...');
+        // Sign in successful, now require 2FA
+        await initiateTwoFactor(email, data.session.access_token);
       }
     } catch (error: any) {
       console.error('Sign in error:', error);
@@ -76,9 +89,33 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     }
   };
 
+  const handle2FAVerified = () => {
+    console.log('2FA verification complete, proceeding to dashboard...');
+    resetTwoFactor();
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      navigate('/role-selection');
+    }
+  };
+
   const isFormValid = () => {
     return email && password && captchaToken;
   };
+
+  // Show 2FA screen if required
+  if (twoFactorState.isRequired) {
+    return (
+      <TwoFactorAuth
+        email={twoFactorState.email!}
+        onVerified={handle2FAVerified}
+        onResendCode={resendTwoFactorCode}
+        onVerifyCode={verifyTwoFactorCode}
+        isVerifying={isVerifying}
+        isResending={isResending}
+      />
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">

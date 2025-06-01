@@ -8,9 +8,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Eye, EyeOff, UserPlus, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
+import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
 import { SecureFormWrapper } from '@/components/Security/SecureFormWrapper';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
 
@@ -29,8 +31,18 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   const [captchaKey, setCaptchaKey] = useState(0);
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const { signUp } = useEnhancedAuth();
+  const { 
+    twoFactorState, 
+    isVerifying, 
+    isResending,
+    initiateTwoFactor, 
+    verifyTwoFactorCode, 
+    resendTwoFactorCode,
+    resetTwoFactor
+  } = useTwoFactorAuth();
 
   const handlePasswordChange = useCallback((value: string) => {
     setPassword(value);
@@ -74,19 +86,20 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         throw new Error('Passwords do not match');
       }
       
-      console.log('All validations passed, calling signUp...');
-      const { error } = await signUp(email, password, confirmPassword, captchaToken);
+      console.log('Attempting to create account...');
+      const { data, error } = await signUp(email, password, confirmPassword, captchaToken);
       
-      if (!error) {
-        console.log('Account creation successful');
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
+      if (error) {
         console.error('Account creation failed:', error);
-        // Reset CAPTCHA on error
         setCaptchaToken(null);
         setCaptchaKey(prev => prev + 1);
+        return;
+      }
+
+      if (data?.session) {
+        console.log('Account creation successful, initiating 2FA...');
+        // Account created successfully, now require 2FA
+        await initiateTwoFactor(email, data.session.access_token);
       }
     } catch (error: any) {
       console.error('Create account error:', error);
@@ -94,6 +107,16 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
       setCaptchaKey(prev => prev + 1);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handle2FAVerified = () => {
+    console.log('2FA verification complete, proceeding to role selection...');
+    resetTwoFactor();
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      navigate('/role-selection');
     }
   };
 
@@ -112,6 +135,20 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     if (password !== confirmPassword) return false;
     return true;
   };
+
+  // Show 2FA screen if required
+  if (twoFactorState.isRequired) {
+    return (
+      <TwoFactorAuth
+        email={twoFactorState.email!}
+        onVerified={handle2FAVerified}
+        onResendCode={resendTwoFactorCode}
+        onVerifyCode={verifyTwoFactorCode}
+        isVerifying={isVerifying}
+        isResending={isResending}
+      />
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
