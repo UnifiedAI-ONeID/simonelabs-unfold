@@ -28,11 +28,13 @@ const CreateAccount = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
+      // New users always go to role selection first
       navigate('/role-selection', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
   const handleCreateAccountSuccess = () => {
+    // New users always go to role selection
     navigate('/role-selection', { replace: true });
   };
 

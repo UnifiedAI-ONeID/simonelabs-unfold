@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -111,12 +110,14 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   };
 
   const handle2FAVerified = () => {
-    console.log('2FA verification complete, proceeding to role selection...');
+    console.log('2FA verification complete for new user, redirecting to role selection...');
     resetTwoFactor();
+    
+    // New users always go to role selection first
+    navigate('/role-selection');
+    
     if (onSuccess) {
       onSuccess();
-    } else {
-      navigate('/role-selection');
     }
   };
 

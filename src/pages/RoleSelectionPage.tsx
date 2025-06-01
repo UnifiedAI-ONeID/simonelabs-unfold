@@ -23,21 +23,24 @@ const RoleSelectionPage = () => {
       icon: GraduationCap,
       title: "Student",
       description: "Learn new skills with AI-powered courses and interactive content",
-      features: ["Personalized learning paths", "Interactive courses", "Study groups"]
+      features: ["Personalized learning paths", "Interactive courses", "Study groups"],
+      dashboard: "/student"
     },
     {
       id: 'educator' as UserRole,
       icon: Users,
       title: "Educator",
       description: "Create and monetize your expertise with powerful teaching tools",
-      features: ["Course creation tools", "Student analytics", "Revenue sharing"]
+      features: ["Course creation tools", "Student analytics", "Revenue sharing"],
+      dashboard: "/educator"
     },
     {
       id: 'admin' as UserRole,
       icon: Shield,
       title: "Administrator",
       description: "Manage the platform and oversee all educational activities",
-      features: ["User management", "Platform analytics", "Content moderation"]
+      features: ["User management", "Platform analytics", "Content moderation"],
+      dashboard: "/administration"
     }
   ];
 
@@ -46,6 +49,8 @@ const RoleSelectionPage = () => {
 
     setIsUpdating(true);
     try {
+      console.log('Updating user role to:', selectedRole);
+      
       const { error } = await supabase.auth.updateUser({
         data: { role: selectedRole }
       });
@@ -57,20 +62,14 @@ const RoleSelectionPage = () => {
         description: `Welcome to SimoneLabs as a ${selectedRole}!`,
       });
 
-      switch (selectedRole) {
-        case 'student':
-          navigate('/student');
-          break;
-        case 'educator':
-          navigate('/educator');
-          break;
-        case 'admin':
-          navigate('/administration');
-          break;
-        default:
-          navigate('/dashboard');
+      // Navigate to the appropriate dashboard
+      const selectedRoleData = roles.find(role => role.id === selectedRole);
+      if (selectedRoleData) {
+        console.log('Navigating to dashboard:', selectedRoleData.dashboard);
+        navigate(selectedRoleData.dashboard, { replace: true });
       }
     } catch (error: any) {
+      console.error('Role selection error:', error);
       toast({
         title: "Error selecting role",
         description: error.message,
@@ -131,7 +130,7 @@ const RoleSelectionPage = () => {
               disabled={!selectedRole || isUpdating}
               className="px-8 py-3 text-lg"
             >
-              {isUpdating ? 'Setting up your account...' : 'Continue'}
+              {isUpdating ? 'Setting up your account...' : 'Continue to Dashboard'}
             </Button>
           </div>
         </CardContent>

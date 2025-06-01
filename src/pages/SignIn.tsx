@@ -8,7 +8,7 @@ import { getSecurityHeaders } from '@/lib/securityConfig';
 const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, loading, user, getRoleBasedRedirect } = useEnhancedAuth();
+  const { isAuthenticated, loading, user } = useEnhancedAuth();
 
   useEffect(() => {
     const headers = getSecurityHeaders();
@@ -34,12 +34,24 @@ const SignIn = () => {
       if (!userRole) {
         navigate('/role-selection', { replace: true });
       } else {
-        const roleBasedRedirect = getRoleBasedRedirect();
-        const from = (location.state as any)?.from?.pathname || roleBasedRedirect;
-        navigate(from, { replace: true });
+        // Redirect to role-specific dashboard
+        switch (userRole) {
+          case 'student':
+            navigate('/student', { replace: true });
+            break;
+          case 'educator':
+            navigate('/educator', { replace: true });
+            break;
+          case 'admin':
+          case 'superuser':
+            navigate('/administration', { replace: true });
+            break;
+          default:
+            navigate('/role-selection', { replace: true });
+        }
       }
     }
-  }, [isAuthenticated, loading, navigate, location, user, getRoleBasedRedirect]);
+  }, [isAuthenticated, loading, navigate, user]);
 
   const handleSignInSuccess = () => {
     const userRole = user?.user_metadata?.role;
@@ -47,9 +59,21 @@ const SignIn = () => {
     if (!userRole) {
       navigate('/role-selection', { replace: true });
     } else {
-      const roleBasedRedirect = getRoleBasedRedirect();
-      const from = (location.state as any)?.from?.pathname || roleBasedRedirect;
-      navigate(from, { replace: true });
+      // Redirect to role-specific dashboard
+      switch (userRole) {
+        case 'student':
+          navigate('/student', { replace: true });
+          break;
+        case 'educator':
+          navigate('/educator', { replace: true });
+          break;
+        case 'admin':
+        case 'superuser':
+          navigate('/administration', { replace: true });
+          break;
+        default:
+          navigate('/role-selection', { replace: true });
+      }
     }
   };
 

@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +28,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const { signIn } = useEnhancedAuth();
+  const { signIn, user } = useEnhancedAuth();
   const { 
     twoFactorState, 
     isVerifying, 
@@ -90,12 +89,36 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   };
 
   const handle2FAVerified = () => {
-    console.log('2FA verification complete, proceeding to dashboard...');
+    console.log('2FA verification complete, checking user role...');
     resetTwoFactor();
+    
+    // Check if user has a role assigned
+    const userRole = user?.user_metadata?.role;
+    
+    if (!userRole) {
+      console.log('No role found, redirecting to role selection...');
+      navigate('/role-selection');
+    } else {
+      console.log('Role found:', userRole, 'redirecting to dashboard...');
+      // Redirect based on role
+      switch (userRole) {
+        case 'student':
+          navigate('/student');
+          break;
+        case 'educator':
+          navigate('/educator');
+          break;
+        case 'admin':
+        case 'superuser':
+          navigate('/administration');
+          break;
+        default:
+          navigate('/role-selection');
+      }
+    }
+    
     if (onSuccess) {
       onSuccess();
-    } else {
-      navigate('/role-selection');
     }
   };
 
