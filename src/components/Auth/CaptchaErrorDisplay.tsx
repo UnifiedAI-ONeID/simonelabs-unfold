@@ -26,7 +26,7 @@ export const CaptchaErrorDisplay = ({
   if (!captchaError) return null;
 
   const getErrorSeverity = (error: string) => {
-    if (error.includes('timeout') || error.includes('network')) return 'warning';
+    if (error.includes('timeout') || error.includes('network')) return 'default';
     if (error.includes('configuration') || error.includes('service')) return 'destructive';
     return 'destructive';
   };
@@ -46,7 +46,7 @@ export const CaptchaErrorDisplay = ({
         <span>{captchaError}</span>
         {retryCount > 0 && (
           <span className="text-xs opacity-75">
-            {t('captcha.retryAttempt', `Retry attempt ${retryCount}`, { count: retryCount })}
+            {t('captcha.retryAttempt', 'Retry attempt {{count}}', { count: retryCount })}
           </span>
         )}
         {import.meta.env.DEV && (
