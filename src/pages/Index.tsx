@@ -73,12 +73,28 @@ const Index = () => {
               </p>
 
               <div className="flex justify-center gap-4 pt-4">
-                <Link to={isAuthenticated ? (user?.user_metadata?.role ? "/dashboard" : "/role-selection") : "/auth"}>
-                  <Button className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl group">
-                    <span>{isAuthenticated ? "Go to Dashboard" : t('hero.cta')}</span>
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
+                {isAuthenticated ? (
+                  <Link to={user?.user_metadata?.role ? "/dashboard" : "/role-selection"}>
+                    <Button className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl group">
+                      <span>Go to Dashboard</span>
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <Link to="/create-account">
+                      <Button className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl group">
+                        <span>Create Account</span>
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                    <Link to="/signin">
+                      <Button variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl">
+                        <span>Sign In</span>
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
 

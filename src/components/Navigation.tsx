@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut } from "lucide-react";
@@ -71,11 +72,18 @@ const Navigation = () => {
                 </Button>
               </>
             ) : (
-              <Link to="/auth">
-                <Button variant="default" size="sm">
-                  Sign In
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-3">
+                <Link to="/signin">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/create-account">
+                  <Button variant="default" size="sm">
+                    Create Account
+                  </Button>
+                </Link>
+              </div>
             )}
             <LanguageSwitcher />
             <ThemeToggle />
@@ -136,11 +144,18 @@ const Navigation = () => {
                   </Button>
                 </>
               ) : (
-                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="default" size="sm" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
+                <>
+                  <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="ghost" size="sm" className="w-full justify-start px-2">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/create-account" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="default" size="sm" className="w-full justify-start px-2">
+                      Create Account
+                    </Button>
+                  </Link>
+                </>
               )}
             </div>
           </div>
