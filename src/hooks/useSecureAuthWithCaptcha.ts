@@ -41,7 +41,15 @@ export const useSecureAuthWithCaptcha = () => {
       return false;
     }
 
+    // Development bypass
+    if (import.meta.env.DEV && token === 'dev-bypass-token') {
+      console.log('Development mode: bypassing CAPTCHA validation');
+      return true;
+    }
+
     try {
+      console.log('Validating CAPTCHA token...');
+      
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
         body: { token },
         headers: {
@@ -52,6 +60,23 @@ export const useSecureAuthWithCaptcha = () => {
 
       if (error) {
         console.error('CAPTCHA validation error:', error);
+        
+        // Provide user-friendly error messages
+        let userMessage = 'CAPTCHA verification failed. Please try again.';
+        if (error.message?.includes('configuration')) {
+          userMessage = 'CAPTCHA service is not properly configured. Please contact support.';
+        } else if (error.message?.includes('network') || error.message?.includes('503')) {
+          userMessage = 'CAPTCHA service is temporarily unavailable. Please try again in a moment.';
+        } else if (error.message?.includes('expired')) {
+          userMessage = 'CAPTCHA token expired. Please complete the verification again.';
+        }
+        
+        toast({
+          title: "CAPTCHA Error",
+          description: userMessage,
+          variant: "destructive",
+        });
+
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
           details: `CAPTCHA validation failed: ${error.message}`
@@ -63,15 +88,31 @@ export const useSecureAuthWithCaptcha = () => {
       const isValid = result.success;
       
       if (!isValid) {
+        console.log('CAPTCHA validation returned false');
+        toast({
+          title: "CAPTCHA Failed",
+          description: "Please complete the security verification again.",
+          variant: "destructive",
+        });
+        
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
           details: 'CAPTCHA validation returned false'
         });
+      } else {
+        console.log('CAPTCHA validation successful');
       }
       
       return isValid;
     } catch (error) {
       console.error('CAPTCHA validation network error:', error);
+      
+      toast({
+        title: "Network Error",
+        description: "Unable to verify CAPTCHA. Please check your connection and try again.",
+        variant: "destructive",
+      });
+      
       await logSecurityEvent({
         type: 'VALIDATION_FAILURE',
         details: 'CAPTCHA validation network error'

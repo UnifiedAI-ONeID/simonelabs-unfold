@@ -52,6 +52,7 @@ serve(async (req) => {
 
   // Validate request size and format
   if (!validateRequest(req)) {
+    console.error('Request too large');
     return createSecureErrorResponse('Request too large', 413);
   }
 
@@ -61,26 +62,31 @@ serve(async (req) => {
     
     try {
       parsedBody = JSON.parse(body);
-    } catch {
+    } catch (parseError) {
+      console.error('Invalid JSON format:', parseError);
       return createSecureErrorResponse('Invalid JSON format');
     }
 
     const { token } = parsedBody;
     
     if (!token || typeof token !== 'string') {
+      console.error('Invalid or missing token in request');
       return createSecureErrorResponse('Invalid or missing token');
     }
 
     // Validate token format (basic check)
     if (token.length < 10 || token.length > 2048) {
+      console.error('Invalid token format, length:', token.length);
       return createSecureErrorResponse('Invalid token format');
     }
 
     const secretKey = Deno.env.get('TURNSTILE_SECRET_KEY');
     if (!secretKey) {
-      console.error('TURNSTILE_SECRET_KEY not configured');
-      return createSecureErrorResponse('Service configuration error', 500);
+      console.error('TURNSTILE_SECRET_KEY not configured in Supabase secrets');
+      return createSecureErrorResponse('CAPTCHA service configuration error - missing secret key', 500);
     }
+
+    console.log('TURNSTILE_SECRET_KEY found, proceeding with validation');
 
     // Get client IP with fallback
     const clientIP = req.headers.get('CF-Connecting-IP') || 
@@ -88,12 +94,35 @@ serve(async (req) => {
                     req.headers.get('X-Real-IP') || 
                     '127.0.0.1';
 
+    console.log('Client IP:', clientIP.substring(0, 8) + '...');
+
+    // Check for development environment bypass
+    const isDevelopment = Deno.env.get('ENVIRONMENT') === 'development';
+    if (isDevelopment && token === 'dev-bypass-token') {
+      console.log('Development mode: bypassing CAPTCHA validation');
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          development: true,
+          timestamp: new Date().toISOString()
+        }),
+        { 
+          headers: { 
+            ...headers, 
+            'Content-Type': 'application/json' 
+          }
+        }
+      );
+    }
+
     // Verify the token with Cloudflare Turnstile
     const formData = new URLSearchParams({
       secret: secretKey,
       response: token,
       remoteip: clientIP,
     });
+
+    console.log('Sending verification request to Turnstile API...');
 
     const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
@@ -105,11 +134,14 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error('Turnstile API error:', response.status, response.statusText);
-      return createSecureErrorResponse('CAPTCHA service unavailable', 503);
+      console.error('Turnstile API HTTP error:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Turnstile API error response:', errorText);
+      return createSecureErrorResponse('CAPTCHA service temporarily unavailable', 503);
     }
 
     const result: TurnstileResponse = await response.json();
+    console.log('Turnstile API response:', JSON.stringify(result, null, 2));
     
     if (!result.success) {
       console.warn('CAPTCHA verification failed:', {
@@ -118,7 +150,20 @@ serve(async (req) => {
         hostname: result.hostname
       });
       
-      return createSecureErrorResponse('CAPTCHA verification failed');
+      // Provide more specific error messages based on error codes
+      const errorCodes = result['error-codes'] || [];
+      let errorMessage = 'CAPTCHA verification failed';
+      
+      if (errorCodes.includes('timeout-or-duplicate')) {
+        errorMessage = 'CAPTCHA token expired or already used. Please try again.';
+      } else if (errorCodes.includes('invalid-input-response')) {
+        errorMessage = 'Invalid CAPTCHA token. Please refresh and try again.';
+      } else if (errorCodes.includes('invalid-input-secret')) {
+        errorMessage = 'CAPTCHA service configuration error';
+        console.error('Invalid secret key configured!');
+      }
+      
+      return createSecureErrorResponse(errorMessage);
     }
 
     // Log successful verification (without sensitive data)
@@ -131,7 +176,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        challenge_ts: result.challenge_ts
       }),
       { 
         headers: { 
@@ -143,6 +189,6 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('CAPTCHA validation error:', error);
-    return createSecureErrorResponse('Internal server error', 500);
+    return createSecureErrorResponse('Internal server error during CAPTCHA validation', 500);
   }
 });
