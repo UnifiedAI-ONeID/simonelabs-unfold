@@ -1,4 +1,3 @@
-
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -54,11 +53,12 @@ export const useSecureAuthWithCaptcha = () => {
     try {
       console.log(`CAPTCHA validation attempt ${retryCount + 1}...`);
       
+      // Fixed: Properly format the request body and headers
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
-        body: { token },
+        body: JSON.stringify({ token }), // Ensure body is properly stringified
         headers: {
-          ...CSRFProtection.getHeaders(),
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...CSRFProtection.getHeaders()
         }
       });
 

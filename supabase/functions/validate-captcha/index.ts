@@ -95,13 +95,29 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.text();
+    // Fixed: Better request body handling
+    let body: string;
+    try {
+      body = await req.text();
+      console.log(`[${requestId}] Raw request body length: ${body.length}`);
+      
+      // Handle empty body
+      if (!body || body.trim() === '') {
+        console.error(`[${requestId}] Empty request body`);
+        return createSecureErrorResponse('Empty request body');
+      }
+    } catch (readError) {
+      console.error(`[${requestId}] Failed to read request body:`, readError);
+      return createSecureErrorResponse('Failed to read request body');
+    }
+
     let parsedBody;
-    
     try {
       parsedBody = JSON.parse(body);
+      console.log(`[${requestId}] Successfully parsed JSON body`);
     } catch (parseError) {
       console.error(`[${requestId}] Invalid JSON format:`, parseError);
+      console.error(`[${requestId}] Body content:`, body.substring(0, 200));
       return createSecureErrorResponse('Invalid JSON format');
     }
 
