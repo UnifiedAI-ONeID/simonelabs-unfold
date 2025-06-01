@@ -60,6 +60,8 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     setIsSubmitting(true);
     
     try {
+      console.log('Starting account creation process...');
+      
       if (!captchaToken) {
         throw new Error('Please complete the CAPTCHA verification');
       }
@@ -72,10 +74,16 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         throw new Error('Passwords do not match');
       }
       
+      console.log('All validations passed, calling signUp...');
       const { error } = await signUp(email, password, confirmPassword, captchaToken);
-      if (!error && onSuccess) {
-        onSuccess();
-      } else if (error) {
+      
+      if (!error) {
+        console.log('Account creation successful');
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        console.error('Account creation failed:', error);
         // Reset CAPTCHA on error
         setCaptchaToken(null);
         setCaptchaKey(prev => prev + 1);
@@ -286,7 +294,7 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         </SecureFormWrapper>
 
         <div className="mt-4 text-center">
-          <Link to="/auth">
+          <Link to="/signin">
             <Button type="button" variant="link">
               Already have an account? Sign in here
             </Button>

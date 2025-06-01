@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -103,6 +104,7 @@ export const useEnhancedAuth = () => {
     }
 
     try {
+      console.log('Validating CAPTCHA token...');
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
         body: { token },
         headers: {
@@ -119,13 +121,17 @@ export const useEnhancedAuth = () => {
         return false;
       }
 
+      console.log('CAPTCHA validation response:', data);
       const isValid = data?.success === true;
       
       if (!isValid) {
+        console.error('CAPTCHA validation returned false:', data);
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
-          details: 'CAPTCHA validation returned false'
+          details: `CAPTCHA validation returned false: ${JSON.stringify(data)}`
         });
+      } else {
+        console.log('CAPTCHA validation successful');
       }
       
       return isValid;
@@ -141,6 +147,8 @@ export const useEnhancedAuth = () => {
 
   const signUp = async (email: string, password: string, confirmPassword: string, captchaToken?: string, role?: string) => {
     try {
+      console.log('Starting signup process for:', email);
+      
       if (!authRateLimiter.canMakeRequest(email)) {
         throw new Error('Too many signup attempts. Please wait before trying again.');
       }
@@ -158,14 +166,19 @@ export const useEnhancedAuth = () => {
 
       // Validate CAPTCHA token if provided
       if (captchaToken) {
+        console.log('Validating CAPTCHA for signup...');
         const isCaptchaValid = await validateCaptcha(captchaToken);
         if (!isCaptchaValid) {
-          throw new Error('CAPTCHA verification failed. Please try again.');
+          throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
         }
+        console.log('CAPTCHA validation passed for signup');
+      } else {
+        throw new Error('CAPTCHA verification is required');
       }
 
       await cleanupAuthState();
 
+      console.log('Calling Supabase signUp...');
       const { data, error } = await supabase.auth.signUp({
         email: sanitizedEmail,
         password,
@@ -176,6 +189,7 @@ export const useEnhancedAuth = () => {
       });
 
       if (error) {
+        console.error('Supabase signup error:', error);
         await logSecurityEvent({
           type: 'AUTH_ATTEMPT',
           details: `Signup failed for ${sanitizedEmail}: ${error.message}`
@@ -183,6 +197,7 @@ export const useEnhancedAuth = () => {
         throw error;
       }
 
+      console.log('Signup successful:', data);
       await logSecurityEvent({
         type: 'AUTH_ATTEMPT',
         details: `Successful signup for ${sanitizedEmail}`
@@ -195,6 +210,7 @@ export const useEnhancedAuth = () => {
 
       return { data, error: null };
     } catch (error: any) {
+      console.error('Signup process error:', error);
       toast({
         title: "Sign up failed",
         description: error.message,
@@ -206,6 +222,8 @@ export const useEnhancedAuth = () => {
 
   const signIn = async (email: string, password: string, captchaToken?: string) => {
     try {
+      console.log('Starting signin process for:', email);
+      
       if (!authRateLimiter.canMakeRequest(email)) {
         throw new Error('Too many signin attempts. Please wait before trying again.');
       }
@@ -214,20 +232,26 @@ export const useEnhancedAuth = () => {
 
       // Validate CAPTCHA token if provided
       if (captchaToken) {
+        console.log('Validating CAPTCHA for signin...');
         const isCaptchaValid = await validateCaptcha(captchaToken);
         if (!isCaptchaValid) {
-          throw new Error('CAPTCHA verification failed. Please try again.');
+          throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
         }
+        console.log('CAPTCHA validation passed for signin');
+      } else {
+        throw new Error('CAPTCHA verification is required');
       }
 
       await cleanupAuthState();
 
+      console.log('Calling Supabase signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: sanitizedEmail,
         password,
       });
 
       if (error) {
+        console.error('Supabase signin error:', error);
         await logSecurityEvent({
           type: 'AUTH_ATTEMPT',
           details: `Signin failed for ${sanitizedEmail}: ${error.message}`
@@ -235,6 +259,7 @@ export const useEnhancedAuth = () => {
         throw error;
       }
 
+      console.log('Signin successful:', data);
       await logSecurityEvent({
         type: 'AUTH_ATTEMPT',
         details: `Successful signin for ${sanitizedEmail}`
@@ -247,6 +272,7 @@ export const useEnhancedAuth = () => {
 
       return { data, error: null };
     } catch (error: any) {
+      console.error('Signin process error:', error);
       toast({
         title: "Sign in failed",
         description: error.message,
@@ -258,6 +284,7 @@ export const useEnhancedAuth = () => {
 
   const signOut = async () => {
     try {
+      console.log('Starting signout process...');
       await logSecurityEvent({
         type: 'AUTH_ATTEMPT',
         details: 'User initiated signout'
@@ -270,10 +297,11 @@ export const useEnhancedAuth = () => {
         description: "You have been signed out of your account.",
       });
 
-      window.location.href = '/auth';
+      // Fixed: Redirect to signin instead of auth to prevent loops
+      window.location.href = '/signin';
     } catch (error: any) {
       console.error('Signout error:', error);
-      window.location.href = '/auth';
+      window.location.href = '/signin';
     }
   };
 
