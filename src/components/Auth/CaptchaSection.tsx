@@ -1,13 +1,12 @@
 
 import { useCallback, useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Turnstile } from '@marsidev/react-turnstile';
-import { CheckCircle, AlertCircle, RefreshCw, Bug, Loader2, Shield } from 'lucide-react';
+import { Shield, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
+import { CaptchaWidget } from './CaptchaWidget';
+import { CaptchaDevControls } from './CaptchaDevControls';
+import { CaptchaErrorDisplay } from './CaptchaErrorDisplay';
+import { CaptchaStatusDisplay } from './CaptchaStatusDisplay';
 
 interface CaptchaSectionProps {
   captchaToken: string | null;
@@ -112,130 +111,41 @@ export const CaptchaSection = ({
         {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
       </div>
       
-      {/* Development helpers */}
-      {import.meta.env.DEV && (
-        <Alert className="border-orange-200 bg-orange-50">
-          <Bug className="h-4 w-4 text-orange-600" />
-          <AlertDescription>
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-orange-800">{t('captcha.devMode')}</p>
-              <p className="text-xs text-orange-700">
-                {t('captcha.devDescription')}
-              </p>
-              <Button 
-                type="button"
-                variant="outline" 
-                size="sm" 
-                onClick={handleDevBypass}
-                className="text-xs border-orange-300 text-orange-700 hover:bg-orange-100"
-              >
-                <Bug className="h-3 w-3 mr-1" />
-                {t('captcha.bypassButton')}
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+      <CaptchaDevControls 
+        onDevBypass={handleDevBypass}
+        isManualTesting={isManualTesting}
+      />
+
+      {!isManualTesting ? (
+        <CaptchaWidget
+          captchaKey={captchaKey}
+          onSuccess={handleCaptchaSuccess}
+          onError={handleCaptchaError}
+          onBeforeInteractive={handleBeforeInteractive}
+          onAfterInteractive={handleAfterInteractive}
+          isLoading={isLoading}
+        />
+      ) : (
+        <CaptchaDevControls 
+          onDevBypass={handleDevBypass}
+          isManualTesting={isManualTesting}
+        />
       )}
 
-      <div className="flex justify-center relative">
-        {!isManualTesting ? (
-          <div className="relative">
-            <Turnstile
-              key={captchaKey}
-              siteKey={TURNSTILE_SITE_KEY}
-              onSuccess={handleCaptchaSuccess}
-              onError={handleCaptchaError}
-              onBeforeInteractive={handleBeforeInteractive}
-              onAfterInteractive={handleAfterInteractive}
-              options={{
-                theme: 'auto',
-                size: 'normal',
-                retry: 'auto'
-              }}
-            />
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t('captcha.loading')}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-4 border border-dashed border-green-300 bg-green-50 rounded-lg text-center">
-            <Bug className="h-6 w-6 mx-auto mb-2 text-green-600" />
-            <p className="text-sm text-green-700 font-medium">{t('captcha.devBypassActive')}</p>
-            <p className="text-xs text-green-600 mt-1">{t('captcha.devBypassDescription')}</p>
-          </div>
-        )}
-      </div>
+      <CaptchaErrorDisplay
+        captchaError={captchaError}
+        retryCount={retryCount}
+        isLoading={isLoading}
+        isManualTesting={isManualTesting}
+        onRetry={handleRetry}
+        onDevBypass={handleDevBypass}
+      />
 
-      {captchaError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <div className="space-y-2">
-              <p className="text-sm">{captchaError}</p>
-              {retryCount > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {t('captcha.retryAttempt', { count: retryCount })}
-                </p>
-              )}
-              <div className="flex gap-2">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRetry}
-                  disabled={isLoading}
-                  className="text-xs"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                      {t('captcha.retrying')}
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="h-3 w-3 mr-1" />
-                      {t('captcha.retryButton')}
-                    </>
-                  )}
-                </Button>
-                {import.meta.env.DEV && !isManualTesting && (
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleDevBypass}
-                    className="text-xs"
-                  >
-                    <Bug className="h-3 w-3 mr-1" />
-                    {t('captcha.useDevBypass')}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {captchaToken && !captchaError && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">{t('captcha.verified')}</span>
-              {isManualTesting && (
-                <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-                  {t('captcha.devModeLabel')}
-                </span>
-              )}
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
+      <CaptchaStatusDisplay
+        captchaToken={captchaToken}
+        captchaError={captchaError}
+        isManualTesting={isManualTesting}
+      />
     </div>
   );
 };
