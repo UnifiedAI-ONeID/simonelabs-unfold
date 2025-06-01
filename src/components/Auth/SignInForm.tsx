@@ -1,16 +1,16 @@
 
-import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
-import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
-import { SecureFormWrapper } from '@/components/Security/SecureFormWrapper';
-import { SignInFormFields } from '@/components/Auth/SignInFormFields';
-import { CaptchaSection } from '@/components/Auth/CaptchaSection';
-import { FormValidationMessage } from '@/components/Auth/FormValidationMessage';
-import { Link, useNavigate } from 'react-router-dom';
+import { validatePassword } from '@/lib/enhancedPasswordValidation';
+import { SignInFormFields } from './SignInFormFields';
+import { CaptchaSection } from './CaptchaSection';
+import { FormValidationMessage } from './FormValidationMessage';
+import { TwoFactorAuth } from './TwoFactorAuth';
 
 interface SignInFormProps {
   onSuccess?: () => void;
@@ -23,78 +23,87 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaKey, setCaptchaKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const { signIn, user } = useEnhancedAuth();
-  const { 
-    twoFactorState, 
-    isVerifying, 
+  const {
+    twoFactorState,
+    isVerifying,
     isResending,
-    initiateTwoFactor, 
-    verifyTwoFactorCode, 
+    initiateTwoFactor,
+    verifyTwoFactorCode,
     resendTwoFactorCode,
     resetTwoFactor
   } = useTwoFactorAuth();
 
-  const handleSubmit = async (formData: any) => {
-    if (isSubmitting) return;
+  // Form validation
+  const passwordValidation = password ? validatePassword(password) : null;
+  const isFormValid = Boolean(
+    email &&
+    password &&
+    passwordValidation?.isValid &&
+    captchaToken
+  );
+
+  // Reset captcha on error
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaError(null);
+    setCaptchaKey(prev => prev + 1);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
+    if (!isFormValid || isSubmitting) return;
+
     setIsSubmitting(true);
     
     try {
-      console.log('Starting sign in process...');
+      console.log('Starting signin process...');
+      const result = await signIn(email, password, captchaToken);
       
-      if (!captchaToken) {
-        throw new Error('Please complete the CAPTCHA verification');
-      }
-
-      console.log('Attempting initial sign in...');
-      const { data, error } = await signIn(email, password, captchaToken);
-      
-      if (error) {
-        console.error('Sign in failed:', error);
-        setCaptchaToken(null);
-        setCaptchaKey(prev => prev + 1);
-        return;
-      }
-
-      if (data?.session) {
-        console.log('Initial sign in successful, initiating 2FA...');
-        await initiateTwoFactor(email, data.session.access_token);
+      if (result?.data?.user && !result.error) {
+        console.log('Signin successful, checking 2FA requirement...');
+        
+        // Check if user needs to complete 2FA
+        const sessionId = crypto.randomUUID();
+        await initiateTwoFactor(email, sessionId);
+        console.log('2FA initiated successfully');
       }
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      setCaptchaToken(null);
-      setCaptchaKey(prev => prev + 1);
+      console.error('Signin error:', error);
+      resetCaptcha();
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handle2FAVerified = () => {
-    console.log('2FA verification complete, checking user role...');
-    resetTwoFactor();
+  const handle2FASuccess = () => {
+    console.log('2FA verification successful, checking user role...');
     
+    // Check if user has a role assigned
     const userRole = user?.user_metadata?.role;
     
     if (!userRole) {
-      console.log('No role found, redirecting to role selection...');
-      navigate('/role-selection');
+      console.log('No role assigned, redirecting to role selection');
+      navigate('/role-selection', { replace: true });
     } else {
-      console.log('Role found:', userRole, 'redirecting to dashboard...');
+      console.log('User has role:', userRole, 'redirecting to appropriate dashboard');
+      // Redirect based on user role
       switch (userRole) {
         case 'student':
-          navigate('/student');
+          navigate('/student', { replace: true });
           break;
         case 'educator':
-          navigate('/educator');
+          navigate('/educator', { replace: true });
           break;
         case 'admin':
         case 'superuser':
-          navigate('/administration');
+          navigate('/administration', { replace: true });
           break;
         default:
-          navigate('/role-selection');
+          navigate('/role-selection', { replace: true });
       }
     }
     
@@ -103,84 +112,98 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     }
   };
 
-  const isFormValid = () => {
-    return email && password && captchaToken;
+  const handle2FAError = () => {
+    console.log('2FA verification failed, resetting form...');
+    resetTwoFactor();
+    resetCaptcha();
   };
 
+  useEffect(() => {
+    return () => {
+      resetTwoFactor();
+    };
+  }, []);
+
+  // Show 2FA component if required
   if (twoFactorState.isRequired) {
     return (
-      <TwoFactorAuth
-        email={twoFactorState.email!}
-        onVerified={handle2FAVerified}
-        onResendCode={resendTwoFactorCode}
-        onVerifyCode={verifyTwoFactorCode}
-        isVerifying={isVerifying}
-        isResending={isResending}
-      />
+      <Card className="w-full max-w-md mx-auto simonelabs-glass-card">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold simonelabs-gradient-text">
+            Two-Factor Authentication
+          </CardTitle>
+          <CardDescription>
+            Please enter the verification code sent to your email
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TwoFactorAuth
+            email={twoFactorState.email || ''}
+            onSuccess={handle2FASuccess}
+            onError={handle2FAError}
+            onResend={resendTwoFactorCode}
+            isVerifying={isVerifying}
+            isResending={isResending}
+          />
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5" />
+    <Card className="w-full max-w-md mx-auto simonelabs-glass-card">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold simonelabs-gradient-text">
           Welcome Back
         </CardTitle>
         <CardDescription>
-          Sign in to your existing account to continue learning
+          Sign in to your account to continue your learning journey
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <SecureFormWrapper
-          onSubmit={handleSubmit}
-          rateLimitKey="signin"
-          maxSubmissions={3}
-          windowMs={300000}
-        >
-          <div className="space-y-4">
-            <SignInFormFields
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-            />
+      <CardContent className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <SignInFormFields
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+          />
 
-            <CaptchaSection
-              captchaToken={captchaToken}
-              setCaptchaToken={setCaptchaToken}
-              captchaError={captchaError}
-              setCaptchaError={setCaptchaError}
-              captchaKey={captchaKey}
-              setCaptchaKey={setCaptchaKey}
-            />
+          <CaptchaSection
+            captchaToken={captchaToken}
+            setCaptchaToken={setCaptchaToken}
+            captchaError={captchaError}
+            setCaptchaError={setCaptchaError}
+            captchaKey={captchaKey}
+            setCaptchaKey={setCaptchaKey}
+          />
 
-            <div className="space-y-2">
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={!isFormValid() || isSubmitting}
-              >
-                {isSubmitting ? 'Signing In...' : 'Sign In to Account'}
-              </Button>
-              
-              <FormValidationMessage
-                isFormValid={isFormValid()}
-                isSubmitting={isSubmitting}
-                email={email}
-                password={password}
-                captchaToken={captchaToken}
-              />
-            </div>
-          </div>
-        </SecureFormWrapper>
+          <FormValidationMessage
+            isFormValid={isFormValid}
+            isSubmitting={isSubmitting}
+            email={email}
+            password={password}
+            captchaToken={captchaToken}
+          />
 
-        <div className="mt-4 text-center">
-          <Link to="/create-account">
-            <Button type="button" variant="link">
-              Don't have an account? Create one here
-            </Button>
-          </Link>
+          <Button
+            type="submit"
+            className="w-full simonelabs-primary-button"
+            disabled={!isFormValid || isSubmitting}
+          >
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
+          </Button>
+        </form>
+
+        <Separator />
+
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/create-account" className="text-primary hover:underline font-medium">
+              Create Account
+            </Link>
+          </p>
         </div>
       </CardContent>
     </Card>
