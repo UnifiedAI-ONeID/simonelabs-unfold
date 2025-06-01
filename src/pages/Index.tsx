@@ -5,9 +5,31 @@ import { ArrowRight, Brain, Users, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
+import { useEnhancedAuth } from "@/hooks/useEnhancedAuth";
+import { WelcomeAssistant } from "@/components/AI/WelcomeAssistant";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const { t } = useTranslation();
+  const { isAuthenticated, user } = useEnhancedAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    // Show welcome assistant for new users
+    if (isAuthenticated && user) {
+      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${user.id}`);
+      if (!hasSeenWelcome) {
+        setShowWelcome(true);
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+    if (user) {
+      localStorage.setItem(`welcome_shown_${user.id}`, 'true');
+    }
+  };
 
   const founders = [
     {
@@ -30,6 +52,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
+      {showWelcome && <WelcomeAssistant onClose={handleCloseWelcome} />}
+      
       <main className="relative pt-14 sm:pt-16 lg:pt-18">
         {/* Hero Section */}
         <section className="min-h-[80vh] sm:min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center relative overflow-hidden">
@@ -49,9 +73,9 @@ const Index = () => {
               </p>
 
               <div className="flex justify-center gap-4 pt-4">
-                <Link to="/auth">
+                <Link to={isAuthenticated ? (user?.user_metadata?.role ? "/dashboard" : "/role-selection") : "/auth"}>
                   <Button className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto rounded-xl group">
-                    <span>{t('hero.cta')}</span>
+                    <span>{isAuthenticated ? "Go to Dashboard" : t('hero.cta')}</span>
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -92,8 +116,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Role Selection Section */}
-        <RoleSelection />
+        {!isAuthenticated && <RoleSelection />}
 
         {/* Founders Section */}
         <section className="py-12 sm:py-16 lg:py-20 bg-card/50">

@@ -7,7 +7,8 @@ import { GraduationCap, Users, Shield } from "lucide-react";
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { UserRole } from '@/hooks/useUserRole';
+
+type UserRole = 'student' | 'educator' | 'admin';
 
 const RoleSelectionPage = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
@@ -30,6 +31,13 @@ const RoleSelectionPage = () => {
       title: "Educator",
       description: "Create and monetize your expertise with powerful teaching tools",
       features: ["Course creation tools", "Student analytics", "Revenue sharing"]
+    },
+    {
+      id: 'admin' as UserRole,
+      icon: Shield,
+      title: "Administrator",
+      description: "Manage the platform and oversee all educational activities",
+      features: ["User management", "Platform analytics", "Content moderation"]
     }
   ];
 
@@ -49,13 +57,15 @@ const RoleSelectionPage = () => {
         description: `Welcome to SimoneLabs as a ${selectedRole}!`,
       });
 
-      // Navigate to the appropriate landing page
       switch (selectedRole) {
         case 'student':
           navigate('/student');
           break;
         case 'educator':
           navigate('/educator');
+          break;
+        case 'admin':
+          navigate('/administration');
           break;
         default:
           navigate('/dashboard');
@@ -81,7 +91,7 @@ const RoleSelectionPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {roles.map((role) => (
               <div
                 key={role.id}

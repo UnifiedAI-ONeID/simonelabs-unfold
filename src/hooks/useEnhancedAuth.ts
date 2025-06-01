@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,20 +27,16 @@ export const useEnhancedAuth = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
 
         console.log('Auth state change:', event, session?.user?.email);
 
-        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-          if (event === 'SIGNED_OUT') {
-            await cleanupAuthState();
-          }
+        if (event === 'SIGNED_OUT') {
+          await cleanupAuthState();
         }
 
-        // Update state synchronously
         setAuthState({
           user: session?.user ?? null,
           session,
@@ -47,7 +44,6 @@ export const useEnhancedAuth = () => {
           isAuthenticated: !!session?.user
         });
 
-        // Defer additional operations
         if (session?.user && event === 'SIGNED_IN') {
           setTimeout(async () => {
             if (mounted) {
@@ -61,7 +57,6 @@ export const useEnhancedAuth = () => {
       }
     );
 
-    // Then check for existing session
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -104,15 +99,12 @@ export const useEnhancedAuth = () => {
 
   const signUp = async (email: string, password: string, confirmPassword: string, role?: string) => {
     try {
-      // Rate limiting
       if (!authRateLimiter.canMakeRequest(email)) {
         throw new Error('Too many signup attempts. Please wait before trying again.');
       }
 
-      // Sanitize inputs
       const sanitizedEmail = InputSanitizer.sanitizeText(email).toLowerCase();
       
-      // Validate password
       const passwordValidation = validatePassword(password);
       if (!passwordValidation.isValid) {
         throw new Error(passwordValidation.errors[0]);
@@ -122,7 +114,6 @@ export const useEnhancedAuth = () => {
         throw new Error('Passwords do not match');
       }
 
-      // Clean any existing auth state
       await cleanupAuthState();
 
       const { data, error } = await supabase.auth.signUp({
@@ -165,15 +156,12 @@ export const useEnhancedAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Rate limiting
       if (!authRateLimiter.canMakeRequest(email)) {
         throw new Error('Too many signin attempts. Please wait before trying again.');
       }
 
-      // Sanitize inputs
       const sanitizedEmail = InputSanitizer.sanitizeText(email).toLowerCase();
 
-      // Clean any existing auth state
       await cleanupAuthState();
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -224,17 +212,15 @@ export const useEnhancedAuth = () => {
         description: "You have been signed out of your account.",
       });
 
-      // Force page refresh for clean state
       window.location.href = '/auth';
     } catch (error: any) {
       console.error('Signout error:', error);
-      // Force redirect even if signout fails
       window.location.href = '/auth';
     }
   };
 
   const getUserRole = () => {
-    return authState.user?.user_metadata?.role || 'student';
+    return authState.user?.user_metadata?.role || 'user';
   };
 
   const getRoleBasedRedirect = () => {
@@ -244,8 +230,9 @@ export const useEnhancedAuth = () => {
         return '/student';
       case 'educator':
         return '/educator';
-      case 'administrator':
-        return '/administrator';
+      case 'admin':
+      case 'superuser':
+        return '/administration';
       default:
         return '/dashboard';
     }
