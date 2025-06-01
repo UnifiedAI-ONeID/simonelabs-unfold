@@ -106,9 +106,7 @@ export const CaptchaSection = ({
             options={{
               theme: 'auto',
               size: 'normal',
-              retry: 'auto',
-              'retry-interval': 8000,
-              'refresh-expired': 'auto'
+              retry: 'auto'
             }}
           />
         ) : (
