@@ -13,21 +13,7 @@ const getSecurityHeaders = () => ({
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
 });
 
-const validateRequest = (req: Request): { isValid: boolean; error?: string } => {
-  const contentLength = req.headers.get('content-length');
-  if (contentLength && parseInt(contentLength) > 1024 * 10) { // 10KB limit
-    return { isValid: false, error: 'Request too large' };
-  }
-
-  const contentType = req.headers.get('content-type');
-  if (!contentType || !contentType.includes('application/json')) {
-    return { isValid: false, error: 'Invalid content type' };
-  }
-
-  return { isValid: true };
-};
-
-const createSecureErrorResponse = (message: string, status: number = 400, details?: any) => {
+const createErrorResponse = (message: string, status: number = 400, details?: any) => {
   const response = {
     success: false,
     error: message,
@@ -76,7 +62,7 @@ serve(async (req) => {
   const headers = getSecurityHeaders();
   const requestId = crypto.randomUUID();
 
-  console.log(`[${requestId}] CAPTCHA validation request started`);
+  console.log(`[${requestId}] CAPTCHA validation request started - Method: ${req.method}`);
 
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers });
@@ -84,80 +70,54 @@ serve(async (req) => {
 
   if (req.method !== 'POST') {
     console.log(`[${requestId}] Invalid method: ${req.method}`);
-    return createSecureErrorResponse('Method not allowed', 405);
-  }
-
-  // Validate request format and size
-  const validation = validateRequest(req);
-  if (!validation.isValid) {
-    console.error(`[${requestId}] Request validation failed: ${validation.error}`);
-    return createSecureErrorResponse(validation.error!, 400);
+    return createErrorResponse('Method not allowed', 405);
   }
 
   try {
-    // Fixed: Better request body handling
+    // Read and parse request body
     let body: string;
+    let parsedBody: any;
+    
     try {
       body = await req.text();
-      console.log(`[${requestId}] Raw request body length: ${body.length}`);
+      console.log(`[${requestId}] Request body received, length: ${body.length}`);
       
-      // Handle empty body
       if (!body || body.trim() === '') {
         console.error(`[${requestId}] Empty request body`);
-        return createSecureErrorResponse('Empty request body');
+        return createErrorResponse('Request body is required');
       }
-    } catch (readError) {
-      console.error(`[${requestId}] Failed to read request body:`, readError);
-      return createSecureErrorResponse('Failed to read request body');
-    }
 
-    let parsedBody;
-    try {
-      parsedBody = JSON.parse(body);
-      console.log(`[${requestId}] Successfully parsed JSON body`);
-    } catch (parseError) {
-      console.error(`[${requestId}] Invalid JSON format:`, parseError);
-      console.error(`[${requestId}] Body content:`, body.substring(0, 200));
-      return createSecureErrorResponse('Invalid JSON format');
+      // Handle both direct JSON and stringified JSON
+      try {
+        parsedBody = JSON.parse(body);
+      } catch (parseError) {
+        // If body is already an object (shouldn't happen but let's be safe)
+        console.log(`[${requestId}] Body parsing failed, trying as direct object`);
+        parsedBody = body;
+      }
+      
+      console.log(`[${requestId}] Request body parsed successfully`);
+    } catch (readError) {
+      console.error(`[${requestId}] Failed to read request:`, readError);
+      return createErrorResponse('Failed to read request body');
     }
 
     const { token } = parsedBody;
     
     if (!token || typeof token !== 'string') {
-      console.error(`[${requestId}] Invalid or missing token in request`);
-      return createSecureErrorResponse('Invalid or missing token');
+      console.error(`[${requestId}] Invalid token in request:`, { token: typeof token });
+      return createErrorResponse('Valid CAPTCHA token is required');
     }
 
-    // Enhanced token format validation
+    // Token format validation
     if (token.length < 10 || token.length > 2048) {
-      console.error(`[${requestId}] Invalid token format, length: ${token.length}`);
-      return createSecureErrorResponse('Invalid token format');
+      console.error(`[${requestId}] Invalid token length: ${token.length}`);
+      return createErrorResponse('Invalid CAPTCHA token format');
     }
 
-    // Check for malicious patterns
-    if (token.includes('<script>') || token.includes('javascript:') || token.includes('data:')) {
-      console.error(`[${requestId}] Potentially malicious token detected`);
-      return createSecureErrorResponse('Invalid token format');
-    }
+    console.log(`[${requestId}] Processing token: ${token.substring(0, 20)}...`);
 
-    const secretKey = Deno.env.get('TURNSTILE_SECRET_KEY');
-    if (!secretKey) {
-      console.error(`[${requestId}] TURNSTILE_SECRET_KEY not configured in Supabase secrets`);
-      return createSecureErrorResponse('CAPTCHA service configuration error - missing secret key', 500);
-    }
-
-    console.log(`[${requestId}] TURNSTILE_SECRET_KEY found, proceeding with validation`);
-
-    // Get client IP with enhanced detection
-    const clientIP = req.headers.get('CF-Connecting-IP') || 
-                    req.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || 
-                    req.headers.get('X-Real-IP') || 
-                    req.headers.get('X-Client-IP') ||
-                    '127.0.0.1';
-
-    console.log(`[${requestId}] Client IP: ${clientIP.substring(0, 8)}...`);
-
-    // Enhanced development environment bypass
+    // Check for development bypass
     const isDevelopment = Deno.env.get('ENVIRONMENT') === 'development';
     if (isDevelopment && token === 'dev-bypass-token') {
       console.log(`[${requestId}] Development mode: bypassing CAPTCHA validation`);
@@ -168,7 +128,22 @@ serve(async (req) => {
       });
     }
 
-    // Verify the token with Cloudflare Turnstile
+    // Get secret key
+    const secretKey = Deno.env.get('TURNSTILE_SECRET_KEY');
+    if (!secretKey) {
+      console.error(`[${requestId}] TURNSTILE_SECRET_KEY not configured`);
+      return createErrorResponse('CAPTCHA service configuration error', 500);
+    }
+
+    console.log(`[${requestId}] Secret key found, proceeding with Turnstile validation`);
+
+    // Get client IP
+    const clientIP = req.headers.get('CF-Connecting-IP') || 
+                    req.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || 
+                    req.headers.get('X-Real-IP') || 
+                    '127.0.0.1';
+
+    // Verify with Cloudflare Turnstile
     const formData = new URLSearchParams({
       secret: secretKey,
       response: token,
@@ -178,7 +153,7 @@ serve(async (req) => {
     console.log(`[${requestId}] Sending verification request to Turnstile API...`);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
       const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
@@ -186,7 +161,6 @@ serve(async (req) => {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'User-Agent': 'Supabase-Edge-Function/1.0',
-          'Accept': 'application/json'
         },
         body: formData,
         signal: controller.signal
@@ -195,61 +169,30 @@ serve(async (req) => {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        console.error(`[${requestId}] Turnstile API HTTP error: ${response.status} ${response.statusText}`);
-        const errorText = await response.text();
-        console.error(`[${requestId}] Turnstile API error response:`, errorText);
-        
-        if (response.status >= 500) {
-          return createSecureErrorResponse('CAPTCHA service temporarily unavailable', 503);
-        } else {
-          return createSecureErrorResponse('CAPTCHA verification failed', 400);
-        }
+        console.error(`[${requestId}] Turnstile API error: ${response.status}`);
+        return createErrorResponse('CAPTCHA verification service error', 503);
       }
 
       const result: TurnstileResponse = await response.json();
-      console.log(`[${requestId}] Turnstile API response:`, JSON.stringify(result, null, 2));
+      console.log(`[${requestId}] Turnstile response:`, { success: result.success, errors: result['error-codes'] });
       
       if (!result.success) {
-        console.warn(`[${requestId}] CAPTCHA verification failed:`, {
-          errors: result['error-codes'],
-          timestamp: result.challenge_ts,
-          hostname: result.hostname
-        });
-        
-        // Enhanced error message mapping
         const errorCodes = result['error-codes'] || [];
         let errorMessage = 'CAPTCHA verification failed';
-        let statusCode = 400;
         
         if (errorCodes.includes('timeout-or-duplicate')) {
-          errorMessage = 'CAPTCHA token expired or already used. Please try again.';
+          errorMessage = 'CAPTCHA token expired. Please try again.';
         } else if (errorCodes.includes('invalid-input-response')) {
           errorMessage = 'Invalid CAPTCHA token. Please refresh and try again.';
         } else if (errorCodes.includes('invalid-input-secret')) {
           errorMessage = 'CAPTCHA service configuration error';
-          statusCode = 500;
-          console.error(`[${requestId}] Invalid secret key configured!`);
-        } else if (errorCodes.includes('missing-input-secret')) {
-          errorMessage = 'CAPTCHA service configuration error';
-          statusCode = 500;
-        } else if (errorCodes.includes('missing-input-response')) {
-          errorMessage = 'Missing CAPTCHA token';
-        } else if (errorCodes.includes('bad-request')) {
-          errorMessage = 'Invalid CAPTCHA request format';
+          console.error(`[${requestId}] Invalid secret key!`);
         }
         
-        return createSecureErrorResponse(errorMessage, statusCode, {
-          errorCodes: errorCodes
-        });
+        return createErrorResponse(errorMessage, 400, { errorCodes });
       }
 
-      // Log successful verification (without sensitive data)
-      console.log(`[${requestId}] CAPTCHA verified successfully:`, {
-        timestamp: result.challenge_ts,
-        hostname: result.hostname,
-        action: result.action,
-        clientIP: clientIP.substring(0, 8) + '...' // Partial IP for privacy
-      });
+      console.log(`[${requestId}] CAPTCHA verified successfully`);
 
       return createSuccessResponse({
         challenge_ts: result.challenge_ts,
@@ -261,16 +204,16 @@ serve(async (req) => {
       clearTimeout(timeoutId);
       
       if (fetchError.name === 'AbortError') {
-        console.error(`[${requestId}] Turnstile API request timeout`);
-        return createSecureErrorResponse('CAPTCHA verification timeout. Please try again.', 408);
+        console.error(`[${requestId}] Turnstile API timeout`);
+        return createErrorResponse('CAPTCHA verification timeout', 408);
       } else {
-        console.error(`[${requestId}] Turnstile API network error:`, fetchError);
-        return createSecureErrorResponse('Network error during CAPTCHA verification', 503);
+        console.error(`[${requestId}] Turnstile API error:`, fetchError);
+        return createErrorResponse('CAPTCHA verification service unavailable', 503);
       }
     }
 
   } catch (error) {
-    console.error(`[${requestId}] CAPTCHA validation error:`, error);
-    return createSecureErrorResponse('Internal server error during CAPTCHA validation', 500);
+    console.error(`[${requestId}] Unexpected error:`, error);
+    return createErrorResponse('Internal server error', 500);
   }
 });

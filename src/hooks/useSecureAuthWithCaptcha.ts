@@ -1,3 +1,4 @@
+
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -21,19 +22,6 @@ interface CaptchaValidationResponse {
   details?: any;
 }
 
-// Helper function to clean up authentication state
-const cleanupAuthState = () => {
-  try {
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-  } catch (error) {
-    console.error('Error cleaning up auth state:', error);
-  }
-};
-
 export const useSecureAuthWithCaptcha = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -51,40 +39,41 @@ export const useSecureAuthWithCaptcha = () => {
     }
 
     try {
-      console.log(`CAPTCHA validation attempt ${retryCount + 1}...`);
+      console.log(`CAPTCHA validation attempt ${retryCount + 1} for token: ${token.substring(0, 20)}...`);
       
-      // Fixed: Properly format the request body and headers
+      // Prepare request body
+      const requestBody = { token };
+      
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
-        body: JSON.stringify({ token }), // Ensure body is properly stringified
+        body: requestBody,
         headers: {
           'Content-Type': 'application/json',
           ...CSRFProtection.getHeaders()
         }
       });
 
+      console.log('Supabase function response:', { data, error });
+
       if (error) {
         console.error('CAPTCHA validation error:', error);
         
-        // Enhanced error handling with retry logic for certain errors
         let userMessage = 'CAPTCHA verification failed. Please try again.';
         let shouldRetry = false;
         
         if (error.message?.includes('timeout') || error.message?.includes('408')) {
           userMessage = 'CAPTCHA verification timed out. Retrying...';
           shouldRetry = retryCount < 2;
-        } else if (error.message?.includes('network') || error.message?.includes('503')) {
-          userMessage = 'CAPTCHA service is temporarily unavailable. Please try again in a moment.';
+        } else if (error.message?.includes('503')) {
+          userMessage = 'CAPTCHA service temporarily unavailable. Please try again.';
           shouldRetry = retryCount < 1;
         } else if (error.message?.includes('expired') || error.message?.includes('duplicate')) {
           userMessage = 'CAPTCHA token expired. Please complete the verification again.';
-        } else if (error.message?.includes('configuration')) {
-          userMessage = 'CAPTCHA service is not properly configured. Please contact support.';
         }
         
         // Automatic retry for network/timeout errors
         if (shouldRetry) {
           console.log(`Retrying CAPTCHA validation (attempt ${retryCount + 2})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Progressive delay
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
           return validateCaptcha(token, retryCount + 1);
         }
         
@@ -103,15 +92,14 @@ export const useSecureAuthWithCaptcha = () => {
       }
 
       const result: CaptchaValidationResponse = data;
-      const isValid = result.success;
       
-      if (!isValid) {
+      if (!result || !result.success) {
         console.log('CAPTCHA validation returned false:', result);
         
         let errorMessage = 'Please complete the security verification again.';
-        if (result.details?.errorCodes?.includes('timeout-or-duplicate')) {
+        if (result?.details?.errorCodes?.includes('timeout-or-duplicate')) {
           errorMessage = 'CAPTCHA token expired. Please try again.';
-        } else if (result.details?.errorCodes?.includes('invalid-input-response')) {
+        } else if (result?.details?.errorCodes?.includes('invalid-input-response')) {
           errorMessage = 'Invalid CAPTCHA response. Please refresh and try again.';
         }
         
@@ -121,27 +109,25 @@ export const useSecureAuthWithCaptcha = () => {
           variant: "destructive",
         });
         
-        await logSecurityEvent({
-          type: 'VALIDATION_FAILURE',
-          details: `CAPTCHA validation returned false: ${JSON.stringify(result)} (attempt ${retryCount + 1})`
+        return false;
+      }
+
+      console.log('CAPTCHA validation successful:', {
+        development: result.development,
+        bypass: result.bypass,
+        challenge_ts: result.challenge_ts
+      });
+      
+      if (result.development) {
+        toast({
+          title: "Development Mode",
+          description: "CAPTCHA bypassed for development testing.",
+          variant: "default",
         });
-      } else {
-        console.log('CAPTCHA validation successful:', {
-          development: result.development,
-          bypass: result.bypass,
-          challenge_ts: result.challenge_ts
-        });
-        
-        if (result.development) {
-          toast({
-            title: "Development Mode",
-            description: "CAPTCHA bypassed for development testing.",
-            variant: "default",
-          });
-        }
       }
       
-      return isValid;
+      return true;
+      
     } catch (error) {
       console.error('CAPTCHA validation network error:', error);
       
@@ -158,11 +144,6 @@ export const useSecureAuthWithCaptcha = () => {
         variant: "destructive",
       });
       
-      await logSecurityEvent({
-        type: 'VALIDATION_FAILURE',
-        details: `CAPTCHA validation network error: ${error} (attempt ${retryCount + 1})`
-      });
-      
       return false;
     }
   };
@@ -171,36 +152,19 @@ export const useSecureAuthWithCaptcha = () => {
     mutationFn: async (authData: AuthData) => {
       const clientId = `signup_${authData.email}`;
       
-      // Enhanced rate limiting check
       if (!authRateLimiter.canMakeRequest(clientId)) {
-        await logSecurityEvent({
-          type: 'RATE_LIMIT_EXCEEDED',
-          details: `Signup rate limit exceeded for ${authData.email}`
-        });
         throw new Error('Too many signup attempts. Please wait before trying again.');
       }
 
-      // Clean up any existing auth state
-      cleanupAuthState();
-
-      // Enhanced input validation
+      // Input validation
       if (!validateInput.email(authData.email)) {
-        await logSecurityEvent({
-          type: 'VALIDATION_FAILURE',
-          details: 'Invalid email format in signup'
-        });
         throw new Error('Invalid email format');
       }
 
       if (!validateInput.password(authData.password)) {
-        await logSecurityEvent({
-          type: 'VALIDATION_FAILURE',
-          details: 'Invalid password format in signup'
-        });
         throw new Error('Password must be at least 8 characters long');
       }
 
-      // Validate required fields
       if (!authData.email || !authData.password || !authData.confirmPassword) {
         throw new Error('All fields are required');
       }
@@ -209,7 +173,7 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('Passwords do not match');
       }
 
-      // Validate CAPTCHA - always required
+      // CAPTCHA validation
       if (!authData.captchaToken) {
         throw new Error('CAPTCHA verification is required');
       }
@@ -217,16 +181,11 @@ export const useSecureAuthWithCaptcha = () => {
       console.log('Starting CAPTCHA validation for signup...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
-        await logSecurityEvent({
-          type: 'VALIDATION_FAILURE',
-          details: 'CAPTCHA validation failed in signup'
-        });
         throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
 
       console.log('CAPTCHA validation passed, proceeding with signup...');
 
-      // Proceed with signup only after all validations pass
       const { data, error } = await supabase.auth.signUp({
         email: authData.email,
         password: authData.password,
@@ -237,17 +196,8 @@ export const useSecureAuthWithCaptcha = () => {
 
       if (error) {
         console.error('Signup error:', error);
-        await logSecurityEvent({
-          type: 'AUTH_ATTEMPT',
-          details: `Signup failed for ${authData.email}: ${error.message}`
-        });
         throw new Error(error.message);
       }
-
-      await logSecurityEvent({
-        type: 'AUTH_ATTEMPT',
-        details: `Successful signup for ${authData.email}`
-      });
 
       return data;
     },
@@ -272,40 +222,20 @@ export const useSecureAuthWithCaptcha = () => {
     mutationFn: async (authData: AuthData) => {
       const clientId = `signin_${authData.email}`;
       
-      // Enhanced rate limiting check
       if (!authRateLimiter.canMakeRequest(clientId)) {
-        await logSecurityEvent({
-          type: 'RATE_LIMIT_EXCEEDED',
-          details: `Signin rate limit exceeded for ${authData.email}`
-        });
         throw new Error('Too many signin attempts. Please wait before trying again.');
       }
 
-      // Clean up any existing auth state
-      cleanupAuthState();
-
-      // Attempt global sign out before new sign in
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.log('Global signout attempt failed, continuing...');
-      }
-
-      // Enhanced input validation
+      // Input validation
       if (!validateInput.email(authData.email)) {
-        await logSecurityEvent({
-          type: 'VALIDATION_FAILURE',
-          details: 'Invalid email format in signin'
-        });
         throw new Error('Invalid email format');
       }
 
-      // Validate required fields
       if (!authData.email || !authData.password) {
         throw new Error('Email and password are required');
       }
 
-      // Validate CAPTCHA - always required
+      // CAPTCHA validation
       if (!authData.captchaToken) {
         throw new Error('CAPTCHA verification is required');
       }
@@ -313,16 +243,11 @@ export const useSecureAuthWithCaptcha = () => {
       console.log('Starting CAPTCHA validation for signin...');
       const isCaptchaValid = await validateCaptcha(authData.captchaToken);
       if (!isCaptchaValid) {
-        await logSecurityEvent({
-          type: 'VALIDATION_FAILURE',
-          details: 'CAPTCHA validation failed in signin'
-        });
         throw new Error('CAPTCHA verification failed. Please complete the verification and try again.');
       }
 
       console.log('CAPTCHA validation passed, proceeding with signin...');
 
-      // Proceed with signin only after all validations pass
       const { data, error } = await supabase.auth.signInWithPassword({
         email: authData.email,
         password: authData.password,
@@ -330,17 +255,8 @@ export const useSecureAuthWithCaptcha = () => {
 
       if (error) {
         console.error('Signin error:', error);
-        await logSecurityEvent({
-          type: 'AUTH_ATTEMPT',
-          details: `Signin failed for ${authData.email}: ${error.message}`
-        });
         throw new Error(error.message);
       }
-
-      await logSecurityEvent({
-        type: 'AUTH_ATTEMPT',
-        details: `Successful signin for ${authData.email}`
-      });
 
       return data;
     },

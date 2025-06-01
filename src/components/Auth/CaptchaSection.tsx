@@ -42,8 +42,7 @@ export const CaptchaSection = ({
     setCaptchaToken(null);
     setIsLoading(false);
     
-    // Provide more helpful error messages based on error type
-    let errorMessage = 'CAPTCHA verification failed';
+    let errorMessage = 'CAPTCHA verification failed. Please try again.';
     let shouldAutoRetry = false;
     
     if (error?.includes('timeout')) {
@@ -55,8 +54,6 @@ export const CaptchaSection = ({
     } else if (error?.includes('expired')) {
       errorMessage = 'CAPTCHA token expired. Please refresh and try again.';
       shouldAutoRetry = true;
-    } else if (error?.includes('invalid')) {
-      errorMessage = 'Invalid CAPTCHA response. Please try again.';
     } else if (error) {
       errorMessage = `CAPTCHA error: ${error}`;
     }
@@ -80,7 +77,6 @@ export const CaptchaSection = ({
     setRetryCount(prev => prev + 1);
     setCaptchaKey(captchaKey + 1);
     
-    // Reset loading state after a short delay if no response
     setTimeout(() => {
       setIsLoading(false);
     }, 10000);
@@ -122,7 +118,7 @@ export const CaptchaSection = ({
             <div className="space-y-2">
               <p className="text-sm font-medium text-orange-800">Development Mode</p>
               <p className="text-xs text-orange-700">
-                If CAPTCHA is not working, you can use the bypass button below for testing.
+                CAPTCHA may not work with test keys. Use the bypass button for testing.
               </p>
               <Button 
                 type="button"
