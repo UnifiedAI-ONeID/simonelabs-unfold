@@ -8,11 +8,18 @@
     <meta name="description" content="Transform your learning experience with SimoneLabs - The future of AI-powered education and personalized learning" />
     <meta name="author" content="SimoneLabs" />
 
-    <!-- Education-themed Icons - Open Book Icon -->
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/167/167755.png" type="image/x-icon">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/167/167755.png" type="image/png" sizes="32x32">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/167/167755.png" type="image/png" sizes="192x192">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/167/167755.png">
+    <!-- Theme-aware Book Icons for Education -->
+    <!-- Light mode favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/></svg>" type="image/svg+xml" media="(prefers-color-scheme: light)">
+    
+    <!-- Dark mode favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/></svg>" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+    
+    <!-- Fallback favicon for browsers that don't support media queries in favicons -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/></svg>" type="image/svg+xml">
+    
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/></svg>">
 
     <!-- Progressive Web App Meta Tags -->
     <meta name="theme-color" content="#3B82F6" />
@@ -40,6 +47,7 @@
 
   <body>
     <div id="root"></div>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
