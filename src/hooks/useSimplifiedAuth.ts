@@ -185,13 +185,19 @@ export const useSimplifiedAuth = () => {
         console.error('❌ Signup error:', error);
         let errorMessage = error.message;
         
-        // Handle specific error cases
+        // Handle specific error cases with improved messaging
         if (error.message.includes('User already registered')) {
           errorMessage = 'An account with this email already exists. Please sign in instead.';
         } else if (error.message.includes('Password should be')) {
           errorMessage = 'Password must be at least 6 characters long.';
         } else if (error.message.includes('Invalid email')) {
           errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('over_email_send_rate_limit') || error.message.includes('email rate limit')) {
+          errorMessage = 'Email rate limit exceeded. Please try again in a few minutes or use a different email address.';
+        } else if (error.message.includes('request_timeout') || error.message.includes('timeout')) {
+          errorMessage = 'Request timed out. Please check your connection and try again.';
+        } else if (error.message.includes('database') || error.message.includes('schema')) {
+          errorMessage = 'Database error occurred. Please try again or contact support if the issue persists.';
         }
         
         toast({
@@ -220,7 +226,13 @@ export const useSimplifiedAuth = () => {
       return { data };
     } catch (error: any) {
       console.error('💥 Sign up catch error:', error);
-      const errorMessage = error.message || 'An unexpected error occurred during sign up';
+      let errorMessage = error.message || 'An unexpected error occurred during sign up';
+      
+      // Additional client-side error handling
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('network')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+      
       toast({
         title: "Sign up failed",
         description: errorMessage,
@@ -245,7 +257,7 @@ export const useSimplifiedAuth = () => {
         // Handle specific error cases
         if (error.message.includes('Invalid email')) {
           errorMessage = 'Please enter a valid email address.';
-        } else if (error.message.includes('Too many requests')) {
+        } else if (error.message.includes('Too many requests') || error.message.includes('rate limit')) {
           errorMessage = 'Too many reset attempts. Please wait before trying again.';
         }
         

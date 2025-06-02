@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { CreateAccountForm } from '@/components/Auth/CreateAccountForm';
+import { DevAuthHelper } from '@/components/Auth/DevAuthHelper';
 import { getSecurityHeaders } from '@/lib/securityConfig';
 
 const CreateAccount = () => {
@@ -68,6 +69,7 @@ const CreateAccount = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
       <CreateAccountForm onSuccess={handleCreateAccountSuccess} />
+      <DevAuthHelper />
     </div>
   );
 };
