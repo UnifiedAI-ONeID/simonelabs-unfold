@@ -7,7 +7,6 @@ import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
-import { SecureFormWrapper } from '@/components/Security/SecureFormWrapper';
 import { CreateAccountFormFields } from '@/components/Auth/CreateAccountFormFields';
 import { CreateAccountValidationMessage } from '@/components/Auth/CreateAccountValidationMessage';
 import { Link, useNavigate } from 'react-router-dom';
@@ -44,7 +43,8 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     }
   }, []);
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (isSubmitting) return;
     
     setIsSubmitting(true);
@@ -124,43 +124,36 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <SecureFormWrapper
-          onSubmit={handleSubmit}
-          rateLimitKey="signup"
-          maxSubmissions={3}
-          windowMs={300000}
-        >
-          <div className="space-y-4">
-            <CreateAccountFormFields
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <CreateAccountFormFields
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={handlePasswordChange}
+            confirmPassword={confirmPassword}
+            setConfirmPassword={setConfirmPassword}
+            passwordValidation={passwordValidation}
+          />
+
+          <div className="space-y-2">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!isFormValid() || isSubmitting}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Create New Account'}
+            </Button>
+            
+            <CreateAccountValidationMessage
+              isFormValid={isFormValid()}
+              isSubmitting={isSubmitting}
               email={email}
-              setEmail={setEmail}
               password={password}
-              setPassword={handlePasswordChange}
               confirmPassword={confirmPassword}
-              setConfirmPassword={setConfirmPassword}
               passwordValidation={passwordValidation}
             />
-
-            <div className="space-y-2">
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={!isFormValid() || isSubmitting}
-              >
-                {isSubmitting ? 'Creating Account...' : 'Create New Account'}
-              </Button>
-              
-              <CreateAccountValidationMessage
-                isFormValid={isFormValid()}
-                isSubmitting={isSubmitting}
-                email={email}
-                password={password}
-                confirmPassword={confirmPassword}
-                passwordValidation={passwordValidation}
-              />
-            </div>
           </div>
-        </SecureFormWrapper>
+        </form>
 
         <div className="mt-4 text-center">
           <Link to="/signin">
