@@ -4,14 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
-import { Turnstile } from '@marsidev/react-turnstile';
 import { useTranslation } from 'react-i18next';
 import { PasswordStrength } from '@/components/ui/password-strength';
 import { sanitizeText } from '@/lib/security';
 import { useToast } from '@/hooks/use-toast';
-
-// Use production site key
-const TURNSTILE_SITE_KEY = '0x4AAAAAABfVmLaPZh3sMQ7-';
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -41,49 +37,8 @@ const AuthForm = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileKey, setTurnstileKey] = useState(0);
-  const [captchaStatus, setCaptchaStatus] = useState<'loading' | 'ready' | 'error' | 'success'>('loading');
-  const turnstileRef = useRef<any>(null);
   const { toast } = useToast();
   const { t } = useTranslation('auth');
-
-  const handleTurnstileSuccess = useCallback((token: string) => {
-    console.log('CAPTCHA success:', token?.substring(0, 20) + '...');
-    setTurnstileToken(token);
-    setCaptchaStatus('success');
-  }, []);
-
-  const handleTurnstileError = useCallback((error?: string) => {
-    console.error('CAPTCHA error:', error);
-    setTurnstileToken(null);
-    setCaptchaStatus('error');
-    setTurnstileKey(prev => prev + 1);
-    
-    toast({
-      title: "Security verification failed",
-      description: "Please try the verification again.",
-      variant: "destructive",
-    });
-  }, [toast]);
-
-  const handleTurnstileExpire = useCallback(() => {
-    console.log('CAPTCHA expired');
-    setTurnstileToken(null);
-    setCaptchaStatus('loading');
-    setTurnstileKey(prev => prev + 1);
-    
-    toast({
-      title: "Verification expired",
-      description: "Please complete the security verification again.",
-      variant: "destructive",
-    });
-  }, [toast]);
-
-  const handleTurnstileLoad = useCallback(() => {
-    console.log('CAPTCHA loaded');
-    setCaptchaStatus('ready');
-  }, []);
 
   const resetForm = useCallback(() => {
     setEmail('');
@@ -91,9 +46,6 @@ const AuthForm = ({
     setConfirmPassword('');
     setFullName('');
     setShowPassword(false);
-    setTurnstileToken(null);
-    setCaptchaStatus('loading');
-    setTurnstileKey(prev => prev + 1);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,16 +83,6 @@ const AuthForm = ({
       return;
     }
 
-    // CAPTCHA is required for all environments
-    if (!turnstileToken) {
-      toast({
-        title: "Security verification required",
-        description: "Please complete the security verification first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!isLogin) {
       if (password.length < 8) {
         toast({
@@ -171,38 +113,16 @@ const AuthForm = ({
     }
 
     try {
+      // Pass null for captchaToken since CAPTCHA is disabled
       await onSubmit({
         email: sanitizedEmail,
         password,
         confirmPassword,
         fullName: sanitizedFullName,
-        captchaToken: turnstileToken
+        captchaToken: null
       });
     } catch (error) {
       console.error('Auth error:', error);
-    } finally {
-      setTurnstileToken(null);
-      setCaptchaStatus('loading');
-      setTurnstileKey(prev => prev + 1);
-    }
-  };
-
-  const getCaptchaStatusColor = () => {
-    switch (captchaStatus) {
-      case 'success': return 'text-green-600';
-      case 'error': return 'text-red-600';
-      case 'ready': return 'text-blue-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  const getCaptchaStatusText = () => {
-    switch (captchaStatus) {
-      case 'success': return '✓ Verification complete';
-      case 'error': return '✗ Verification failed - please try again';
-      case 'ready': return '⏳ Please complete verification';
-      case 'loading': return '🔄 Loading verification...';
-      default: return '';
     }
   };
 
@@ -306,40 +226,21 @@ const AuthForm = ({
               </div>
             )}
 
-            <div className="space-y-3">
-              <div className="flex justify-center">
-                <div className="scale-90 sm:scale-100">
-                  <Turnstile
-                    key={turnstileKey}
-                    ref={turnstileRef}
-                    siteKey={TURNSTILE_SITE_KEY}
-                    onSuccess={handleTurnstileSuccess}
-                    onError={handleTurnstileError}
-                    onExpire={handleTurnstileExpire}
-                    onLoad={handleTurnstileLoad}
-                    options={{
-                      theme: 'auto',
-                      size: 'normal',
-                      appearance: 'always',
-                      retry: 'auto'
-                    }}
-                  />
-                </div>
-              </div>
-              
+            {/* CAPTCHA section removed - disabled for now */}
+            {import.meta.env.DEV && (
               <div className="text-center">
-                <span className={`text-xs font-medium ${getCaptchaStatusColor()}`}>
-                  {getCaptchaStatusText()}
+                <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                  ⚠️ CAPTCHA is currently disabled
                 </span>
               </div>
-            </div>
+            )}
           </>
         )}
 
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl py-3 h-12 font-medium transition-all duration-200 text-base"
-          disabled={isLoading || (!isForgotPassword && !turnstileToken)}
+          disabled={isLoading}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
