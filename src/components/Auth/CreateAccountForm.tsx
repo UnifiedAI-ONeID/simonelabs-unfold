@@ -7,7 +7,7 @@ import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
 import { CreateAccountFormFields } from '@/components/Auth/CreateAccountFormFields';
 import { CreateAccountValidationMessage } from '@/components/Auth/CreateAccountValidationMessage';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 interface CreateAccountFormProps {
   onSuccess?: () => void;
@@ -19,7 +19,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
   const { signUp } = useSimplifiedAuth();
 

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent } from './securityEnhancements';
 
@@ -27,7 +28,8 @@ export const ensureUserProfile = async (userId: string, email: string) => {
       .maybeSingle();
 
     if (checkError && checkError.code !== 'PGRST116') {
-      throw checkError;
+      console.error('Error checking profile:', checkError);
+      return false;
     }
 
     // Create profile if it doesn't exist
@@ -41,10 +43,13 @@ export const ensureUserProfile = async (userId: string, email: string) => {
         });
 
       if (insertError) {
-        throw insertError;
+        console.error('Error creating profile:', insertError);
+        return false;
       }
 
       console.log('User profile created successfully');
+    } else {
+      console.log('User profile already exists');
     }
 
     return true;

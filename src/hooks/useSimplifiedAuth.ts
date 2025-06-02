@@ -102,9 +102,18 @@ export const useSimplifiedAuth = () => {
 
       if (error) {
         console.error('❌ Signin error:', error);
+        let errorMessage = error.message;
+        
+        // Handle specific error cases
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        }
+        
         toast({
           title: "Sign in failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
         return { error };
@@ -149,19 +158,35 @@ export const useSimplifiedAuth = () => {
 
       if (error) {
         console.error('❌ Signup error:', error);
+        let errorMessage = error.message;
+        
+        // Handle specific error cases
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please sign in instead.';
+        }
+        
         toast({
           title: "Sign up failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
         return { error };
       }
 
       console.log('✅ Signup successful');
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account.",
-      });
+      
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email to verify your account before signing in.",
+        });
+      } else {
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to our platform!",
+        });
+      }
 
       return { data };
     } catch (error: any) {
