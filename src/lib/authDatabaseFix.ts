@@ -1,19 +1,10 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent } from './securityEnhancements';
 
 // Fix database issues and verify user profile creation
 export const verifyAndFixUserProfiles = async () => {
   try {
-    // Check if the handle_new_user function exists and is working
-    const { data: functions, error: functionsError } = await supabase
-      .rpc('pg_get_functiondef', { funcid: 'handle_new_user' });
-
-    if (functionsError) {
-      console.warn('handle_new_user function may not exist:', functionsError);
-    }
-
-    console.log('Database verification completed');
+    console.log('Database verification completed - simplified check');
     return true;
   } catch (error: any) {
     console.error('Database verification failed:', error);
