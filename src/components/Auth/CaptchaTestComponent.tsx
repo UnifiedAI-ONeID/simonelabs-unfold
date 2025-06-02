@@ -29,10 +29,8 @@ export const CaptchaTestComponent = () => {
       console.log(`[${requestId}] Sending test data:`, testData);
       console.log(`[${requestId}] Stringified:`, JSON.stringify(testData));
       
-      // Fix: Use correct Supabase function invocation syntax
-      const { data, error } = await supabase.functions.invoke('validate-captcha', {
-        body: testData
-      });
+      // Correct syntax: pass data directly as second parameter
+      const { data, error } = await supabase.functions.invoke('validate-captcha', testData);
 
       console.log(`[${requestId}] Response:`, { data, error });
       

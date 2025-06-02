@@ -65,12 +65,9 @@ export const useSecureAuthWithCaptcha = () => {
         retryCount: retryCount
       };
       console.log(`[${requestId}] Request data being sent:`, requestData);
-      console.log(`[${requestId}] Request data stringified:`, JSON.stringify(requestData));
       
-      // Fix: Use correct Supabase function invocation syntax
-      const { data, error } = await supabase.functions.invoke('validate-captcha', {
-        body: requestData
-      });
+      // Correct syntax: pass data directly as second parameter
+      const { data, error } = await supabase.functions.invoke('validate-captcha', requestData);
 
       console.log(`[${requestId}] 📨 Supabase function response:`, { 
         data, 
@@ -86,24 +83,28 @@ export const useSecureAuthWithCaptcha = () => {
         let userMessage = 'CAPTCHA verification failed. Please try again.';
         let shouldRetry = false;
         
-        // Enhanced error categorization
-        if (error.message?.includes('timeout') || error.message?.includes('408')) {
+        // Enhanced error categorization with actual error details
+        const errorMessage = error.message || 'Unknown error';
+        
+        if (errorMessage.includes('timeout') || errorMessage.includes('408')) {
           userMessage = 'CAPTCHA verification timed out. Retrying...';
           shouldRetry = retryCount < 2;
-        } else if (error.message?.includes('503') || error.message?.includes('unavailable')) {
+        } else if (errorMessage.includes('503') || errorMessage.includes('unavailable')) {
           userMessage = 'CAPTCHA service temporarily unavailable. Please try again.';
           shouldRetry = retryCount < 1;
-        } else if (error.message?.includes('expired') || error.message?.includes('duplicate')) {
+        } else if (errorMessage.includes('expired') || errorMessage.includes('duplicate')) {
           userMessage = 'CAPTCHA token expired. Please complete the verification again.';
-        } else if (error.message?.includes('400')) {
+        } else if (errorMessage.includes('400')) {
           userMessage = 'Invalid CAPTCHA response. Please try again.';
-        } else if (error.message?.includes('TURNSTILE_SECRET_KEY')) {
+        } else if (errorMessage.includes('TURNSTILE_SECRET_KEY')) {
           userMessage = 'CAPTCHA service configuration error. Please contact support.';
           console.error(`[${requestId}] 🚨 CRITICAL: TURNSTILE_SECRET_KEY not configured!`);
-        } else if (error.message?.includes('non-2xx status code')) {
-          userMessage = 'CAPTCHA service error. Please try again.';
-          console.error(`[${requestId}] 🚨 Non-2xx status code error - likely empty request body or server issue`);
+        } else if (errorMessage.includes('non-2xx status code')) {
+          userMessage = `CAPTCHA service error: ${errorMessage}`;
+          console.error(`[${requestId}] 🚨 Non-2xx status code error - showing actual error to user`);
           shouldRetry = retryCount < 1;
+        } else {
+          userMessage = `CAPTCHA verification error: ${errorMessage}`;
         }
         
         // Automatic retry with exponential backoff
@@ -122,7 +123,7 @@ export const useSecureAuthWithCaptcha = () => {
 
         await logSecurityEvent({
           type: 'VALIDATION_FAILURE',
-          details: `CAPTCHA validation failed: ${error.message} (attempt ${retryCount + 1})`
+          details: `CAPTCHA validation failed: ${errorMessage} (attempt ${retryCount + 1})`
         });
         
         return false;
