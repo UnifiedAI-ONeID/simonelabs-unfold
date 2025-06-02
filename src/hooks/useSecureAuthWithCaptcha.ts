@@ -66,8 +66,10 @@ export const useSecureAuthWithCaptcha = () => {
       };
       console.log(`[${requestId}] Request data being sent:`, requestData);
       
-      // Correct syntax: pass data directly as second parameter
-      const { data, error } = await supabase.functions.invoke('validate-captcha', requestData);
+      // Correct TypeScript syntax: pass data in body property of options object
+      const { data, error } = await supabase.functions.invoke('validate-captcha', {
+        body: requestData
+      });
 
       console.log(`[${requestId}] 📨 Supabase function response:`, { 
         data, 

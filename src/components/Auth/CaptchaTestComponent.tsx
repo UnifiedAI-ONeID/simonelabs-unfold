@@ -29,8 +29,10 @@ export const CaptchaTestComponent = () => {
       console.log(`[${requestId}] Sending test data:`, testData);
       console.log(`[${requestId}] Stringified:`, JSON.stringify(testData));
       
-      // Correct syntax: pass data directly as second parameter
-      const { data, error } = await supabase.functions.invoke('validate-captcha', testData);
+      // Correct TypeScript syntax: pass data in body property of options object
+      const { data, error } = await supabase.functions.invoke('validate-captcha', {
+        body: testData
+      });
 
       console.log(`[${requestId}] Response:`, { data, error });
       
