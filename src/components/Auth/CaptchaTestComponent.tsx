@@ -29,8 +29,10 @@ export const CaptchaTestComponent = () => {
       console.log(`[${requestId}] Sending test data:`, testData);
       console.log(`[${requestId}] Stringified:`, JSON.stringify(testData));
       
-      // Fix: Pass data directly to the edge function, not in a body property
-      const { data, error } = await supabase.functions.invoke('validate-captcha', testData);
+      // Fix: Use correct Supabase function invocation syntax
+      const { data, error } = await supabase.functions.invoke('validate-captcha', {
+        body: testData
+      });
 
       console.log(`[${requestId}] Response:`, { data, error });
       
