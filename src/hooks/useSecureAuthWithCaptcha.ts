@@ -1,9 +1,7 @@
-
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { CSRFProtection } from '@/lib/csrf';
 import { AdvancedRateLimiter } from '@/lib/advancedRateLimiting';
 import { logSecurityEvent, validateInput } from '@/lib/securityEnhancements';
 import { SecureInputValidator } from '@/lib/enhancedInputValidation';
@@ -66,13 +64,15 @@ export const useSecureAuthWithCaptcha = () => {
         timestamp: new Date().toISOString(),
         retryCount: retryCount
       };
-      console.log(`[${requestId}] Request data:`, requestData);
+      console.log(`[${requestId}] Request data being sent:`, requestData);
+      console.log(`[${requestId}] Request data stringified:`, JSON.stringify(requestData));
       
+      // Remove CSRF headers for now to test if they're causing the issue
       const { data, error } = await supabase.functions.invoke('validate-captcha', {
         body: requestData,
         headers: {
-          'Content-Type': 'application/json',
-          ...CSRFProtection.getHeaders()
+          'Content-Type': 'application/json'
+          // Removed CSRF headers to test if they're causing the empty body issue
         }
       });
 
@@ -104,6 +104,10 @@ export const useSecureAuthWithCaptcha = () => {
         } else if (error.message?.includes('TURNSTILE_SECRET_KEY')) {
           userMessage = 'CAPTCHA service configuration error. Please contact support.';
           console.error(`[${requestId}] 🚨 CRITICAL: TURNSTILE_SECRET_KEY not configured!`);
+        } else if (error.message?.includes('non-2xx status code')) {
+          userMessage = 'CAPTCHA service error. Please try again.';
+          console.error(`[${requestId}] 🚨 Non-2xx status code error - likely empty request body or server issue`);
+          shouldRetry = retryCount < 1;
         }
         
         // Automatic retry with exponential backoff
@@ -171,6 +175,11 @@ export const useSecureAuthWithCaptcha = () => {
       
     } catch (error) {
       console.error(`[${requestId}] 💥 CAPTCHA validation network error:`, error);
+      console.error(`[${requestId}] Error details:`, {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       
       // Enhanced retry logic for network errors
       if (retryCount < 2) {
