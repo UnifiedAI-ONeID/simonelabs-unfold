@@ -76,7 +76,6 @@ serve(async (req) => {
   console.log(`[${requestId}] === CAPTCHA validation request started ===`);
   console.log(`[${requestId}] Method: ${req.method}`);
   console.log(`[${requestId}] URL: ${req.url}`);
-  console.log(`[${requestId}] Headers:`, Object.fromEntries(req.headers.entries()));
 
   if (req.method === 'OPTIONS') {
     console.log(`[${requestId}] CORS preflight request - returning headers`);
@@ -89,50 +88,19 @@ serve(async (req) => {
   }
 
   try {
-    // Read and parse request body with better error handling
-    let bodyText: string;
-    let parsedBody: any;
+    // Read and parse request body using req.json() - this is the correct way for Supabase functions
+    let requestBody: any;
     
     try {
-      // Check content type
-      const contentType = req.headers.get('content-type') || '';
-      console.log(`[${requestId}] Content-Type: ${contentType}`);
-      
-      bodyText = await req.text();
-      console.log(`[${requestId}] Raw body received, length: ${bodyText.length}`);
-      console.log(`[${requestId}] Raw body content: "${bodyText}"`);
-      
-      if (!bodyText || bodyText.trim() === '') {
-        console.error(`[${requestId}] Empty request body received`);
-        return createErrorResponse('Request body is required. Please ensure CAPTCHA token is included.', 400);
-      }
-
-      // Try to parse as JSON
-      try {
-        parsedBody = JSON.parse(bodyText);
-        console.log(`[${requestId}] Successfully parsed JSON body:`, parsedBody);
-      } catch (jsonError) {
-        console.error(`[${requestId}] JSON parse error:`, jsonError);
-        console.error(`[${requestId}] Attempting to parse as potential form data or plain text...`);
-        
-        // Try to handle different content types
-        if (contentType.includes('application/x-www-form-urlencoded')) {
-          const params = new URLSearchParams(bodyText);
-          parsedBody = { token: params.get('token') };
-          console.log(`[${requestId}] Parsed as form data:`, parsedBody);
-        } else {
-          // Maybe it's just a plain token
-          parsedBody = { token: bodyText.trim() };
-          console.log(`[${requestId}] Treating as plain token:`, parsedBody);
-        }
-      }
-    } catch (readError) {
-      console.error(`[${requestId}] Failed to read request body:`, readError);
-      return createErrorResponse('Failed to read request body. Please try again.', 400);
+      requestBody = await req.json();
+      console.log(`[${requestId}] Successfully parsed request body:`, requestBody);
+    } catch (jsonError) {
+      console.error(`[${requestId}] Failed to parse JSON body:`, jsonError);
+      return createErrorResponse('Invalid JSON in request body. Please ensure CAPTCHA token is included.', 400);
     }
 
     // Extract and validate token
-    const token = parsedBody?.token || parsedBody?.response || parsedBody;
+    const token = requestBody?.token;
     console.log(`[${requestId}] Extracted token type:`, typeof token);
     console.log(`[${requestId}] Token preview:`, typeof token === 'string' ? token.substring(0, 30) + '...' : token);
     
@@ -140,7 +108,7 @@ serve(async (req) => {
       console.error(`[${requestId}] Invalid token format:`, { 
         tokenType: typeof token, 
         tokenValue: token,
-        parsedBody 
+        requestBody 
       });
       return createErrorResponse('Valid CAPTCHA token is required. Please complete the CAPTCHA verification.', 400);
     }
@@ -213,7 +181,6 @@ serve(async (req) => {
     });
 
     console.log(`[${requestId}] 🚀 Sending verification request to Turnstile API...`);
-    console.log(`[${requestId}] Form data keys:`, Array.from(formData.keys()));
 
     // Create abort controller for timeout
     const controller = new AbortController();
@@ -236,7 +203,6 @@ serve(async (req) => {
       clearTimeout(timeoutId);
 
       console.log(`[${requestId}] 📡 Turnstile API response status: ${response.status}`);
-      console.log(`[${requestId}] Response headers:`, Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         console.error(`[${requestId}] ❌ Turnstile API HTTP error: ${response.status} ${response.statusText}`);
