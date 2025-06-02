@@ -200,6 +200,11 @@ export const useEnhancedAuth = () => {
       }
 
       console.log('✅ Signin successful');
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
+      });
+      
       return { data };
     } catch (error: any) {
       console.error('Sign in error:', error);

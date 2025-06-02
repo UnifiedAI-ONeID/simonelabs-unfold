@@ -50,16 +50,14 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
       }
       
       console.log('Attempting to create account...');
-      const { data, error } = await signUp(email, password, confirmPassword);
+      const { error } = await signUp(email, password, confirmPassword);
       
       if (error) {
         console.error('Account creation failed:', error);
         return;
       }
 
-      // Redirect to email verification page after successful signup
-      console.log('Account creation successful, redirecting to email verification...');
-      navigate('/email-verification');
+      console.log('Account creation successful');
       
       if (onSuccess) {
         onSuccess();
