@@ -1,6 +1,7 @@
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
-import { useTranslation } from 'react-i18next';
 
 interface CreateAccountValidationMessageProps {
   isFormValid: boolean;
@@ -9,7 +10,7 @@ interface CreateAccountValidationMessageProps {
   password: string;
   confirmPassword: string;
   passwordValidation: PasswordValidationResult | null;
-  captchaToken: string | null;
+  captchaToken: string | null; // This will always be null when CAPTCHA is disabled
 }
 
 export const CreateAccountValidationMessage = ({
@@ -21,20 +22,49 @@ export const CreateAccountValidationMessage = ({
   passwordValidation,
   captchaToken
 }: CreateAccountValidationMessageProps) => {
-  const { t } = useTranslation('auth');
+  if (isSubmitting) {
+    return (
+      <Alert>
+        <CheckCircle className="h-4 w-4" />
+        <AlertDescription>
+          Creating your account...
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
-  if (isFormValid || isSubmitting) return null;
+  if (isFormValid) {
+    return (
+      <Alert>
+        <CheckCircle className="h-4 w-4" />
+        <AlertDescription>
+          Ready to create account! (CAPTCHA disabled)
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  const issues = [];
+  if (!email) issues.push('Email address required');
+  if (!password) issues.push('Password required');
+  if (!confirmPassword) issues.push('Password confirmation required');
+  if (password && confirmPassword && password !== confirmPassword) {
+    issues.push('Passwords must match');
+  }
+  if (passwordValidation && !passwordValidation.isValid) {
+    issues.push('Password must meet security requirements');
+  }
 
   return (
-    <div className="text-sm text-muted-foreground space-y-1">
-      <p className="text-center">{t('validation.completeRequirements')}</p>
-      <ul className="text-xs space-y-1">
-        {!email && <li>• {t('validation.enterEmail')}</li>}
-        {!password && <li>• {t('validation.enterPassword')}</li>}
-        {!passwordValidation?.isValid && <li>• {t('validation.passwordSecurityRequirements')}</li>}
-        {confirmPassword && password !== confirmPassword && <li>• {t('validation.passwordMustMatch')}</li>}
-        {!captchaToken && <li>• {t('validation.completeCaptcha')}</li>}
-      </ul>
-    </div>
+    <Alert variant="destructive">
+      <XCircle className="h-4 w-4" />
+      <AlertDescription>
+        <div className="space-y-1">
+          {issues.map((issue, index) => (
+            <div key={index}>• {issue}</div>
+          ))}
+        </div>
+      </AlertDescription>
+    </Alert>
   );
 };

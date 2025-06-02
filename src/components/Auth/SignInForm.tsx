@@ -8,7 +8,6 @@ import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { validatePassword } from '@/lib/enhancedPasswordValidation';
 import { SignInFormFields } from './SignInFormFields';
-import { CaptchaSection } from './CaptchaSection';
 import { FormValidationMessage } from './FormValidationMessage';
 import { TwoFactorAuth } from './TwoFactorAuth';
 
@@ -19,9 +18,6 @@ interface SignInFormProps {
 export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaError, setCaptchaError] = useState<string | null>(null);
-  const [captchaKey, setCaptchaKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
@@ -36,21 +32,13 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     resetTwoFactor
   } = useTwoFactorAuth();
 
-  // Form validation
+  // Form validation - removed captchaToken requirement
   const passwordValidation = password ? validatePassword(password) : null;
   const isFormValid = Boolean(
     email &&
     password &&
-    passwordValidation?.isValid &&
-    captchaToken
+    passwordValidation?.isValid
   );
-
-  // Reset captcha on error
-  const resetCaptcha = () => {
-    setCaptchaToken(null);
-    setCaptchaError(null);
-    setCaptchaKey(prev => prev + 1);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +49,8 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     
     try {
       console.log('Starting signin process...');
-      const result = await signIn(email, password, captchaToken);
+      // Pass null for captchaToken since CAPTCHA is disabled
+      const result = await signIn(email, password, null);
       
       // Check if the result has 2FA properties
       if (result?.data && 'requires2FA' in result.data && result.data.requires2FA && 'sessionId' in result.data && result.data.sessionId) {
@@ -73,7 +62,6 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
       }
     } catch (error: any) {
       console.error('Signin error:', error);
-      resetCaptcha();
     } finally {
       setIsSubmitting(false);
     }
@@ -87,7 +75,6 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     } catch (error: any) {
       console.error('2FA completion error:', error);
       resetTwoFactor();
-      resetCaptcha();
     }
   };
 
@@ -127,7 +114,6 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const handle2FAError = () => {
     console.log('2FA verification failed, resetting form...');
     resetTwoFactor();
-    resetCaptcha();
   };
 
   useEffect(() => {
@@ -181,21 +167,21 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
             setPassword={setPassword}
           />
 
-          <CaptchaSection
-            captchaToken={captchaToken}
-            setCaptchaToken={setCaptchaToken}
-            captchaError={captchaError}
-            setCaptchaError={setCaptchaError}
-            captchaKey={captchaKey}
-            setCaptchaKey={setCaptchaKey}
-          />
+          {/* CAPTCHA section removed - disabled for now */}
+          {import.meta.env.DEV && (
+            <div className="text-center">
+              <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                ⚠️ CAPTCHA is currently disabled
+              </span>
+            </div>
+          )}
 
           <FormValidationMessage
             isFormValid={isFormValid}
             isSubmitting={isSubmitting}
             email={email}
             password={password}
-            captchaToken={captchaToken}
+            captchaToken={null} // Always null since CAPTCHA is disabled
           />
 
           <Button

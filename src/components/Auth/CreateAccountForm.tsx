@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,6 @@ import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
 import { SecureFormWrapper } from '@/components/Security/SecureFormWrapper';
 import { CreateAccountFormFields } from '@/components/Auth/CreateAccountFormFields';
-import { CaptchaSection } from '@/components/Auth/CaptchaSection';
 import { CreateAccountValidationMessage } from '@/components/Auth/CreateAccountValidationMessage';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -20,9 +20,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaError, setCaptchaError] = useState<string | null>(null);
-  const [captchaKey, setCaptchaKey] = useState(0);
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -54,10 +51,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     
     try {
       console.log('Starting account creation process...');
-      
-      if (!captchaToken) {
-        throw new Error('Please complete the CAPTCHA verification');
-      }
 
       if (!passwordValidation?.isValid) {
         throw new Error('Please ensure your password meets all requirements');
@@ -68,12 +61,11 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
       }
       
       console.log('Attempting to create account...');
-      const { data, error } = await signUp(email, password, confirmPassword, captchaToken);
+      // Pass null for captchaToken since CAPTCHA is disabled
+      const { data, error } = await signUp(email, password, confirmPassword, null);
       
       if (error) {
         console.error('Account creation failed:', error);
-        setCaptchaToken(null);
-        setCaptchaKey(prev => prev + 1);
         return;
       }
 
@@ -86,8 +78,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
       }
     } catch (error: any) {
       console.error('Create account error:', error);
-      setCaptchaToken(null);
-      setCaptchaKey(prev => prev + 1);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,10 +95,9 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
 
   const isFormValid = () => {
     if (!email || !password || !confirmPassword) return false;
-    if (!captchaToken) return false;
     if (!passwordValidation?.isValid) return false;
     if (password !== confirmPassword) return false;
-    return true;
+    return true; // No CAPTCHA requirement anymore
   };
 
   if (twoFactorState.isRequired) {
@@ -153,14 +142,14 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
               passwordValidation={passwordValidation}
             />
 
-            <CaptchaSection
-              captchaToken={captchaToken}
-              setCaptchaToken={setCaptchaToken}
-              captchaError={captchaError}
-              setCaptchaError={setCaptchaError}
-              captchaKey={captchaKey}
-              setCaptchaKey={setCaptchaKey}
-            />
+            {/* CAPTCHA section removed - disabled for now */}
+            {import.meta.env.DEV && (
+              <div className="text-center">
+                <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                  ⚠️ CAPTCHA is currently disabled
+                </span>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Button
@@ -178,7 +167,7 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
                 password={password}
                 confirmPassword={confirmPassword}
                 passwordValidation={passwordValidation}
-                captchaToken={captchaToken}
+                captchaToken={null} // Always null since CAPTCHA is disabled
               />
             </div>
           </div>

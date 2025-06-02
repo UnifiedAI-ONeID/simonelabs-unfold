@@ -1,12 +1,13 @@
 
-import { useTranslation } from 'react-i18next';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 interface FormValidationMessageProps {
   isFormValid: boolean;
   isSubmitting: boolean;
   email: string;
   password: string;
-  captchaToken: string | null;
+  captchaToken: string | null; // This will always be null when CAPTCHA is disabled
 }
 
 export const FormValidationMessage = ({
@@ -16,18 +17,38 @@ export const FormValidationMessage = ({
   password,
   captchaToken
 }: FormValidationMessageProps) => {
-  const { t } = useTranslation('auth');
+  if (isSubmitting) {
+    return (
+      <Alert>
+        <CheckCircle className="h-4 w-4" />
+        <AlertDescription>
+          Processing your sign in request...
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
-  if (isFormValid || isSubmitting) return null;
+  if (isFormValid) {
+    return (
+      <Alert>
+        <CheckCircle className="h-4 w-4" />
+        <AlertDescription>
+          Ready to sign in! (CAPTCHA disabled)
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  const missingFields = [];
+  if (!email) missingFields.push('Email address');
+  if (!password) missingFields.push('Password');
 
   return (
-    <div className="text-sm text-muted-foreground space-y-1">
-      <p className="text-center">{t('validation.completeRequirements')}</p>
-      <ul className="text-xs space-y-1">
-        {!email && <li>• {t('validation.enterEmail')}</li>}
-        {!password && <li>• {t('validation.enterPassword')}</li>}
-        {!captchaToken && <li>• {t('validation.completeCaptcha')}</li>}
-      </ul>
-    </div>
+    <Alert variant="destructive">
+      <XCircle className="h-4 w-4" />
+      <AlertDescription>
+        Please complete: {missingFields.join(', ')}
+      </AlertDescription>
+    </Alert>
   );
 };
