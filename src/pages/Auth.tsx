@@ -1,16 +1,16 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useEnhancedAuth();
+  const { isAuthenticated, loading } = useSimplifiedAuth();
 
   useEffect(() => {
     if (!loading) {
       if (isAuthenticated) {
-        navigate('/role-selection', { replace: true });
+        navigate('/dashboard', { replace: true });
       } else {
         // Redirect to sign in page instead of staying on auth
         navigate('/signin', { replace: true });
@@ -22,7 +22,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
       <div className="text-center space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground">Redirecting to sign in...</p>
+        <p className="text-muted-foreground">Redirecting...</p>
       </div>
     </div>
   );

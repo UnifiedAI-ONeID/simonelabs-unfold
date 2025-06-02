@@ -1,13 +1,13 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { CreateAccountForm } from '@/components/Auth/CreateAccountForm';
 import { getSecurityHeaders } from '@/lib/securityConfig';
 
 const CreateAccount = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useEnhancedAuth();
+  const { isAuthenticated, loading } = useSimplifiedAuth();
 
   useEffect(() => {
     const headers = getSecurityHeaders();
@@ -28,14 +28,14 @@ const CreateAccount = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      // If user is already authenticated, redirect to role selection
-      navigate('/role-selection', { replace: true });
+      // If user is already authenticated, redirect to dashboard
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
   const handleCreateAccountSuccess = () => {
-    // After successful signup and 2FA, user will be redirected to signin page
-    // No need to do anything here as the redirect is handled in CreateAccountForm
+    // After successful signup, user will need to verify email
+    // They can try signing in or wait for email verification
     console.log('Account creation process completed');
   };
 
@@ -44,7 +44,7 @@ const CreateAccount = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading secure authentication...</p>
+          <p className="text-muted-foreground">Loading authentication...</p>
         </div>
       </div>
     );

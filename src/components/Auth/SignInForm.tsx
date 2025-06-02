@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn } from 'lucide-react';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { SignInFormFields } from '@/components/Auth/SignInFormFields';
 import { FormValidationMessage } from '@/components/Auth/FormValidationMessage';
 import { Link } from 'react-router-dom';
@@ -17,7 +17,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { signIn } = useEnhancedAuth();
+  const { signIn } = useSimplifiedAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

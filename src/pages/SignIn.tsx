@@ -1,14 +1,13 @@
 
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useNavigate } from 'react-router-dom';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { SignInForm } from '@/components/Auth/SignInForm';
 import { getSecurityHeaders } from '@/lib/securityConfig';
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated, loading, user } = useEnhancedAuth();
+  const { isAuthenticated, loading, user } = useSimplifiedAuth();
 
   useEffect(() => {
     const headers = getSecurityHeaders();
@@ -29,52 +28,13 @@ const SignIn = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
-      const userRole = user.user_metadata?.role;
-      
-      if (!userRole) {
-        navigate('/role-selection', { replace: true });
-      } else {
-        // Redirect to role-specific dashboard
-        switch (userRole) {
-          case 'student':
-            navigate('/student', { replace: true });
-            break;
-          case 'educator':
-            navigate('/educator', { replace: true });
-            break;
-          case 'admin':
-          case 'superuser':
-            navigate('/administration', { replace: true });
-            break;
-          default:
-            navigate('/role-selection', { replace: true });
-        }
-      }
+      // Redirect to dashboard after successful sign in
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, loading, navigate, user]);
 
   const handleSignInSuccess = () => {
-    const userRole = user?.user_metadata?.role;
-    
-    if (!userRole) {
-      navigate('/role-selection', { replace: true });
-    } else {
-      // Redirect to role-specific dashboard
-      switch (userRole) {
-        case 'student':
-          navigate('/student', { replace: true });
-          break;
-        case 'educator':
-          navigate('/educator', { replace: true });
-          break;
-        case 'admin':
-        case 'superuser':
-          navigate('/administration', { replace: true });
-          break;
-        default:
-          navigate('/role-selection', { replace: true });
-      }
-    }
+    navigate('/dashboard', { replace: true });
   };
 
   if (loading) {
@@ -82,7 +42,7 @@ const SignIn = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading secure authentication...</p>
+          <p className="text-muted-foreground">Loading authentication...</p>
         </div>
       </div>
     );

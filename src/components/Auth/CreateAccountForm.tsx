@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserPlus } from 'lucide-react';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
 import { CreateAccountFormFields } from '@/components/Auth/CreateAccountFormFields';
 import { CreateAccountValidationMessage } from '@/components/Auth/CreateAccountValidationMessage';
@@ -21,7 +21,7 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const { signUp } = useEnhancedAuth();
+  const { signUp } = useSimplifiedAuth();
 
   const handlePasswordChange = useCallback((value: string) => {
     setPassword(value);
