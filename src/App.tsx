@@ -6,6 +6,7 @@ import Auth from '@/pages/Auth';
 import SignIn from '@/pages/SignIn';
 import CreateAccount from '@/pages/CreateAccount';
 import EmailVerification from '@/pages/EmailVerification';
+import ResetPassword from '@/pages/ResetPassword';
 import RoleSelectionPage from '@/pages/RoleSelectionPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StudentDashboard from '@/pages/StudentDashboard';
@@ -50,6 +51,10 @@ const App: React.FC = () => {
     {
       path: "/email-verification",
       element: <EmailVerification />,
+    },
+    {
+      path: "/reset-password",
+      element: <ResetPassword />,
     },
     {
       path: "/role-selection",

@@ -6,6 +6,7 @@ import { LogIn } from 'lucide-react';
 import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { SignInFormFields } from '@/components/Auth/SignInFormFields';
 import { FormValidationMessage } from '@/components/Auth/FormValidationMessage';
+import { ForgotPasswordForm } from '@/components/Auth/ForgotPasswordForm';
 import { Link } from 'react-router-dom';
 
 interface SignInFormProps {
@@ -17,6 +18,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const { signIn } = useSimplifiedAuth();
 
@@ -59,6 +61,25 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     return email.trim() !== '' && password.trim() !== '';
   };
 
+  if (showForgotPassword) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LogIn className="h-5 w-5" />
+            Reset Password
+          </CardTitle>
+          <CardDescription>
+            Enter your email to receive a password reset link
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -92,6 +113,15 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
               disabled={!isFormValid() || isSubmitting}
             >
               {isSubmitting ? 'Signing In...' : 'Sign In'}
+            </Button>
+            
+            <Button
+              type="button"
+              variant="link"
+              className="w-full text-sm"
+              onClick={() => setShowForgotPassword(true)}
+            >
+              Forgot your password?
             </Button>
             
             <FormValidationMessage

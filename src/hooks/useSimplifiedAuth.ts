@@ -230,6 +230,95 @@ export const useSimplifiedAuth = () => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      console.log('🔑 Starting password reset for:', email);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        console.error('❌ Password reset error:', error);
+        let errorMessage = error.message;
+        
+        // Handle specific error cases
+        if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Too many reset attempts. Please wait before trying again.';
+        }
+        
+        toast({
+          title: "Password reset failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return { error: { message: errorMessage } };
+      }
+
+      console.log('✅ Password reset email sent for:', email);
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for instructions to reset your password.",
+      });
+      
+      return { success: true };
+    } catch (error: any) {
+      console.error('💥 Password reset catch error:', error);
+      const errorMessage = error.message || 'An unexpected error occurred during password reset';
+      toast({
+        title: "Password reset failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return { error: { message: errorMessage } };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      console.log('🔑 Updating password...');
+      
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        console.error('❌ Password update error:', error);
+        let errorMessage = error.message;
+        
+        if (error.message.includes('Password should be')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        }
+        
+        toast({
+          title: "Password update failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return { error: { message: errorMessage } };
+      }
+
+      console.log('✅ Password updated successfully');
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully updated.",
+      });
+      
+      return { success: true };
+    } catch (error: any) {
+      console.error('💥 Password update catch error:', error);
+      const errorMessage = error.message || 'An unexpected error occurred while updating password';
+      toast({
+        title: "Password update failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return { error: { message: errorMessage } };
+    }
+  };
+
   const signOut = async () => {
     try {
       console.log('👋 Starting signout process...');
@@ -252,6 +341,8 @@ export const useSimplifiedAuth = () => {
     ...authState,
     signIn,
     signUp,
-    signOut
+    signOut,
+    resetPassword,
+    updatePassword
   };
 };
