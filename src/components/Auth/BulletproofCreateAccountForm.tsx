@@ -58,6 +58,13 @@ export const BulletproofCreateAccountForm = ({ onSuccess }: BulletproofCreateAcc
     e.preventDefault();
     if (isSubmitting) return;
     
+    console.log('🎯 [CREATE ACCOUNT] Form submission started:', {
+      email: email.substring(0, 5) + '***',
+      hasPassword: !!password,
+      hasConfirmPassword: !!confirmPassword,
+      retryCount
+    });
+    
     setIsSubmitting(true);
     setError(null);
     
@@ -73,31 +80,43 @@ export const BulletproofCreateAccountForm = ({ onSuccess }: BulletproofCreateAcc
 
       const passwordErrors = validatePassword(password);
       if (passwordErrors.length > 0) {
+        console.log('❌ [CREATE ACCOUNT] Password validation failed:', passwordErrors);
         throw new Error('Password does not meet security requirements');
       }
       
       if (password !== confirmPassword) {
+        console.log('❌ [CREATE ACCOUNT] Password mismatch');
         throw new Error('Passwords do not match');
       }
       
-      console.log('🚀 Submitting account creation...', { email, retryCount });
+      console.log('🚀 [CREATE ACCOUNT] Starting signup process with validated inputs...');
       
       const result = await signUp(email, password, confirmPassword);
       
       if (result.error) {
-        console.error('❌ Account creation failed:', result.error);
+        console.error('❌ [CREATE ACCOUNT] Signup failed with error:', {
+          message: result.error.message,
+          retryCount,
+          timestamp: new Date().toISOString()
+        });
         setError(result.error.message || 'Account creation failed');
         return;
       }
 
-      console.log('✅ Account creation successful');
+      console.log('✅ [CREATE ACCOUNT] Signup successful:', {
+        hasUser: !!result.data?.user,
+        hasSession: !!result.data?.session,
+        userEmail: result.data?.user?.email,
+        needsVerification: !result.data?.session && !!result.data?.user,
+        timestamp: new Date().toISOString()
+      });
       
       // Check if user was automatically signed in
       if (result.data?.session) {
-        console.log('User automatically signed in, redirecting to role selection');
+        console.log('🎉 [CREATE ACCOUNT] User automatically signed in, redirecting to role selection');
         navigate('/role-selection', { replace: true });
       } else {
-        console.log('Email verification required, staying on create account page');
+        console.log('📧 [CREATE ACCOUNT] Email verification required, staying on create account page');
         // User needs to verify email first, show success message
         setError(null);
       }
@@ -106,7 +125,12 @@ export const BulletproofCreateAccountForm = ({ onSuccess }: BulletproofCreateAcc
         onSuccess();
       }
     } catch (error: any) {
-      console.error('💥 Create account error:', error);
+      console.error('💥 [CREATE ACCOUNT] Unexpected error during signup:', {
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+        retryCount
+      });
       setError(error.message || 'An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
