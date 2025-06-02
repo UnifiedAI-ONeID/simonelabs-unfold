@@ -23,7 +23,7 @@ export const verifyAndFixUserProfiles = async () => {
   } catch (error: any) {
     console.error('💥 Database verification failed:', error);
     await logSecurityEvent({
-      type: 'DATABASE_VERIFICATION_ERROR',
+      type: 'VALIDATION_FAILURE',
       details: `Database verification failed: ${error.message}`
     });
     return false;
@@ -103,7 +103,7 @@ export const ensureUserProfile = async (userId: string, email: string) => {
     
     // Log the error for monitoring
     await logSecurityEvent({
-      type: 'PROFILE_CREATION_ERROR',
+      type: 'OPERATION_FAILED',
       details: `Profile creation failed for user ${userId}: ${error.message}`
     });
     
