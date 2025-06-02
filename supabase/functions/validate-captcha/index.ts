@@ -22,10 +22,12 @@ const createSuccessResponse = (data: any) => {
   const response = {
     success: true,
     timestamp: new Date().toISOString(),
+    disabled: true,
+    bypass: true,
     ...data
   };
 
-  console.log('Success Response:', response);
+  console.log('CAPTCHA Disabled - Success Response:', response);
 
   return new Response(
     JSON.stringify(response),
@@ -42,9 +44,8 @@ serve(async (req) => {
   const headers = getEnhancedSecurityHeaders();
   const requestId = crypto.randomUUID();
 
-  console.log(`[${requestId}] === CAPTCHA validation request started (DISABLED MODE) ===`);
+  console.log(`[${requestId}] === CAPTCHA DISABLED - Auto-approving all requests ===`);
   console.log(`[${requestId}] Method: ${req.method}`);
-  console.log(`[${requestId}] URL: ${req.url}`);
 
   if (req.method === 'OPTIONS') {
     console.log(`[${requestId}] CORS preflight request - returning headers`);
@@ -53,41 +54,30 @@ serve(async (req) => {
 
   if (req.method !== 'POST') {
     console.log(`[${requestId}] Invalid method: ${req.method}`);
-    return new Response('Method not allowed', { status: 405, headers });
+    // Even for invalid methods, return success when CAPTCHA is disabled
+    return createSuccessResponse({
+      message: 'CAPTCHA validation is currently disabled - all requests approved'
+    });
   }
 
   try {
-    // Parse request body
-    let requestBody: any;
-    
-    try {
-      requestBody = await req.json();
-      console.log(`[${requestId}] Successfully parsed request body:`, requestBody);
-    } catch (jsonError) {
-      console.log(`[${requestId}] JSON parse error (ignoring in disabled mode):`, jsonError);
-      requestBody = {};
-    }
+    // Don't even try to parse the request body - just return success
+    console.log(`[${requestId}] ✅ CAPTCHA DISABLED - Auto-approving request without validation`);
 
-    console.log(`[${requestId}] ✅ CAPTCHA validation DISABLED - returning success for all requests`);
-
-    // Always return success when CAPTCHA is disabled
     return createSuccessResponse({
-      disabled: true,
-      bypass: true,
       challenge_ts: new Date().toISOString(),
-      environment: 'captcha_disabled',
-      message: 'CAPTCHA validation is currently disabled'
+      environment: 'captcha_completely_disabled',
+      message: 'CAPTCHA validation is disabled - request automatically approved'
     });
 
   } catch (error) {
-    console.error(`[${requestId}] 💀 Unexpected error in CAPTCHA validation:`, error);
-    // Even on error, return success when disabled
+    console.error(`[${requestId}] 💀 Unexpected error (returning success anyway):`, error);
+    
+    // Even on error, return success when CAPTCHA is disabled
     return createSuccessResponse({
-      disabled: true,
-      bypass: true,
       challenge_ts: new Date().toISOString(),
-      environment: 'captcha_disabled',
-      message: 'CAPTCHA validation is currently disabled'
+      environment: 'captcha_completely_disabled',
+      message: 'CAPTCHA validation is disabled - request automatically approved despite error'
     });
   }
 });
