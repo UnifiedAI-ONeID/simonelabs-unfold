@@ -173,7 +173,7 @@ const ResetPassword = () => {
                 </Button>
               </div>
               {passwordValidation && (
-                <PasswordValidationDisplay validation={passwordValidation} />
+                <PasswordValidationDisplay passwordValidation={passwordValidation} />
               )}
             </div>
 
