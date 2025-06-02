@@ -67,14 +67,8 @@ export const useSecureAuthWithCaptcha = () => {
       console.log(`[${requestId}] Request data being sent:`, requestData);
       console.log(`[${requestId}] Request data stringified:`, JSON.stringify(requestData));
       
-      // Remove CSRF headers for now to test if they're causing the issue
-      const { data, error } = await supabase.functions.invoke('validate-captcha', {
-        body: requestData,
-        headers: {
-          'Content-Type': 'application/json'
-          // Removed CSRF headers to test if they're causing the empty body issue
-        }
-      });
+      // Fix: Pass data directly to the edge function, not in a body property
+      const { data, error } = await supabase.functions.invoke('validate-captcha', requestData);
 
       console.log(`[${requestId}] 📨 Supabase function response:`, { 
         data, 
