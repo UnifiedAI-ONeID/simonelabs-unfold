@@ -17,6 +17,12 @@ const RoleSelectionPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  console.log('🎭 [AUTH TEST] RoleSelectionPage - Current user:', {
+    userId: user?.id,
+    email: user?.email,
+    currentRole: user?.user_metadata?.role
+  });
+
   const roles = [
     {
       id: 'student' as UserRole,
@@ -45,17 +51,29 @@ const RoleSelectionPage = () => {
   ];
 
   const handleRoleSelection = async () => {
-    if (!selectedRole || !user) return;
+    if (!selectedRole || !user) {
+      console.log('❌ [AUTH TEST] RoleSelection - Missing data:', { selectedRole, hasUser: !!user });
+      return;
+    }
 
     setIsUpdating(true);
     try {
-      console.log('Updating user role to:', selectedRole);
+      console.log('🎭 [AUTH TEST] RoleSelection - Updating user role:', {
+        userId: user.id,
+        selectedRole,
+        currentRole: user.user_metadata?.role
+      });
       
       const { error } = await supabase.auth.updateUser({
         data: { role: selectedRole }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [AUTH TEST] RoleSelection - Update error:', error);
+        throw error;
+      }
+
+      console.log('✅ [AUTH TEST] RoleSelection - Role updated successfully');
 
       toast({
         title: "Role selected successfully!",
@@ -65,11 +83,14 @@ const RoleSelectionPage = () => {
       // Navigate to the appropriate dashboard
       const selectedRoleData = roles.find(role => role.id === selectedRole);
       if (selectedRoleData) {
-        console.log('Navigating to dashboard:', selectedRoleData.dashboard);
+        console.log('🎯 [AUTH TEST] RoleSelection - Navigating to dashboard:', {
+          role: selectedRole,
+          dashboard: selectedRoleData.dashboard
+        });
         navigate(selectedRoleData.dashboard, { replace: true });
       }
     } catch (error: any) {
-      console.error('Role selection error:', error);
+      console.error('💥 [AUTH TEST] RoleSelection - Error:', error);
       toast({
         title: "Error selecting role",
         description: error.message,
@@ -99,7 +120,10 @@ const RoleSelectionPage = () => {
                     ? 'border-primary bg-primary/5 shadow-lg'
                     : 'border-border hover:border-primary/50 hover:shadow-md'
                 }`}
-                onClick={() => setSelectedRole(role.id)}
+                onClick={() => {
+                  console.log('🎭 [AUTH TEST] RoleSelection - Role selected:', role.id);
+                  setSelectedRole(role.id);
+                }}
               >
                 <div className="text-center space-y-4">
                   <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${
