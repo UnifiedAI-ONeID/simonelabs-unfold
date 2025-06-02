@@ -7,15 +7,13 @@ interface FormValidationMessageProps {
   isSubmitting: boolean;
   email: string;
   password: string;
-  captchaToken: string | null; // This will always be null when CAPTCHA is disabled
 }
 
 export const FormValidationMessage = ({
   isFormValid,
   isSubmitting,
   email,
-  password,
-  captchaToken
+  password
 }: FormValidationMessageProps) => {
   if (isSubmitting) {
     return (
@@ -33,7 +31,7 @@ export const FormValidationMessage = ({
       <Alert>
         <CheckCircle className="h-4 w-4" />
         <AlertDescription>
-          Ready to sign in! (CAPTCHA disabled)
+          Ready to sign in!
         </AlertDescription>
       </Alert>
     );

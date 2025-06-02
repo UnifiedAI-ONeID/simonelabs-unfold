@@ -10,37 +10,12 @@ import { SecureInputValidator } from '@/lib/enhancedInputValidation';
 interface AuthData {
   email: string;
   password: string;
-  captchaToken?: string;
   confirmPassword?: string;
-}
-
-interface CaptchaValidationResponse {
-  success: boolean;
-  error?: string;
-  disabled?: boolean;
-  bypass?: boolean;
-  challenge_ts?: string;
-  details?: any;
-  environment?: string;
 }
 
 export const useSecureAuthWithCaptcha = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const validateCaptcha = async (token: string, retryCount = 0): Promise<boolean> => {
-    const requestId = crypto.randomUUID();
-    console.log(`[${requestId}] 🛡️ CAPTCHA validation DISABLED - bypassing validation...`);
-    
-    // Always return true when CAPTCHA is disabled
-    toast({
-      title: "CAPTCHA Disabled",
-      description: "CAPTCHA validation is currently disabled for testing.",
-      variant: "default",
-    });
-    
-    return true;
-  };
 
   const signUpMutation = useMutation({
     mutationFn: async (authData: AuthData) => {
@@ -73,7 +48,7 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('Passwords do not match');
       }
 
-      console.log('🚀 Starting signup process (CAPTCHA disabled)...');
+      console.log('🚀 Starting signup process...');
 
       const { data, error } = await supabase.auth.signUp({
         email: authData.email,
@@ -136,7 +111,7 @@ export const useSecureAuthWithCaptcha = () => {
         throw new Error('Email and password are required');
       }
 
-      console.log('🚀 Starting signin process (CAPTCHA disabled)...');
+      console.log('🚀 Starting signin process...');
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: authData.email,
@@ -182,6 +157,5 @@ export const useSecureAuthWithCaptcha = () => {
     signIn: signInMutation.mutate,
     isSigningUp: signUpMutation.isPending,
     isSigningIn: signInMutation.isPending,
-    validateCaptcha,
   };
 };

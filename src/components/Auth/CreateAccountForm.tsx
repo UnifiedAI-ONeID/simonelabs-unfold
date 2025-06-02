@@ -61,8 +61,7 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
       }
       
       console.log('Attempting to create account...');
-      // Pass null for captchaToken since CAPTCHA is disabled
-      const { data, error } = await signUp(email, password, confirmPassword, null);
+      const { data, error } = await signUp(email, password, confirmPassword);
       
       if (error) {
         console.error('Account creation failed:', error);
@@ -97,7 +96,7 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     if (!email || !password || !confirmPassword) return false;
     if (!passwordValidation?.isValid) return false;
     if (password !== confirmPassword) return false;
-    return true; // No CAPTCHA requirement anymore
+    return true;
   };
 
   if (twoFactorState.isRequired) {
@@ -142,15 +141,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
               passwordValidation={passwordValidation}
             />
 
-            {/* CAPTCHA section removed - disabled for now */}
-            {import.meta.env.DEV && (
-              <div className="text-center">
-                <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
-                  ⚠️ CAPTCHA is currently disabled
-                </span>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Button
                 type="submit"
@@ -167,7 +157,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
                 password={password}
                 confirmPassword={confirmPassword}
                 passwordValidation={passwordValidation}
-                captchaToken={null} // Always null since CAPTCHA is disabled
               />
             </div>
           </div>

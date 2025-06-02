@@ -18,7 +18,6 @@ interface AuthFormProps {
     password: string;
     confirmPassword?: string;
     fullName?: string;
-    captchaToken: string | null;
   }) => Promise<void>;
   onToggleMode: () => void;
   onToggleForgotPassword: (value: boolean) => void;
@@ -113,13 +112,11 @@ const AuthForm = ({
     }
 
     try {
-      // Pass null for captchaToken since CAPTCHA is disabled
       await onSubmit({
         email: sanitizedEmail,
         password,
         confirmPassword,
-        fullName: sanitizedFullName,
-        captchaToken: null
+        fullName: sanitizedFullName
       });
     } catch (error) {
       console.error('Auth error:', error);
@@ -223,15 +220,6 @@ const AuthForm = ({
                     disabled={isLoading}
                   />
                 </div>
-              </div>
-            )}
-
-            {/* CAPTCHA section removed - disabled for now */}
-            {import.meta.env.DEV && (
-              <div className="text-center">
-                <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
-                  ⚠️ CAPTCHA is currently disabled
-                </span>
               </div>
             )}
           </>

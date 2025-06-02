@@ -181,9 +181,9 @@ export const useEnhancedAuth = () => {
     }
   };
 
-  const signIn = async (email: string, password: string, captchaToken?: string) => {
+  const signIn = async (email: string, password: string) => {
     try {
-      console.log('🚀 Starting signin process (CAPTCHA disabled)...');
+      console.log('🚀 Starting signin process...');
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -219,9 +219,9 @@ export const useEnhancedAuth = () => {
     }
   };
 
-  const signUp = async (email: string, password: string, confirmPassword?: string, captchaToken?: string) => {
+  const signUp = async (email: string, password: string, confirmPassword?: string) => {
     try {
-      console.log('🚀 Starting signup process (CAPTCHA disabled)...');
+      console.log('🚀 Starting signup process...');
       
       if (password !== confirmPassword) {
         throw new Error('Passwords do not match');

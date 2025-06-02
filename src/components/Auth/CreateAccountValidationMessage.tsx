@@ -10,7 +10,6 @@ interface CreateAccountValidationMessageProps {
   password: string;
   confirmPassword: string;
   passwordValidation: PasswordValidationResult | null;
-  captchaToken: string | null; // This will always be null when CAPTCHA is disabled
 }
 
 export const CreateAccountValidationMessage = ({
@@ -19,8 +18,7 @@ export const CreateAccountValidationMessage = ({
   email,
   password,
   confirmPassword,
-  passwordValidation,
-  captchaToken
+  passwordValidation
 }: CreateAccountValidationMessageProps) => {
   if (isSubmitting) {
     return (
@@ -38,7 +36,7 @@ export const CreateAccountValidationMessage = ({
       <Alert>
         <CheckCircle className="h-4 w-4" />
         <AlertDescription>
-          Ready to create account! (CAPTCHA disabled)
+          Ready to create account!
         </AlertDescription>
       </Alert>
     );

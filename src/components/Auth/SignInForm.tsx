@@ -32,7 +32,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     resetTwoFactor
   } = useTwoFactorAuth();
 
-  // Form validation - removed captchaToken requirement
+  // Form validation
   const passwordValidation = password ? validatePassword(password) : null;
   const isFormValid = Boolean(
     email &&
@@ -49,8 +49,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     
     try {
       console.log('Starting signin process...');
-      // Pass null for captchaToken since CAPTCHA is disabled
-      const result = await signIn(email, password, null);
+      const result = await signIn(email, password);
       
       // Check if the result has 2FA properties
       if (result?.data && 'requires2FA' in result.data && result.data.requires2FA && 'sessionId' in result.data && result.data.sessionId) {
@@ -167,21 +166,11 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
             setPassword={setPassword}
           />
 
-          {/* CAPTCHA section removed - disabled for now */}
-          {import.meta.env.DEV && (
-            <div className="text-center">
-              <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
-                ⚠️ CAPTCHA is currently disabled
-              </span>
-            </div>
-          )}
-
           <FormValidationMessage
             isFormValid={isFormValid}
             isSubmitting={isSubmitting}
             email={email}
             password={password}
-            captchaToken={null} // Always null since CAPTCHA is disabled
           />
 
           <Button
