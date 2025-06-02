@@ -43,15 +43,15 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
       }
       
       console.log('Attempting to sign in...');
-      const { data, error } = await signIn(email, password);
+      const result = await signIn(email, password);
       
-      if (error) {
-        console.error('Sign in failed:', error);
+      if (result.error) {
+        console.error('Sign in failed:', result.error);
         return;
       }
 
-      // Check if 2FA is required
-      if (data?.requires2FA) {
+      // Check if 2FA is required - safely check if the data has requires2FA property
+      if (result.data && 'requires2FA' in result.data && result.data.requires2FA) {
         console.log('2FA required, showing 2FA form...');
         return;
       }
