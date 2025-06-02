@@ -27,13 +27,17 @@ const SignIn = () => {
   }, []);
 
   useEffect(() => {
+    console.log('SignIn page - Auth state:', { isAuthenticated, loading, user: user?.email });
+    
     if (!loading && isAuthenticated && user) {
+      console.log('User is authenticated, redirecting to dashboard');
       // Redirect to dashboard after successful sign in
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, loading, navigate, user]);
 
   const handleSignInSuccess = () => {
+    console.log('Sign in success callback triggered');
     navigate('/dashboard', { replace: true });
   };
 
@@ -43,6 +47,18 @@ const SignIn = () => {
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If already authenticated, show loading while redirecting
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
         </div>
       </div>
     );

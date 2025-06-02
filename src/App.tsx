@@ -11,11 +11,12 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import StudentDashboard from '@/pages/StudentDashboard';
 import EducatorDashboard from '@/pages/EducatorDashboard';
 import AdministrationDashboard from '@/pages/AdministrationDashboard';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { WelcomeAssistant } from '@/components/AI/WelcomeAssistant';
+import { AuthTestHelper } from '@/components/Auth/AuthTestHelper';
 
 const App: React.FC = () => {
-  const { isAuthenticated, user } = useEnhancedAuth();
+  const { isAuthenticated, user } = useSimplifiedAuth();
   const [showWelcome, setShowWelcome] = React.useState(false);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ const App: React.FC = () => {
     },
     {
       path: "/auth",
-      element: <SignIn />,
+      element: <Auth />,
     },
     {
       path: "/signin",
@@ -52,7 +53,11 @@ const App: React.FC = () => {
     },
     {
       path: "/role-selection",
-      element: <RoleSelectionPage />,
+      element: (
+        <ProtectedRoute>
+          <RoleSelectionPage />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/student",
@@ -92,6 +97,7 @@ const App: React.FC = () => {
     <>
       <RouterProvider router={router} />
       {showWelcome && <WelcomeAssistant onClose={handleCloseWelcome} />}
+      <AuthTestHelper />
     </>
   );
 };

@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,8 +9,12 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { isAuthenticated, loading, user } = useEnhancedAuth();
+  const { isAuthenticated, loading, user } = useSimplifiedAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    console.log('ProtectedRoute - Auth state:', { isAuthenticated, loading, user: user?.email });
+  }, [isAuthenticated, loading, user]);
 
   if (loading) {
     return (
@@ -24,11 +28,13 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    console.log('Redirecting to signin - not authenticated');
+    return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
   // If user is authenticated but has no role, redirect to role selection
   if (user && !user.user_metadata?.role) {
+    console.log('Redirecting to role selection - no role set');
     return <Navigate to="/role-selection" replace />;
   }
 
@@ -44,6 +50,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
                            userRole === 'educator' ? '/educator' : 
                            userRole === 'admin' || userRole === 'superuser' ? '/administration' : 
                            '/dashboard';
+        console.log('Redirecting due to role mismatch:', { userRole, requiredRole, redirectPath });
         return <Navigate to={redirectPath} replace />;
       }
     }
@@ -56,6 +63,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
                            userRole === 'educator' ? '/educator' : 
                            userRole === 'admin' || userRole === 'superuser' ? '/administration' : 
                            '/dashboard';
+        console.log('Redirecting due to role array mismatch:', { userRole, requiredRole, redirectPath });
         return <Navigate to={redirectPath} replace />;
       }
     }

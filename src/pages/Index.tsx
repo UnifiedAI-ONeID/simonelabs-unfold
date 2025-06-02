@@ -6,16 +6,18 @@ import { ArrowRight, Brain, Users, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
-import { useEnhancedAuth } from "@/hooks/useEnhancedAuth";
+import { useSimplifiedAuth } from "@/hooks/useSimplifiedAuth";
 import { WelcomeAssistant } from "@/components/AI/WelcomeAssistant";
 import { useState, useEffect } from "react";
 
 const Index = () => {
   const { t } = useTranslation('common');
-  const { isAuthenticated, user } = useEnhancedAuth();
+  const { isAuthenticated, user, loading } = useSimplifiedAuth();
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
+    console.log('Index page - Auth state:', { isAuthenticated, loading, user: user?.email });
+    
     // Show welcome assistant for new users
     if (isAuthenticated && user) {
       const hasSeenWelcome = localStorage.getItem(`welcome_shown_${user.id}`);
@@ -23,7 +25,7 @@ const Index = () => {
         setShowWelcome(true);
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, loading]);
 
   const handleCloseWelcome = () => {
     setShowWelcome(false);
@@ -48,6 +50,21 @@ const Index = () => {
       fallback: "SL"
     }
   ];
+
+  // Show loading state while authentication is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
