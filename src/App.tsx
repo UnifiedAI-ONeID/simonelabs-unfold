@@ -13,8 +13,6 @@ import EducatorDashboard from '@/pages/EducatorDashboard';
 import AdministrationDashboard from '@/pages/AdministrationDashboard';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { WelcomeAssistant } from '@/components/AI/WelcomeAssistant';
-import CaptchaTest from '@/pages/CaptchaTest';
-import CaptchaDebug from "@/pages/CaptchaDebug";
 
 const App: React.FC = () => {
   const { isAuthenticated, user } = useEnhancedAuth();
@@ -53,10 +51,6 @@ const App: React.FC = () => {
       element: <EmailVerification />,
     },
     {
-      path: "/captcha-debug",
-      element: <CaptchaDebug />,
-    },
-    {
       path: "/role-selection",
       element: <RoleSelectionPage />,
     },
@@ -91,10 +85,6 @@ const App: React.FC = () => {
           <div>Dashboard</div>
         </ProtectedRoute>
       ),
-    },
-    {
-      path: "/captcha-test",
-      element: <CaptchaTest />,
     },
   ]);
 
