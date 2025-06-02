@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn } from 'lucide-react';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
-import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
-import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
 import { SignInFormFields } from '@/components/Auth/SignInFormFields';
 import { FormValidationMessage } from '@/components/Auth/FormValidationMessage';
 import { Link } from 'react-router-dom';
@@ -20,14 +18,6 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { signIn } = useEnhancedAuth();
-  const { 
-    twoFactorState, 
-    isVerifying, 
-    isResending,
-    verifyTwoFactorCode, 
-    resendTwoFactorCode,
-    resetTwoFactor
-  } = useTwoFactorAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +40,6 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
         return;
       }
 
-      // Check if 2FA is required - safely check if the data has requires2FA property
-      if (result.data && 'requires2FA' in result.data && result.data.requires2FA) {
-        console.log('2FA required, showing 2FA form...');
-        return;
-      }
-
       console.log('Sign in successful');
       
       if (onSuccess) {
@@ -68,31 +52,9 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     }
   };
 
-  const handle2FAVerified = () => {
-    console.log('2FA verification complete, user signed in successfully');
-    resetTwoFactor();
-    
-    if (onSuccess) {
-      onSuccess();
-    }
-  };
-
   const isFormValid = () => {
     return email.trim() !== '' && password.trim() !== '';
   };
-
-  if (twoFactorState.isRequired) {
-    return (
-      <TwoFactorAuth
-        email={twoFactorState.email!}
-        onVerified={handle2FAVerified}
-        onResendCode={resendTwoFactorCode}
-        onVerifyCode={verifyTwoFactorCode}
-        isVerifying={isVerifying}
-        isResending={isResending}
-      />
-    );
-  }
 
   return (
     <Card className="w-full max-w-md mx-auto">

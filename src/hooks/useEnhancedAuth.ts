@@ -13,7 +13,6 @@ interface EnhancedAuthState {
   isAuthenticated: boolean;
   sessionId?: string;
   role?: string;
-  pendingAuth?: { email: string; sessionId: string };
 }
 
 export const useEnhancedAuth = () => {
@@ -200,17 +199,6 @@ export const useEnhancedAuth = () => {
         return { error };
       }
 
-      // Check if 2FA is required (this would be handled by your 2FA system)
-      const requires2FA = data.user?.user_metadata?.requires_2fa;
-      if (requires2FA) {
-        const sessionId = crypto.randomUUID();
-        setAuthState(prev => ({
-          ...prev,
-          pendingAuth: { email, sessionId }
-        }));
-        return { data: { requires2FA: true, sessionId, user: data.user } };
-      }
-
       console.log('✅ Signin successful');
       return { data };
     } catch (error: any) {
@@ -261,16 +249,6 @@ export const useEnhancedAuth = () => {
     }
   };
 
-  const complete2FA = async () => {
-    // This would complete the 2FA process and sign in the user
-    if (authState.pendingAuth) {
-      setAuthState(prev => ({
-        ...prev,
-        pendingAuth: undefined
-      }));
-    }
-  };
-
   const signOut = async () => {
     try {
       const userId = authState.user?.id;
@@ -315,7 +293,6 @@ export const useEnhancedAuth = () => {
     signIn,
     signUp,
     signOut,
-    complete2FA,
     validateCurrentSession
   };
 };

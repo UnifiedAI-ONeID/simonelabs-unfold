@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserPlus } from 'lucide-react';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
-import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
-import { TwoFactorAuth } from '@/components/Auth/TwoFactorAuth';
 import { validatePassword, type PasswordValidationResult } from '@/lib/enhancedPasswordValidation';
 import { CreateAccountFormFields } from '@/components/Auth/CreateAccountFormFields';
 import { CreateAccountValidationMessage } from '@/components/Auth/CreateAccountValidationMessage';
@@ -24,15 +22,6 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   const navigate = useNavigate();
 
   const { signUp } = useEnhancedAuth();
-  const { 
-    twoFactorState, 
-    isVerifying, 
-    isResending,
-    initiateTwoFactor, 
-    verifyTwoFactorCode, 
-    resendTwoFactorCode,
-    resetTwoFactor
-  } = useTwoFactorAuth();
 
   const handlePasswordChange = useCallback((value: string) => {
     setPassword(value);
@@ -82,35 +71,12 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     }
   };
 
-  const handle2FAVerified = () => {
-    console.log('2FA verification complete for new user, redirecting to email verification...');
-    resetTwoFactor();
-    navigate('/email-verification');
-    
-    if (onSuccess) {
-      onSuccess();
-    }
-  };
-
   const isFormValid = () => {
     if (!email || !password || !confirmPassword) return false;
     if (!passwordValidation?.isValid) return false;
     if (password !== confirmPassword) return false;
     return true;
   };
-
-  if (twoFactorState.isRequired) {
-    return (
-      <TwoFactorAuth
-        email={twoFactorState.email!}
-        onVerified={handle2FAVerified}
-        onResendCode={resendTwoFactorCode}
-        onVerifyCode={verifyTwoFactorCode}
-        isVerifying={isVerifying}
-        isResending={isResending}
-      />
-    );
-  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
