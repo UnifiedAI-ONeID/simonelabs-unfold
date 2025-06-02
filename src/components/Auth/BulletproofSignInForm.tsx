@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LogIn, Eye, EyeOff, Loader2, XCircle } from 'lucide-react';
 import { useBulletproofAuth } from '@/hooks/useBulletproofAuth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface BulletproofSignInFormProps {
   onSuccess?: () => void;
@@ -19,8 +19,9 @@ export const BulletproofSignInForm = ({ onSuccess }: BulletproofSignInFormProps)
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const { signIn, resetPassword, retryCount } = useBulletproofAuth();
+  const { signIn, resetPassword, retryCount, user } = useBulletproofAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +49,22 @@ export const BulletproofSignInForm = ({ onSuccess }: BulletproofSignInFormProps)
         return;
       }
 
-      console.log('✅ Signin successful');
+      console.log('✅ Signin successful, redirecting...');
+      
+      // Get the user role and redirect appropriately
+      const userRole = result.data?.user?.user_metadata?.role;
+      
+      if (userRole) {
+        const redirectPath = userRole === 'student' ? '/student' : 
+                           userRole === 'educator' ? '/educator' : 
+                           userRole === 'admin' || userRole === 'superuser' ? '/administration' : 
+                           '/dashboard';
+        console.log('Redirecting to dashboard based on role:', { userRole, redirectPath });
+        navigate(redirectPath, { replace: true });
+      } else {
+        console.log('No role found, redirecting to role selection');
+        navigate('/role-selection', { replace: true });
+      }
       
       if (onSuccess) {
         onSuccess();

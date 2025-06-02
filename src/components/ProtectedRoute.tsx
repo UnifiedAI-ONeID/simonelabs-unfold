@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
+import { useBulletproofAuth } from '@/hooks/useBulletproofAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { isAuthenticated, loading, user } = useSimplifiedAuth();
+  const { isAuthenticated, loading, user } = useBulletproofAuth();
   const location = useLocation();
 
   useEffect(() => {

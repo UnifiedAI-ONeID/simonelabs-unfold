@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { UserPlus, Eye, EyeOff, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useBulletproofAuth } from '@/hooks/useBulletproofAuth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface BulletproofCreateAccountFormProps {
   onSuccess?: () => void;
@@ -22,6 +22,7 @@ export const BulletproofCreateAccountForm = ({ onSuccess }: BulletproofCreateAcc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const { signUp, retryCount } = useBulletproofAuth();
 
@@ -90,6 +91,16 @@ export const BulletproofCreateAccountForm = ({ onSuccess }: BulletproofCreateAcc
       }
 
       console.log('✅ Account creation successful');
+      
+      // Check if user was automatically signed in
+      if (result.data?.session) {
+        console.log('User automatically signed in, redirecting to role selection');
+        navigate('/role-selection', { replace: true });
+      } else {
+        console.log('Email verification required, staying on create account page');
+        // User needs to verify email first, show success message
+        setError(null);
+      }
       
       if (onSuccess) {
         onSuccess();
