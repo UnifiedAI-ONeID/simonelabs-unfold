@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SecurityMonitor } from './SecurityMonitor';
 import { SecureRateLimiter } from './SecureRateLimiter';
 import { SecurityEventLogger } from './SecurityEventLogger';
-import { CaptchaValidator } from '../Auth/CaptchaValidator';
 import { Shield, Activity, Eye, Settings, AlertTriangle } from 'lucide-react';
 
 interface SecurityMetrics {
@@ -114,11 +112,10 @@ export const AdvancedSecurityDashboard = () => {
 
       {/* Security Dashboard Tabs */}
       <Tabs defaultValue="monitor" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="monitor">Monitor</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="limits">Rate Limits</TabsTrigger>
-          <TabsTrigger value="validation">Validation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="monitor" className="space-y-4">
@@ -130,17 +127,13 @@ export const AdvancedSecurityDashboard = () => {
         </TabsContent>
 
         <TabsContent value="limits" className="space-y-4">
-          <SecureRateLimiter />
-        </TabsContent>
-
-        <TabsContent value="validation" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CaptchaValidator />
+            <SecureRateLimiter />
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
-                  Validation Rules
+                  Security Rules
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
