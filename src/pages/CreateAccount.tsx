@@ -1,14 +1,16 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { CreateAccountForm } from '@/components/Auth/CreateAccountForm';
 import { DevAuthHelper } from '@/components/Auth/DevAuthHelper';
 import { getSecurityHeaders } from '@/lib/securityConfig';
+import { BulletproofCreateAccountForm } from '@/components/Auth/BulletproofCreateAccountForm';
+import { BulletproofDevAuthHelper } from '@/components/Auth/BulletproofDevAuthHelper';
+import { useBulletproofAuth } from '@/hooks/useBulletproofAuth';
 
 const CreateAccount = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading, user } = useSimplifiedAuth();
+  const { isAuthenticated, loading, user } = useBulletproofAuth();
 
   useEffect(() => {
     const headers = getSecurityHeaders();
@@ -32,15 +34,12 @@ const CreateAccount = () => {
     
     if (!loading && isAuthenticated && user) {
       console.log('User is already authenticated, redirecting to dashboard');
-      // If user is already authenticated, redirect to dashboard
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, loading, navigate, user]);
 
   const handleCreateAccountSuccess = () => {
     console.log('Account creation success callback triggered');
-    // After successful signup, user might need to verify email
-    // Don't redirect immediately, let the auth state change handle it
   };
 
   if (loading) {
@@ -54,7 +53,6 @@ const CreateAccount = () => {
     );
   }
 
-  // If already authenticated, show loading while redirecting
   if (isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
@@ -68,8 +66,8 @@ const CreateAccount = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
-      <CreateAccountForm onSuccess={handleCreateAccountSuccess} />
-      <DevAuthHelper />
+      <BulletproofCreateAccountForm onSuccess={handleCreateAccountSuccess} />
+      <BulletproofDevAuthHelper />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -12,12 +11,12 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import StudentDashboard from '@/pages/StudentDashboard';
 import EducatorDashboard from '@/pages/EducatorDashboard';
 import AdministrationDashboard from '@/pages/AdministrationDashboard';
-import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
+import { useBulletproofAuth } from '@/hooks/useBulletproofAuth';
 import { WelcomeAssistant } from '@/components/AI/WelcomeAssistant';
 import { AuthDebugPanel } from '@/components/Auth/AuthDebugPanel';
 
 const App: React.FC = () => {
-  const { isAuthenticated, user } = useSimplifiedAuth();
+  const { isAuthenticated, user } = useBulletproofAuth();
   const [showWelcome, setShowWelcome] = React.useState(false);
 
   useEffect(() => {

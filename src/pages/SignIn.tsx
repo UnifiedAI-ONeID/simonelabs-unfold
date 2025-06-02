@@ -1,13 +1,14 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
-import { SignInForm } from '@/components/Auth/SignInForm';
+import { useBulletproofAuth } from '@/hooks/useBulletproofAuth';
+import { BulletproofSignInForm } from '@/components/Auth/BulletproofSignInForm';
+import { BulletproofDevAuthHelper } from '@/components/Auth/BulletproofDevAuthHelper';
 import { getSecurityHeaders } from '@/lib/securityConfig';
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading, user } = useSimplifiedAuth();
+  const { isAuthenticated, loading, user } = useBulletproofAuth();
 
   useEffect(() => {
     const headers = getSecurityHeaders();
@@ -30,15 +31,13 @@ const SignIn = () => {
     console.log('SignIn page - Auth state:', { isAuthenticated, loading, user: user?.email });
     
     if (!loading && isAuthenticated && user) {
-      console.log('User is authenticated, redirecting to dashboard');
-      // Redirect to dashboard after successful sign in
+      console.log('User is already authenticated, redirecting to dashboard');
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, loading, navigate, user]);
 
   const handleSignInSuccess = () => {
     console.log('Sign in success callback triggered');
-    navigate('/dashboard', { replace: true });
   };
 
   if (loading) {
@@ -52,7 +51,6 @@ const SignIn = () => {
     );
   }
 
-  // If already authenticated, show loading while redirecting
   if (isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
@@ -66,7 +64,8 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
-      <SignInForm onSuccess={handleSignInSuccess} />
+      <BulletproofSignInForm onSuccess={handleSignInSuccess} />
+      <BulletproofDevAuthHelper />
     </div>
   );
 };
