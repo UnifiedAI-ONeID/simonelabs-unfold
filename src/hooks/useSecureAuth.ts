@@ -38,6 +38,8 @@ export const useSecureAuth = () => {
           throw new Error('Passwords do not match');
         }
 
+        console.log('🚀 Starting signup process (CAPTCHA disabled)...');
+
         const { data, error } = await supabase.auth.signUp({
           email: authData.email,
           password: authData.password,
@@ -81,6 +83,8 @@ export const useSecureAuth = () => {
         if (!authData.email || !authData.password) {
           throw new Error('Email and password are required');
         }
+
+        console.log('🚀 Starting signin process (CAPTCHA disabled)...');
 
         const { data, error } = await supabase.auth.signInWithPassword({
           email: authData.email,

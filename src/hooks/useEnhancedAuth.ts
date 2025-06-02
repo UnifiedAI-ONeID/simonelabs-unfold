@@ -183,12 +183,15 @@ export const useEnhancedAuth = () => {
 
   const signIn = async (email: string, password: string, captchaToken?: string) => {
     try {
+      console.log('🚀 Starting signin process (CAPTCHA disabled)...');
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('❌ Signin error:', error);
         toast({
           title: "Sign in failed",
           description: error.message,
@@ -208,6 +211,7 @@ export const useEnhancedAuth = () => {
         return { data: { requires2FA: true, sessionId, user: data.user } };
       }
 
+      console.log('✅ Signin successful');
       return { data };
     } catch (error: any) {
       console.error('Sign in error:', error);
@@ -217,6 +221,8 @@ export const useEnhancedAuth = () => {
 
   const signUp = async (email: string, password: string, confirmPassword?: string, captchaToken?: string) => {
     try {
+      console.log('🚀 Starting signup process (CAPTCHA disabled)...');
+      
       if (password !== confirmPassword) {
         throw new Error('Passwords do not match');
       }
@@ -233,6 +239,7 @@ export const useEnhancedAuth = () => {
       });
 
       if (error) {
+        console.error('❌ Signup error:', error);
         toast({
           title: "Sign up failed",
           description: error.message,
@@ -241,6 +248,7 @@ export const useEnhancedAuth = () => {
         return { error };
       }
 
+      console.log('✅ Signup successful');
       toast({
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
