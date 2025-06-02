@@ -19,6 +19,7 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { signUp } = useSimplifiedAuth();
 
@@ -36,9 +37,10 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
+    setError(null);
     
     try {
-      console.log('Starting account creation process...');
+      console.log('🚀 Starting account creation process...', { email });
 
       if (!passwordValidation?.isValid) {
         throw new Error('Please ensure your password meets all requirements');
@@ -48,21 +50,22 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
         throw new Error('Passwords do not match');
       }
       
-      console.log('Attempting to create account...');
-      const { error } = await signUp(email, password, confirmPassword);
+      const result = await signUp(email, password, confirmPassword);
       
-      if (error) {
-        console.error('Account creation failed:', error);
+      if (result.error) {
+        console.error('❌ Account creation failed:', result.error);
+        setError(result.error.message || 'Account creation failed');
         return;
       }
 
-      console.log('Account creation successful');
+      console.log('✅ Account creation successful');
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error: any) {
-      console.error('Create account error:', error);
+      console.error('💥 Create account error:', error);
+      setError(error.message || 'An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,6 +100,12 @@ export const CreateAccountForm = ({ onSuccess }: CreateAccountFormProps) => {
             setConfirmPassword={setConfirmPassword}
             passwordValidation={passwordValidation}
           />
+
+          {error && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Button

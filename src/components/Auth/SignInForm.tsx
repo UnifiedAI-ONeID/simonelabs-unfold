@@ -16,6 +16,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { signIn } = useSimplifiedAuth();
 
@@ -24,29 +25,31 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
+    setError(null);
     
     try {
-      console.log('Starting sign in process...');
+      console.log('🔐 Starting sign in process...', { email });
       
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
       
-      console.log('Attempting to sign in...');
       const result = await signIn(email, password);
       
       if (result.error) {
-        console.error('Sign in failed:', result.error);
+        console.error('❌ Sign in failed:', result.error);
+        setError(result.error.message || 'Sign in failed');
         return;
       }
 
-      console.log('Sign in successful');
+      console.log('✅ Sign in successful');
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('💥 Sign in error:', error);
+      setError(error.message || 'An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -75,6 +78,12 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
             password={password}
             setPassword={setPassword}
           />
+
+          {error && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Button

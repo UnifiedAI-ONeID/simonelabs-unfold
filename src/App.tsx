@@ -13,7 +13,7 @@ import EducatorDashboard from '@/pages/EducatorDashboard';
 import AdministrationDashboard from '@/pages/AdministrationDashboard';
 import { useSimplifiedAuth } from '@/hooks/useSimplifiedAuth';
 import { WelcomeAssistant } from '@/components/AI/WelcomeAssistant';
-import { AuthTestHelper } from '@/components/Auth/AuthTestHelper';
+import { AuthDebugPanel } from '@/components/Auth/AuthDebugPanel';
 
 const App: React.FC = () => {
   const { isAuthenticated, user } = useSimplifiedAuth();
@@ -97,7 +97,7 @@ const App: React.FC = () => {
     <>
       <RouterProvider router={router} />
       {showWelcome && <WelcomeAssistant onClose={handleCloseWelcome} />}
-      <AuthTestHelper />
+      <AuthDebugPanel />
     </>
   );
 };

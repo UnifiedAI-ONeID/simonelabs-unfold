@@ -22,11 +22,16 @@ export const useSimplifiedAuth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
+      console.log('🔄 Auth state change:', event, session?.user?.email);
       
+      if (!mounted) return;
+
       if (event === 'SIGNED_IN' && session?.user) {
+        console.log('✅ User signed in, ensuring profile...');
         // Ensure user profile exists
         await ensureUserProfile(session.user.id, session.user.email || '');
         
@@ -37,12 +42,21 @@ export const useSimplifiedAuth = () => {
           isAuthenticated: true
         });
       } else if (event === 'SIGNED_OUT') {
+        console.log('👋 User signed out');
         setAuthState({
           user: null,
           session: null,
           loading: false,
           isAuthenticated: false
         });
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('🔄 Token refreshed');
+        setAuthState(prev => ({
+          ...prev,
+          session,
+          user: session?.user || null,
+          isAuthenticated: !!session?.user
+        }));
       } else {
         setAuthState(prev => ({
           ...prev,
@@ -54,15 +68,19 @@ export const useSimplifiedAuth = () => {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log('🔍 Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
+        if (!mounted) return;
+
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('❌ Error getting session:', error);
           setAuthState(prev => ({ ...prev, loading: false }));
           return;
         }
 
         if (session?.user) {
+          console.log('✅ Found existing session for:', session.user.email);
           await ensureUserProfile(session.user.id, session.user.email || '');
           setAuthState({
             user: session.user,
@@ -71,6 +89,7 @@ export const useSimplifiedAuth = () => {
             isAuthenticated: true
           });
         } else {
+          console.log('ℹ️ No existing session found');
           setAuthState({
             user: null,
             session: null,
@@ -79,24 +98,27 @@ export const useSimplifiedAuth = () => {
           });
         }
       } catch (error: any) {
-        console.error('Error in getInitialSession:', error);
-        setAuthState(prev => ({ ...prev, loading: false }));
+        console.error('💥 Error in getInitialSession:', error);
+        if (mounted) {
+          setAuthState(prev => ({ ...prev, loading: false }));
+        }
       }
     };
 
     getInitialSession();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🚀 Starting signin process...');
+      console.log('🔐 Starting signin process for:', email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -109,6 +131,8 @@ export const useSimplifiedAuth = () => {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Too many attempts. Please wait a moment before trying again.';
         }
         
         toast({
@@ -116,10 +140,10 @@ export const useSimplifiedAuth = () => {
           description: errorMessage,
           variant: "destructive",
         });
-        return { error };
+        return { error: { message: errorMessage } };
       }
 
-      console.log('✅ Signin successful');
+      console.log('✅ Signin successful for:', data.user?.email);
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -127,26 +151,27 @@ export const useSimplifiedAuth = () => {
       
       return { data };
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('💥 Sign in catch error:', error);
+      const errorMessage = error.message || 'An unexpected error occurred during sign in';
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
-      return { error: { message: error.message } };
+      return { error: { message: errorMessage } };
     }
   };
 
   const signUp = async (email: string, password: string, confirmPassword?: string) => {
     try {
-      console.log('🚀 Starting signup process...');
+      console.log('🚀 Starting signup process for:', email);
       
       if (password !== confirmPassword) {
         throw new Error('Passwords do not match');
       }
 
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -163,6 +188,10 @@ export const useSimplifiedAuth = () => {
         // Handle specific error cases
         if (error.message.includes('User already registered')) {
           errorMessage = 'An account with this email already exists. Please sign in instead.';
+        } else if (error.message.includes('Password should be')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
         }
         
         toast({
@@ -170,10 +199,10 @@ export const useSimplifiedAuth = () => {
           description: errorMessage,
           variant: "destructive",
         });
-        return { error };
+        return { error: { message: errorMessage } };
       }
 
-      console.log('✅ Signup successful');
+      console.log('✅ Signup successful for:', data.user?.email);
       
       // Check if email confirmation is required
       if (data.user && !data.session) {
@@ -190,25 +219,27 @@ export const useSimplifiedAuth = () => {
 
       return { data };
     } catch (error: any) {
-      console.error('Sign up error:', error);
+      console.error('💥 Sign up catch error:', error);
+      const errorMessage = error.message || 'An unexpected error occurred during sign up';
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
-      return { error: { message: error.message } };
+      return { error: { message: errorMessage } };
     }
   };
 
   const signOut = async () => {
     try {
+      console.log('👋 Starting signout process...');
       await supabase.auth.signOut({ scope: 'global' });
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
     } catch (error: any) {
-      console.error('Error signing out:', error);
+      console.error('💥 Error signing out:', error);
       toast({
         title: "Sign out failed",
         description: error.message,
