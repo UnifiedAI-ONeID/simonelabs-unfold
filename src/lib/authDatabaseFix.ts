@@ -7,7 +7,7 @@ export const verifyAndFixUserProfiles = async () => {
   try {
     // Check if the handle_new_user function exists and is working
     const { data: functions, error: functionsError } = await supabase
-      .rpc('pg_get_functiondef', { funcid: 'public.handle_new_user'::regproc });
+      .rpc('pg_get_functiondef', { funcid: 'handle_new_user' });
 
     if (functionsError) {
       console.warn('handle_new_user function may not exist:', functionsError);
