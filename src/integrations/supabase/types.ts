@@ -367,6 +367,24 @@ export type Database = {
         }
         Relationships: []
       }
+      request_log: {
+        Row: {
+          id: number
+          ip: unknown
+          timestamp: string | null
+        }
+        Insert: {
+          id?: number
+          ip: unknown
+          timestamp?: string | null
+        }
+        Update: {
+          id?: number
+          ip?: unknown
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           details: string | null
@@ -631,6 +649,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      clean_old_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_expired_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -638,6 +664,10 @@ export type Database = {
       cleanup_expired_verification_codes: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      exceeded_rate_limit: {
+        Args: { ip_in: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -659,6 +689,10 @@ export type Database = {
           p_severity?: string
         }
         Returns: string
+      }
+      register_request: {
+        Args: { ip_in: string }
+        Returns: undefined
       }
       update_user_gamification_stats: {
         Args: {

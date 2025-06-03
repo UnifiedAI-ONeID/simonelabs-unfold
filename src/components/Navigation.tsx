@@ -49,9 +49,6 @@ const Navigation = () => {
             <Link to="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
               Pricing
             </Link>
-            <Link to="/captcha-debug" className="text-sm font-medium hover:text-primary transition-colors text-orange-600">
-              CAPTCHA Debug
-            </Link>
             {isAuthenticated ? (
               <>
                 <Button
@@ -111,13 +108,6 @@ const Navigation = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Pricing
-              </Link>
-              <Link
-                to="/captcha-debug"
-                className="text-sm font-medium hover:text-primary transition-colors px-2 py-1 text-orange-600"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                CAPTCHA Debug
               </Link>
               {isAuthenticated ? (
                 <>
