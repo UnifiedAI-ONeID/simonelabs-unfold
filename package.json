@@ -8,8 +8,7 @@
     "build": "npx vite build",
     "build:dev": "npx vite build --mode development",
     "lint": "eslint .",
-    "preview": "npx vite preview",
-    "install": "npm install --legacy-peer-deps"
+    "preview": "npx vite preview"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",
@@ -73,7 +72,6 @@
     "lovable-tagger": "^1.1.8",
     "lucide-react": "^0.462.0",
     "marked": "^12.0.1",
-    "ml5": "^0.12.2",
     "monaco-editor": "^0.47.0",
     "natural": "^6.10.5",
     "next-themes": "^0.3.0",
@@ -121,5 +119,9 @@
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
     "vite-plugin-compression": "^0.5.1"
+  },
+  "resolutions": {
+    "@tensorflow/tfjs-converter": "^4.17.0",
+    "@tensorflow-models/blazeface": "^0.0.7"
   }
 }
